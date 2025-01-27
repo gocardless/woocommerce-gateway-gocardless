@@ -1,0 +1,47 @@
+{
+	"name": "woocommerce-gateway-gocardless",
+	"version": "2.8.3",
+	"description": "WooCommerce GoCardless Gateway",
+	"homepage": "https://woocommerce.com/products/gocardless/",
+	"license": "GPL-3.0-or-later",
+	"scripts": {
+		"build": "npm run build:webpack && npm run archive",
+		"archive": "rm -rf $npm_package_name && composer archive --file=$npm_package_name --format=zip",
+		"postarchive": "rm -rf $npm_package_name && unzip $npm_package_name.zip -d $npm_package_name && rm $npm_package_name.zip && zip -r $npm_package_name.zip $npm_package_name && rm -rf $npm_package_name",
+		"build:webpack": "wp-scripts build",
+		"start:webpack": "wp-scripts start",
+		"phpcompat": "./vendor/bin/phpcs --standard=phpcs-compat.xml.dist -p .",
+		"lint:js": "wp-scripts lint-js",
+		"test:unit": "./vendor/bin/phpunit",
+		"env": "wp-env",
+		"env:start": "wp-env start",
+		"env:clean": "wp-env clean",
+		"env:stop": "wp-env stop",
+		"env:destroy": "wp-env destroy",
+		"postenv:start": "bash ./tests/e2e/bin/initialize.sh",
+		"env:install-plugins": "bash ./tests/e2e/bin/install-plugins.sh",
+		"test:e2e": "npx playwright test --config tests/e2e/playwright.config.js",
+		"test:e2e-local": "export $(cat ./tests/e2e/config/.env | xargs) && npm run test:e2e",
+		"test:e2e-debug": "npx playwright test --config tests/e2e/playwright.config.js --debug",
+		"test:e2e-codegen": "npx playwright codegen",
+		"test:e2e-report": "npx playwright show-report tests/e2e/test-results/playwright-report",
+		"test:e2e-foundational": "npx playwright test --config tests/e2e/playwright.config.js --grep @foundational"
+	},
+	"devDependencies": {
+		"@playwright/test": "^1.44.1",
+		"@woocommerce/api": "^0.2.0",
+		"@woocommerce/dependency-extraction-webpack-plugin": "^3.0.1",
+		"@woocommerce/eslint-plugin": "^2.3.0",
+		"@woocommerce/woocommerce-rest-api": "^1.0.1",
+		"@wordpress/env": "^10.2.0",
+		"@wordpress/scripts": "^28.0.0",
+		"prettier": "^3.3.2"
+	},
+	"engines": {
+		"node": "~20",
+		"npm": "~10"
+	},
+	"config": {
+		"wp_org_slug": "woocommerce-gateway-gocardless"
+	}
+}

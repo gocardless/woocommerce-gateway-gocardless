@@ -1,0 +1,320 @@
+*** WooCommerce GoCardless Gateway Changelog ***
+
+2024-12-09 - version 2.8.3
+* Dev - Bump WooCommerce "tested up to" version 9.5.
+* Dev - Bump WooCommerce minimum supported version to 9.3.
+
+2024-10-28 - version 2.8.2
+* Dev - Bump WordPress "tested up to" version 6.7.
+* Dev - Bump WordPress minimum supported version to 6.5.
+* Dev - Bump WooCommerce "tested up to" version 9.4.
+* Dev - Bump WooCommerce minimum supported version to 9.2.
+* Dev - Fix failing E2E tests.
+
+2024-08-20 - version 2.8.1
+* Fix - Ensure payments work correctly when user accounts are automatically created during the checkout process.
+* Add - Plugin banner and icon images for WordPress.org.
+* Dev - Bump WooCommerce "tested up to" version 9.2.
+* Dev - Bump WooCommerce minimum supported version to 9.0.
+
+2024-08-05 - version 2.8.0
+* Add - Display a note informing the customer if JavaScript is disabled or not supported in their browser.
+* Fix - Ensure the "Cancel Payment & Subscription" order action is only visible while the payment status is in "pending_submission".
+* Fix - Ensure disconnecting your GoCardless account works properly.
+* Fix - Ensure the GoCardless payment method is available only for supported currencies.
+* Fix - Ensure the GoCardless payment gateway works correctly for guest customers when a default customer location is not set.
+* Dev - Bump WooCommerce "tested up to" version 9.1.
+* Dev - Bump WooCommerce minimum supported version to 8.9.
+* Dev - Bump WordPress "tested up to" version 6.6.
+* Dev - Bump WordPress minimum supported version to 6.4.
+* Dev - Add an FAQs section to the readme file, including new details on how to connect multiple WooCommerce stores to a single GoCardless account.
+* Dev - Removed old backward compatibility code, which was added to handle the update of the plugin's main file to `woocommerce-gateway-gocardless.php`.
+* Dev - Upgraded NPM and Composer packages and updated the Node version to v20 to modernize the developer experience.
+* Dev - Add E2E tests for each Direct Debit scheme.
+
+2024-07-29 - version 2.7.2
+* Add - New toggle option to enable or disable Instant Bank Pay.
+* Dev - PHPCS fixes and various code improvements.
+
+2024-06-26 - version 2.7.1
+* Fix - Ensure the webhook secret is generated with enough entropy.
+
+2024-06-03 - version 2.7.0
+* Add - Support for the GoCardless Billing Request API, allowing customers to stay on a merchant's site when completing payment in the checkout flow.
+* Add - Support for Instant Bank Pay for one-off payments.
+* Add - Support for Success+ (intelligent retries) for payment creation.
+* Add - Show the GoCardless payment status in the order list table and order preview.
+* Add - Handle the mandate "cancelled", "expired", "failed", and "blocked" webhook events.
+* Add - Display the refund ID and reference information in the order note related to a refund.
+* Add - Save the GoCardless customer ID in user meta to use for creating all future payments/mandates.
+* Add - Ensure the Country is auto-selected in the payment modal based on pre-filled customer data.
+* Add - Screenshots to readme file.
+* Dev - Add Code of Conduct and License files.
+* Dev - Bump WooCommerce "tested up to" version 8.9.
+* Dev - Bump WooCommerce minimum supported version to 8.7.
+* Fix - Only display the schemes that are available to the merchant in the GoCardless settings.
+* Fix - Replace the middleware URL from `connect.woocommerce.com` to `api.woocommerce.com/integrations`.
+* Tweak - Improved the process of adding the webhook secret information.
+* Tweak - Update the payment method title to "Pay by bank" and change the logo to the GoCardless logo.
+
+2024-04-01 - version 2.6.4
+* Dev - Bump WooCommerce "tested up to" version 8.7.
+* Dev - Bump WooCommerce minimum supported version to 8.4.
+* Dev - Bump WordPress "tested up to" version 6.5.
+
+2024-02-05 - version 2.6.3
+* Dev - Bump WooCommerce "tested up to" version 8.5.
+* Dev - Bump WooCommerce minimum supported version to 8.3.
+* Dev - Bump WordPress minimum supported version to 6.3.
+* Fix - Allow customers to update subscription payment methods via Woo Subscriptions.
+
+2024-01-08 - version 2.6.2
+* Dev - Declare compatibility with Product Editor.
+* Dev - Bump WooCommerce "tested up to" version 8.4.
+* Dev - Bump WooCommerce minimum supported version to 8.2.
+* Dev - Bump PHP minimum supported version to 7.4.
+* Tweak - Bump PHP "tested up to" version 8.3.
+
+2023-12-11 - version 2.6.1
+* Fix - PHP 8.1+ compatibility warnings.
+* Bump WordPress "tested up to" version 6.4.
+* Bump WordPress minimum supported version to 6.2.
+* Tweak - Admin settings colour to match admin theme colour scheme.
+
+2023-11-20 - version 2.6.0
+* Dev - Bump WooCommerce "tested up to" version 8.3.
+* Dev - Bump WooCommerce minimum supported version to 8.1.
+* Dev - Bump WordPress minimum supported version to 6.2.
+* Dev - Update default behavior to use a block-based cart and checkout in e2e tests.
+
+2023-10-25 - version 2.5.9
+* Dev - Bump WooCommerce "tested up to" version 8.1.
+* Dev - Bump WooCommerce minimum supported version to 7.9.
+* Dev - Update PHPCS and PHPCompatibility GitHub Actions.
+* Dev - Migrate end-to-end tests to Playwright.
+
+2023-08-30 - version 2.5.8
+* Fix - Corrected link to the Direct Debit Scheme documentation.
+* Dev - Bump WordPress "tested up to" version from 6.2 to 6.3.
+* Dev - Bump WooCommerce "tested up to" version 7.9.
+* Dev - Bump WooCommerce minimum supported version from 7.2 to 7.7.
+* Dev - Bump PHP minimum supported version from 7.2 to 7.3.
+
+2023-07-04 - version 2.5.7
+* Fix - Prevents displaying the cancel order URL to unauthorised users.
+* Dev - Bump WooCommerce "tested up to" version 7.8.
+* Dev - Bump WooCommerce minimum supported version from 6.8 to 7.2.
+* Dev - Bump WordPress minimum supported version from 5.8 to 6.1.
+
+2023-05-30 - version 2.5.6
+* Fix – Escaped strings.
+* Dev – Bump WooCommerce “tested up to” version 7.6.
+* Dev – Bump WordPress minimum supported version from 5.6 to 5.8.
+* Dev – Bump WordPress “tested up to” version 6.2.
+
+2023-04-04 - version 2.5.5
+* Add - Support for Cart and Checkout blocks.
+* Dev - Bump PHP minimum supported version from 7.0 to 7.2.
+* Dev - Bump WooCommerce minimum supported version from 6.0 to 6.8.
+* Dev - Bump WooCommerce "tested up to" version 7.4.
+
+2023-02-22 - version 2.5.4
+* Add – Cancel subscription if the payment is cancelled when a subscriber cancels the mandate.
+* Dev – Remove WooThemes updater.
+* Tweak – Bump WooCommerce tested up to 7.3.0
+
+2022-12-05 - version 2.5.3
+* Dev – Fix phpunit tests.
+* Update – Bump our Node support to v14.
+* Update – Bump our NPM support to v6.
+* Fix – Subscription status check places orders with submitted payments on hold.
+
+2022-10-31 - version 2.5.2
+* Dev - Add linting, unit and e2e test coverage within GitHub Actions.
+* Add - Support for High-performance Order Storage ("HPOS") (formerly known as Custom Order Table, "COT").
+
+2022-09-09 - version 2.5.0
+* Fix - Process GoCardless webhook events asynchronously.
+* Tweak - Bump minimum WP version to 5.6.
+* Tweak - Bump minimum PHP version to 7.0.
+* Tweak - Bump minimum WC version to 6.0.
+* Add - Support for "Admin Change Payment Method".
+* Add - Support for Subscription Import/Export payment metadata for automatic future payments.
+* Add - Support for CAD/Canada and USD/United States.
+* Fix - Fix PHPCS issues in the repo.
+* Tweak - Bump WC tested Up to 6.8.
+
+2022-07-07 - version 2.4.19
+* Fix - Fixed Compatibility issue with Order Status Control.
+* Fix - Fix connection issue that occur on WooCommerce 6.6
+* Tweak - WC tested up to 6.6.
+
+2022-06-14 - version 2.4.18
+* Tweak - Bump tested up to WordPress version 6.0.
+
+2022-05-02 - version 2.4.17
+* Fix - "Payment methods" my account menu item vanishes when active.
+* Enhancement - Improved error handling of creating refund action for enabling refund endpoint.
+* Add - Support for Sequential Order Numbers Pro.
+* Fixed - String missing translation method.
+* Tweak - WC tested up to 6.4.
+
+2022-04-04 - version 2.4.16
+* Fix - Updated GoCardless retry payment order status to "on-hold".
+* Fix - Added payment status check after a few days for subscription orders.
+* Fix - Bug that would hide GoCardless on payment gateways list.
+* Tweak - WP tested up to 5.9.
+* Tweak - WC tested up to 6.3.
+
+2021-12-15 - version 2.4.15
+* Fix - Bug that would hide Go Cardless when WooCommerce Pre-Orders was active
+* Tweak - WP tested up to 5.8.
+* Tweak - WC tested up to 6.0.
+
+
+2021-02-25 - version 2.4.14
+* Tweak - WP tested up to 5.6.
+* Tweak - WC tested up to 5.0.
+
+2019-12-10 - version 2.4.13
+* Fix - Customers are charged when changing payment method on a subscription.
+* Tweak - WP tested up to 5.3.
+* Tweak - WC tested up to 3.8.
+
+2019-08-06 - version 2.4.12
+* Tweak - WC tested up to 3.7.
+
+2019-04-16 - version 2.4.11
+* Tweak - WC tested up to 3.6
+
+2019-01-07 - version 2.4.10
+* Fix - floating point imprecision when calculating total.
+
+2018-09-27 - version 2.4.9
+* Update - WC tested up to version.
+
+2018-05-22 - version 2.4.8
+* Update - WC tested up to version.
+* Update - Privacy policy notification.
+* Update - Export/erasure hooks added.
+
+2017-12-15 - version 2.4.7
+* Fix - Issue of retrieving the correct order given a resource ID (payment, mandate, etc) as Subscription might store the same meta as the Subscription orders.
+* Fix - Deprecated notice for get_display_name().
+* Update - WC tested up to version.
+
+2017-08-10 - version 2.4.6
+* Fix - Fatal error when deactivating WooCommerce while GoCardless still active.
+* Tweak - Display admin notice if unsupported currency is used.
+* Tweak - Pre-fill customer information in the GoCardless hosted payment pages.
+
+2017-07-13 - version 2.4.5
+* Fix - Error when adding payment method via /my-account/add-payment-method/ page.
+* Enhancement - Added support to replace mandate when there's `mandate_replaced` event from webhook.
+
+2017-05-15 - version 2.4.4
+* Tweak - Default subscription order and renewal order to processing. Filters provided to override the initial order status.
+* Fix - Make sure to check if `get_current_screen` function exists in which the wrapper might be called in non-admin page.
+* Fix - Incorrect filter name for create redirect flow params.
+
+2017-04-03 - version 2.4.3
+* Fix - Added support for WooCommerce 3.0 and compatibility with older versions.
+* Fix - Fatal error caused by calling empty cart during renewal order.
+
+2017-03-01 - version 2.4.2
+* Fix - Before payment is confirm, order status should be on-hold instead of processing.
+* Fix - Truncate the description sent to GoCardless if over 100 characters.
+* Fix - Issue where recurring payment indicator in Subscriptions setting does not show GoCardless supports that.
+* Enhancement - Added support for Subscriptions switching support.
+* Fix - Makes HTTPS in redirect URI and webhook endpoint is requirement.
+
+2017-01-23 - version 2.4.1
+* Add - Update customer endpoint.
+* New - Introduce action hook 'woocommerce_gocardless_after_success_redirect_flow'.
+
+2016-11-16 - version 2.4.0
+* Enhancement - Added support for the latest GoCardless API
+* Enhancement - Support payments tokenization to allow buyers save their bank account information for future checkout.
+* Enhancement - Support WooCommerce Pre-Orders.
+* Enhancement - Support more advanced features of WooCommerce Subscriptions. See https://docs.woocommerce.com/document/subscriptions/payment-gateways/#advanced-features.
+* Enhancement - Simplified settings page.
+* Enhancement - Updated plugin's main file to woocommerce-gateway-gocardless.php.
+
+2016-06-22 - version 2.3.8
+
+* Fix - Issue where cancel_uri is considered invalid by GoCardless when WooCommerce 2.6+ is used.
+* Fix - Issue when there's no next payment of subscription the GoCardless shows error 'Expires at is not in the future and Start as is not in the future'
+* Fix - Issue where subscriptions could not be cancelled caused by deprecated hook being used
+* Fix - Wrong setting link from plugins page when WooCommerce 2.6+ is being used
+* Tweak - Loggin more events when processing subscriptions
+
+2016-05-25 - version 2.3.7
+
+* Add logging mechanism
+
+2015-10-28 - version 2.3.6
+* Add WooCommerce Subscriptions 2.0 support
+* Fix a bug where the setup_fee was incorrectly calculated for subscriptions
+* Fix a bug where we were unhooking and hooking a nonexistent method for subscription renewal payments
+* Fix a bug where a coupon applied to a subscription would result in a negative initial payment
+
+2015-09-02 - version 2.3.5
+* Tweak initial payments.
+* Fix date function.
+
+2015-05-28 - version 2.3.4
+* Fix start_at for BST
+
+2015-05-12 - version 2.3.3
+* Pass start_at date for subscriptions.
+
+2015-04-22 - version 2.3.2
+* Pass get_non_subscription_total to signup fee for mixed carts.
+
+2014-09-15 - version 2.3.1
+* Filter args passed to gocardless. woocommerce_gocardless_bill_args woocommerce_gocardless_pre_auth_args
+
+2014-09-15 - version 2.3.0
+* Subscriptions fixes.
+* New webhook for subscriptions required.
+* Refectored code.
+* Add GoCardLess transaction details to order notes and payment_complete
+
+2014-07-30 - version 2.2.4
+* Fixed setup fee costs.
+* Fixed error handlers in pre-auth.
+* Updated GoCardless SDK.
+* Updated textdomain.
+
+2014-07-21 - version 2.2.3
+* Fix pre-auth class.
+* Use correct endpoint functions.
+
+2014-05-15 - version 2.2.2
+* Add support for subscription renewal synchronisation
+* Add support for purchasing standard products and a subscription in the same transaction
+
+2013-08-01 - version 2.2.1
+* GoCardless library update and set production mode
+
+2013-08-01 - version 2.2.0
+* Subscriptions support
+
+2013-01-18 - version 2.1.1
+* Updated Library
+
+2013-01-18 - version 2.1.0
+* Added WC 2.0 Compatibility
+* 3.5 compat
+
+2012-12-05 - version 2.0.1
+* Updater
+
+2012-10-05 - version 2.0
+* Allow pre-authorizations
+* Pass existing data (name etc) through to GoCardless
+* Updated GoCardless API
+* Pre-auth admin page for taking payments
+
+2012-05-10 - version 1.0
+* First Release

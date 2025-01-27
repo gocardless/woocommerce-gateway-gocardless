@@ -1,0 +1,44 @@
+{
+    "name": "woocommerce/woocommerce-gateway-gocardless",
+    "description": "WooCommerce Gateway GoCardless",
+    "type": "wordpress-plugin",
+    "homepage": "https://woocommerce.com/products/gocardless/",
+    "license": "GPL-3.0-or-later",
+    "minimum-stability": "dev",
+    "require-dev": {
+        "woocommerce/woocommerce-sniffs": "1.0.0",
+        "sirbrillig/phpcs-changed": "^2.11.5",
+        "10up/wp_mock": "^1.0.1",
+        "phpunit/phpunit": "^9.6"
+    },
+    "archive": {
+        "exclude": [
+            "!/build",
+            "node_modules",
+            "tests",
+            ".github",
+            ".eslintrc.js",
+            ".eslintignore",
+            ".prettierrc.js",
+            ".gitattributes ",
+            ".gitignore",
+            ".nvmrc",
+            ".phpunit.result.cache",
+            "composer.json",
+            "composer.lock",
+            "phpcs.xml.dist",
+            "phpcs-compat.xml.dist",
+            "phpunit.xml.dist"
+        ]
+    },
+	"scripts": {
+		"phpcs": [
+		  "vendor/bin/phpcs"
+		]
+	},
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}

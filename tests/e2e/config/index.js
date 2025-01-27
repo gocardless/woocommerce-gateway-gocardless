@@ -1,0 +1,193 @@
+const admin = {
+	username: 'admin',
+	password: 'password',
+	store: {
+		firstname: 'John',
+		lastname: 'Doe',
+		company: 'Automattic',
+		country: 'US:CA',
+		addressfirstline: 'addr 1',
+		addresssecondline: 'addr 2',
+		city: 'San Francisco',
+		state: 'CA',
+		postcode: '94107',
+	},
+};
+
+const address = {
+	firstname: 'John',
+	lastname: 'Doe',
+	company: 'Automattic',
+	country: 'US',
+	countryName: 'United States',
+	addressfirstline: 'addr 1',
+	addresssecondline: 'addr 2',
+	city: 'San Francisco',
+	state: 'CA',
+	stateName: 'California',
+	postcode: '94107',
+	phone: '123456789',
+	email: 'john.doe@example.com',
+};
+
+const customer = {
+	username: 'customer',
+	password: 'password',
+	billing: {
+		...address,
+		country: 'US',
+		countryName: 'United States',
+		city: 'San Francisco',
+		state: 'CA',
+		stateName: 'California',
+		postcode: '94107',
+	},
+	shipping: {
+		...address,
+		country: 'US',
+		addressfirstline: 'addr 1',
+		addresssecondline: 'addr 2',
+		city: 'San Francisco',
+		state: 'CA',
+		postcode: '94107',
+	},
+	addresses: {
+		ach: {
+			...address,
+		},
+		bacs: {
+			...address,
+			country: 'GB',
+			countryName: 'United Kingdom',
+			city: 'London',
+			postcode: 'WC2N 5DU',
+		},
+		becs: {
+			...address,
+			country: 'AU',
+			countryName: 'Australia',
+			city: 'South Mission',
+			state: 'QLD',
+			stateName: 'Queensland',
+			postcode: '4852',
+		},
+		becs_nz: {
+			...address,
+			country: 'NZ',
+			countryName: 'New Zealand',
+			city: 'Auckland',
+			state: 'AUK',
+			stateName: 'Auckland',
+			postcode: '0600',
+		},
+		betalingsservice: {
+			...address,
+			country: 'DK',
+			countryName: 'Denmark',
+			city: 'Lunderskov',
+			state: 'DK-83',
+			stateName: 'Region Syddanmark',
+			postcode: '6640',
+		},
+		pad: {
+			...address,
+			country: 'CA',
+			countryName: 'Canada',
+			city: 'New Norway',
+			state: 'AB',
+			stateName: 'Alberta',
+			postcode: 'T0B 3L0',
+		},
+		sepa_core: {
+			...address,
+			country: 'DK',
+			countryName: 'Denmark',
+			city: 'Lunderskov',
+			state: 'DK-83',
+			stateName: 'Region Syddanmark',
+			postcode: '6640',
+		},
+		autogiro: {
+			...address,
+			country: 'SE',
+			countryName: 'Sweden',
+			city: 'Stockholm',
+			postcode: '103 16',
+		},
+	},
+};
+
+module.exports = {
+	admin,
+	customer,
+	baseUrl: 'http://localhost',
+	goCardlessConfig: {
+		email: process.env.GOCARDLESS_EMAIL || '',
+		password: process.env.GOCARDLESS_PASSWORD || '',
+	},
+	bankDetails: {
+		bankCode: '026073150',
+		accountNumber: '2715500356',
+		accountType: 'checking',
+	},
+	gbBankDetails: {
+		bankCode: '200000',
+		accountNumber: '55779911',
+	},
+	paymentMethodTitle: 'TEST Pay by bank',
+	paymentMethodDescription: 'TEST Pay securely via your bank account.',
+	products: {
+		simple: 'simple-product',
+		simple2: 'simple-product-2',
+		subscription: 'simple-subscription-product',
+	},
+	currencies: {
+		ach: 'USD',
+		autogiro: 'SEK',
+		bacs: 'GBP',
+		becs: 'AUD',
+		becs_nz: 'NZD',
+		betalingsservice: 'DKK',
+		pad: 'CAD',
+		sepa_core: 'EUR',
+	},
+	bankData: {
+		ach: {
+			bankCode: '026073150',
+			accountNumber: '2715500356',
+			accountType: 'checking',
+		},
+		bacs: {
+			bankCode: '200000',
+			accountNumber: '55779911',
+		},
+		becs: {
+			bankCode: '082-082',
+			accountNumber: '012345678',
+		},
+		becs_nz: {
+			bankCode: '12',
+			branchCode: '3113',
+			accountNumber: '0003869',
+			accountNumberSuffix: '00',
+		},
+		pad: {
+			bankCode: '0003',
+			branchCode: '00006',
+			accountNumber: '1234567',
+		},
+		betalingsservice: {
+			bankCode: '345',
+			accountNumber: '3179681',
+			idNumber: '0101701234',
+		},
+		sepa_core: {
+			bankCode: '345',
+			accountNumber: '3179681',
+		},
+		autogiro: {
+			bankCode: '5491',
+			accountNumber: '0000003',
+		},
+	},
+};

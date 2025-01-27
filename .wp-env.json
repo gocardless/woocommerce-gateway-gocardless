@@ -1,0 +1,24 @@
+{
+  "plugins": [
+    "https://downloads.wordpress.org/plugin/woocommerce.zip",
+    "https://downloads.wordpress.org/plugin/email-log.zip",
+    ".",
+    "./tests/e2e/test-plugins/e2e-test-plugin",
+    "./test-plugins/woocommerce-subscriptions",
+    "./test-plugins/woocommerce-pre-orders"
+  ],
+  "themes": [
+    "https://downloads.wordpress.org/theme/storefront.zip"
+  ],
+  "env": {
+    "tests": {
+      "mappings": {
+        "wp-cli.yml": "./tests/e2e/bin/wp-cli.yml"
+      },
+      "port": 80
+    }
+  },
+  "config": {
+    "ALTERNATE_WP_CRON": true
+  }
+}

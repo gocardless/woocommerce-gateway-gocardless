@@ -1,0 +1,15 @@
+# Editors
+sftp-config.json
+.idea
+.vscode
+.wp-env.override.json
+.phpunit.result.cache
+/node_modules/
+/vendor/
+/tests/e2e/test-results.json
+/build/
+/tests/e2e/test-results
+/tests/e2e/test-plugins/woocommerce-subscriptions
+woocommerce-gateway-gocardless.zip
+
+.DS_Store

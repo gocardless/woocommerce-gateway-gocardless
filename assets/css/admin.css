@@ -1,0 +1,41 @@
+.wcgc-webhook-secret-setup:not(.connected) .open {
+    display: none;
+}
+
+.wcgc-webhook-secret-setup.connected .close,
+.wcgc-webhook-secret-setup.connected fieldset {
+    display: none;
+}
+
+.wcgc-webhook-secret-setup .wcgc-webhook-secret-actions a{
+    text-decoration: none;
+}
+
+.wcgc-webhook-secret-setup ul {
+    list-style: disc;
+    margin-left: 16px;
+}
+
+.wcgc-webhook-secret-actions .dashicons::before{
+    font-size: 16px;
+}
+
+.wcgc-webhook-secret-field {
+    margin-bottom: 16px;
+}
+
+.wcgc-webhook-secret-details {
+    margin: 16px 0;
+}
+
+.wcgc-webhook-secret-field .field-label {
+    display: block;
+    padding: 0px 0px 6px 0px;
+    font-weight: 500;
+}
+
+.wcgc-webhook-secret-field .webhook-secret-error {
+    display: block;
+    color: #d63638;
+    margin-top: 6px;
+}

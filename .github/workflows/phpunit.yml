@@ -1,0 +1,31 @@
+name: PHP Unit
+
+on:
+  push:
+    branches:
+      - trunk
+  pull_request:
+    branches:
+      - trunk
+
+jobs:
+  phpunit:
+    name: PHP Unit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set PHP version
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+          tools: composer:v2
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install
+
+      - name: Run PHP Unit tests
+        run: ./vendor/bin/phpunit
