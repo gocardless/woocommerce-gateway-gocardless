@@ -573,8 +573,6 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	public function is_available() {
 		// Subscription checks availability in checkout settings to display
 		// available gateway that supports recurring payments.
-		//
-		// @see https://github.com/woocommerce/woocommerce-gateway-gocardless/issues/57.
 		if ( is_admin() && $this->is_checkout_settings_page() ) {
 			return parent::is_available();
 		}
@@ -605,10 +603,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 		// Disable the option in add-payment-method page. Will enable this in
 		// the future.
 		//
-		// @see https://github.com/woocommerce/woocommerce-gateway-gocardless/issues/74.
-		//
 		// Don't disable it for My Account Navigation.
-		// @see https://github.com/woocommerce/woocommerce-gateway-gocardless/issues/109.
 		if ( function_exists( 'is_add_payment_method_page' ) && is_add_payment_method_page() && 'woocommerce_account_navigation' !== current_action() ) {
 			return false;
 		}
@@ -1482,8 +1477,6 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				 *
 				 * Direct debit can take around a week, so would be useless for
 				 * membership sites.
-				 *
-				 * @see https://github.com/woocommerce/woocommerce-gateway-gocardless/issues/75
 				 */
 				$temp_activated = false;
 				if ( function_exists( 'wcs_order_contains_subscription' ) && wcs_order_contains_subscription( $order_id ) ) {
@@ -1559,8 +1552,6 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 
 		/**
 		 * Compatibility with Order Status Control.
-		 *
-		 * @see https://github.com/woocommerce/woocommerce-gateway-gocardless/issues/108
 		 */
 		if ( 'processing' === $status ) {
 			$order->payment_complete( $payment['payments']['id'] );

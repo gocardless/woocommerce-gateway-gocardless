@@ -172,8 +172,6 @@ class WC_GoCardless_API {
 
 			/**
 			 * Error Handling for enable Refund endpoint.
-			 *
-			 * @see https://github.com/woocommerce/woocommerce-gateway-gocardless/issues/134
 			 */
 			if (
 				'refunds' === $endpoint &&

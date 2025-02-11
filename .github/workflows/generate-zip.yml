@@ -3,6 +3,9 @@ name: Generate ZIP file
 on:
   workflow_dispatch:
   workflow_call:
+  push:
+    branches:
+      - trunk
 
 jobs:
   generate-zip-file:
