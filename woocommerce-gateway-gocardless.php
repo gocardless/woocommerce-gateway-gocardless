@@ -363,7 +363,6 @@ class WC_GoCardless {
 	 * not satisified.
 	 *
 	 * @see https://gocardless.com/faq/merchants/international-payments/
-	 * @see https://github.com/woocommerce/woocommerce-gateway-gocardless/issues/59
 	 *
 	 * @since 2.4.6
 	 * @version 2.4.6

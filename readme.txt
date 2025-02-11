@@ -225,4 +225,4 @@ Yes, it uses [GoCardless](https://gocardless.com/) ([privacy policy](https://goc
 * Dev - Bump WooCommerce minimum supported version to 8.2.
 * Dev - Bump PHP minimum supported version to 7.4.
 
-[See changelog details prior to 2024 here](https://github.com/woocommerce/woocommerce-gateway-gocardless/blob/trunk/changelog.txt).
+[See changelog details prior to 2024 here](https://github.com/gocardless/woocommerce-gateway-gocardless/blob/trunk/changelog.txt).

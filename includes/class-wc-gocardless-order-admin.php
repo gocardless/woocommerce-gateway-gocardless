@@ -184,7 +184,6 @@ class WC_GoCardless_Order_Admin {
 			case 'pending_submission':
 				$actions['gocardless_cancel_payment'] = esc_html__( 'GoCardless &rsaquo; Cancel payment', 'woocommerce-gateway-gocardless' );
 				// Display action text to "Cancel Payment & Subscription" for subscription and parent order.
-				// @see https://github.com/woocommerce/woocommerce-gateway-gocardless/issues/123.
 				if (
 					function_exists( 'wcs_is_subscription' ) &&
 					(
