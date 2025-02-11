@@ -165,6 +165,7 @@ export async function blockFillBillingDetails(page, customerDetails) {
  * @param {boolean} isBlock Whether to use block checkout
  */
 export async function placeOrder(page, isBlock = false) {
+	await page.waitForTimeout(1500);
 	if (isBlock) {
 		await expect(
 			page.locator(
@@ -194,6 +195,7 @@ export async function placeOrder(page, isBlock = false) {
  * @param {Object} options Whether to save payment method
  */
 export async function placeGoCardlessOrder(page, options) {
+	await page.waitForTimeout(1500);
 	const { saveMethod = false, isBlock = false } = options;
 	if (isBlock) {
 		return blockPlaceGoCardlessOrder(page, options);
@@ -237,6 +239,7 @@ export async function placeGoCardlessOrder(page, options) {
 }
 
 export async function blockPlaceOrder(page, saveMethod = false) {
+	await page.waitForTimeout(1500);
 	const haveExistingPaymentMethods = await page
 		.locator('input[name="radio-control-wc-payment-method-saved-tokens"]')
 		.first()
