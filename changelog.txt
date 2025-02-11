@@ -1,5 +1,15 @@
 *** WooCommerce GoCardless Gateway Changelog ***
 
+2025-02-11 - version 2.9.0
+* Add - Handle the payment "chargeback_settled" webhook event.
+* Fix - Ensure subscription renewals work properly after a failed renewal order.
+* Update - Plugin ownership from WooCommerce to GoCardless.
+* Dev - Bump WooCommerce "tested up to" version 9.6.
+* Dev - Bump WooCommerce minimum supported version to 9.4.
+* Dev - Added release and repo management actions.
+* Dev - Exclude the WooCommerce Comment Hook sniff from our PHPCS configuration.
+* Dev - Updates GitHub `actions/cache`, `actions/upload` and `actions/download` to v4 due to deprecation.
+
 2024-12-09 - version 2.8.3
 * Dev - Bump WooCommerce "tested up to" version 9.5.
 * Dev - Bump WooCommerce minimum supported version to 9.3.
@@ -222,7 +232,7 @@
 * Fix - Fatal error caused by calling empty cart during renewal order.
 
 2017-03-01 - version 2.4.2
-* Fix - Before payment is confirm, order status should be on-hold instead of processing.
+* Fix - Before payment is confirmed, order status should be on-hold instead of processing.
 * Fix - Truncate the description sent to GoCardless if over 100 characters.
 * Fix - Issue where recurring payment indicator in Subscriptions setting does not show GoCardless supports that.
 * Enhancement - Added support for Subscriptions switching support.

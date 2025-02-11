@@ -2,7 +2,7 @@
 Contributors: gocardless, woocommerce, automattic
 Tags:         gocardless, woocommerce, direct debit, instant bank pay
 Tested up to: 6.7
-Stable tag:   2.8.3
+Stable tag:   2.9.0
 License:      GPL-3.0-or-later
 License URI:  https://spdx.org/licenses/GPL-3.0-or-later.html
 
@@ -139,6 +139,16 @@ Yes, it uses [GoCardless](https://gocardless.com/) ([privacy policy](https://goc
 3. GoCardless settings screen showing a store connected to ad configured with GoCardless to use the ACH direct debit scheme.
 
 == Changelog ==
+
+= 2.9.0 - 2025-02-11 =
+* Add - Handle the payment "chargeback_settled" webhook event.
+* Fix - Ensure subscription renewals work properly after a failed renewal order.
+* Update - Plugin ownership from WooCommerce to GoCardless.
+* Dev - Bump WooCommerce "tested up to" version 9.6.
+* Dev - Bump WooCommerce minimum supported version to 9.4.
+* Dev - Added release and repo management actions.
+* Dev - Exclude the WooCommerce Comment Hook sniff from our PHPCS configuration.
+* Dev - Updates GitHub `actions/cache`, `actions/upload` and `actions/download` to v4 due to deprecation.
 
 = 2.8.3 - 2024-12-09 =
 * Dev - Bump WooCommerce "tested up to" version 9.5.
