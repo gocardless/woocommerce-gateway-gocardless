@@ -289,7 +289,7 @@ class WC_GoCardless {
 	protected function _display_connect_notice() {
 		// For merchants that don't have access token yet.
 		/* translators: Link to connect GoCardless account */
-		$message = sprintf( __( 'GoCardless is almost ready. To get started, please <a href="%s">connect your GoCardless account</a>.', 'woocommerce-gateway-gocardless' ), $this->get_setting_url() );
+		$message = sprintf( __( 'GoCardless is almost ready! To get started, please <a href="%s">connect your GoCardless account</a>.', 'woocommerce-gateway-gocardless' ), $this->get_setting_url() );
 
 		// For merchants that, maybe, have access token from legacy API.
 		if ( ! empty( $this->settings['access_token'] ) ) {
