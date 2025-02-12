@@ -3,10 +3,11 @@ name: PHP Unit
 on:
   push:
     branches:
+      - develop
       - trunk
   pull_request:
     branches:
-      - trunk
+      - develop
 
 jobs:
   phpunit:
