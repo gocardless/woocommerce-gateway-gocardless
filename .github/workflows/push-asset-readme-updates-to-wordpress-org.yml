@@ -25,7 +25,7 @@ jobs:
 
       - name: Build
         run: |
-          npm run build && rm -rf ./woocommerce-gateway-gocardless && unzip woocommerce-gateway-gocardless.zip -d ./woocommerce-gateway-gocardless
+          npm run build:webpack
 
       - name: WordPress.org plugin asset/readme update
         uses: 10up/action-wordpress-plugin-asset-update@stable
