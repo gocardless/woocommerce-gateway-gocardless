@@ -18,7 +18,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, labeled]
     branches:
-      - trunk
+      - develop
 
 permissions:
   contents: read
@@ -27,7 +27,7 @@ permissions:
 jobs:
   build:
     if: "${{ ( inputs.test != '' && inputs.test != 'none' ) || contains(github.event.pull_request.labels.*.name, 'needs: qit default tests') || contains(github.event.pull_request.labels.*.name, 'needs: qit activation test') || contains(github.event.pull_request.labels.*.name, 'needs: qit api test') || contains(github.event.pull_request.labels.*.name, 'needs: qit e2e test') || contains(github.event.pull_request.labels.*.name, 'needs: qit phpstan test') || contains(github.event.pull_request.labels.*.name, 'needs: qit security test') }}"
-    uses: gocardless/woocommerce-gateway-gocardless/.github/workflows/generate-zip.yml@trunk
+    uses: gocardless/woocommerce-gateway-gocardless/.github/workflows/generate-zip.yml@develop
 
   test:
     if: "${{ ( inputs.test != '' && inputs.test != 'none' ) || contains(github.event.pull_request.labels.*.name, 'needs: qit default tests') || contains(github.event.pull_request.labels.*.name, 'needs: qit activation test') || contains(github.event.pull_request.labels.*.name, 'needs: qit api test') || contains(github.event.pull_request.labels.*.name, 'needs: qit e2e test') || contains(github.event.pull_request.labels.*.name, 'needs: qit phpstan test') || contains(github.event.pull_request.labels.*.name, 'needs: qit security test') }}"
