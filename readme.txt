@@ -140,6 +140,9 @@ Yes, it uses [GoCardless](https://gocardless.com/) ([privacy policy](https://goc
 
 == Changelog ==
 
+= 2.9.1 - 2025-02-12 =
+* Fix - Ensure the final release asset includes the `build` directory.
+
 = 2.9.0 - 2025-02-12 =
 * Add - Handle the payment "chargeback_settled" webhook event.
 * Fix - Ensure subscription renewals work properly after a failed renewal order.
