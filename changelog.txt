@@ -1,5 +1,8 @@
 *** WooCommerce GoCardless Gateway Changelog ***
 
+2025-02-12 - version 2.9.1
+* Fix - Ensure the final release asset includes the `build` directory.
+
 2025-02-12 - version 2.9.0
 * Add - Handle the payment "chargeback_settled" webhook event.
 * Fix - Ensure subscription renewals work properly after a failed renewal order.

@@ -3,11 +3,12 @@ name: E2E test
 on:
   push:
     branches:
-      - smoke-testing
+      - develop
+      - trunk
   pull_request:
     types: [opened, synchronize, reopened, labeled]
     branches:
-      - trunk
+      - develop
 
 jobs:
   e2e:
