@@ -24,7 +24,7 @@ jobs:
 
       - name: Build
         run: |
-          npm run build && rm -rf ./woocommerce-gateway-gocardless && unzip woocommerce-gateway-gocardless.zip -d ./woocommerce-gateway-gocardless
+          npm run build:webpack
 
       - name: WordPress Plugin Deploy
         id: deploy
