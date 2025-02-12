@@ -35,11 +35,10 @@ jobs:
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: npm ci --no-optional
 
-      - name: Generate ZIP file
+      - name: Build plugin
         run: npm run build && rm -rf ./woocommerce-gateway-gocardless && unzip woocommerce-gateway-gocardless.zip -d ./woocommerce-gateway-gocardless
 
-      - name: Use the Upload Artifact GitHub Action
-        uses: actions/upload-artifact@v4
-        with:
-          name: woocommerce-gateway-gocardless
-          path: woocommerce-gateway-gocardless/
+      - name: Generate ZIP file
+        uses: 10up/action-wordpress-plugin-build-zip@stable
+        env:
+          BUILD_DIR: woocommerce-gateway-gocardless/woocommerce-gateway-gocardless/
