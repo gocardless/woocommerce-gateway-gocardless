@@ -1,4 +1,4 @@
-# WooCommerce GoCardless Gateway
+# GoCardless for WooCommerce
 
 > Extends WooCommerce with a GoCardless gateway. A GoCardless merchant account is required.
 
@@ -8,7 +8,7 @@
 
 ## Overview
 
-This is a feature plugin for accepting payments via [GoCardless](https://gocardless.com/). It requires [WooCommerce](https://wordpress.org/plugins/woocommerce/) to be installed before the WooCommerce GoCardless Gateway can be activated.
+This is a feature plugin for accepting payments via [GoCardless](https://gocardless.com/). It requires [WooCommerce](https://wordpress.org/plugins/woocommerce/) to be installed before GoCardless for WooCommerce can be activated.
 
 ## Compatibility
 

@@ -35,7 +35,7 @@ test.describe('Admin Tests', () => {
 		// Addon is active by default in the test environment, so we need to validate that it is activated.
 		await expect(
 			page.getByRole('link', {
-				name: 'Deactivate WooCommerce GoCardless Gateway',
+				name: 'Deactivate GoCardless for WooCommerce',
 				exact: true,
 			})
 		).toBeVisible();
