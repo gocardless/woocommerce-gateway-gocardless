@@ -1,4 +1,4 @@
-=== WooCommerce GoCardless Gateway ===
+=== GoCardless for WooCommerce ===
 Contributors: gocardless, woocommerce, automattic
 Tags:         gocardless, woocommerce, direct debit, instant bank pay
 Tested up to: 6.7
@@ -10,7 +10,7 @@ Extends WooCommerce with a GoCardless gateway. A GoCardless merchant account is 
 
 == Description ==
 
-This is a feature plugin for accepting payments via [GoCardless](https://gocardless.com/).  It requires [WooCommerce](https://wordpress.org/plugins/woocommerce/) to be installed before the WooCommerce GoCardless Gateway can be activated.
+This is a feature plugin for accepting payments via [GoCardless](https://gocardless.com/).  It requires [WooCommerce](https://wordpress.org/plugins/woocommerce/) to be installed before GoCardless for WooCommerce can be activated.
 
 = Compatibility =
 

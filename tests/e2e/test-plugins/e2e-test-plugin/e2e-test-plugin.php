@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin name: WooCommerce WooCommerce GoCardless Gateway Test plugin
+ * Plugin name: GoCardless for WooCommerce Test plugin
  */
 
 // Remove the https from the API request URL

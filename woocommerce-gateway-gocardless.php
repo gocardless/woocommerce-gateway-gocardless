@@ -1,6 +1,6 @@
 <?php //phpcs:ignore WordPress.Files.FileName.InvalidClassFileName -- Main plugin file
 /**
- * Plugin Name:          WooCommerce GoCardless Gateway
+ * Plugin Name:          GoCardless for WooCommerce
  * Plugin URI:           https://www.woocommerce.com/products/gocardless/
  * Description:          Extends both WooCommerce and WooCommerce Subscriptions with the GoCardless Payment Gateway. A GoCardless merchant account is required.
  * Version:              2.9.1
