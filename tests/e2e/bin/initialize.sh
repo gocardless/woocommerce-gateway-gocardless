@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Initializing WooCommerce GoCardless Gateway E2E"
+echo "Initializing GoCardless for WooCommerce E2E"
 
 # Enable pretty permalinks.
 wp-env run tests-wordpress chmod -c ugo+w /var/www/html
