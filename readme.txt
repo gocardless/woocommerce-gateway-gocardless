@@ -2,7 +2,7 @@
 Contributors: gocardless, woocommerce, automattic
 Tags:         gocardless, woocommerce, direct debit, instant bank pay
 Tested up to: 6.7
-Stable tag:   2.9.1
+Stable tag:   2.9.2
 License:      GPL-3.0-or-later
 License URI:  https://spdx.org/licenses/GPL-3.0-or-later.html
 
@@ -139,6 +139,17 @@ Yes, it uses [GoCardless](https://gocardless.com/) ([privacy policy](https://goc
 3. GoCardless settings screen showing a store connected to ad configured with GoCardless to use the ACH direct debit scheme.
 
 == Changelog ==
+
+= 2.9.2 - 2025-02-18 =
+* Dev - Fix QIT E2E tests and add support for a few new test types.
+* Dev - Bump `path-to-regexp` from 0.1.7 to 0.1.12 and `express` from 4.18.2 to 4.21.2.
+* Dev - Bump `http-proxy-middleware` from 2.0.6 to 2.0.7.
+* Dev - Bump `braces` from 3.0.2 to 3.0.3.
+* Dev - Bump `webpack-dev-middleware` from 5.3.3 to 5.3.4.
+* Dev - Bump `nanoid` from 3.3.7 to 3.3.8.
+* Dev - Bump `micromatch` from 4.0.5 to 4.0.8.
+* Dev - Bump `serialize-javascript` from 6.0.1 to 6.0.2.
+* Dev - Bump `webpack` from 5.88.2 to 5.97.1.
 
 = 2.9.1 - 2025-02-12 =
 * Fix - Ensure the final release asset includes the `build` directory.
