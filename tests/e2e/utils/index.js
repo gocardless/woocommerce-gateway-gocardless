@@ -144,6 +144,10 @@ export async function blockFillBillingDetails(page, customerDetails) {
 	await page.locator('#billing-city').fill(customerDetails.city);
 	await page.locator('#billing-city').blur();
 
+	await page.locator('#billing-postcode').fill('');
+	await page.locator('#billing-postcode').fill(customerDetails.postcode);
+	await page.locator('#billing-postcode').blur();
+
 	if (
 		customerDetails.state &&
 		(await page.locator('select#billing-state').isVisible())
@@ -152,10 +156,6 @@ export async function blockFillBillingDetails(page, customerDetails) {
 			.locator('select#billing-state')
 			.selectOption(customerDetails.state);
 	}
-
-	await page.locator('#billing-postcode').fill('');
-	await page.locator('#billing-postcode').fill(customerDetails.postcode);
-	await page.locator('#billing-postcode').blur();
 }
 
 /**
