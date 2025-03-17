@@ -140,10 +140,6 @@ export async function blockFillBillingDetails(page, customerDetails) {
 			.fill(customerDetails.addresssecondline);
 	}
 
-	await page.locator('#billing-city').fill('');
-	await page.locator('#billing-city').fill(customerDetails.city);
-	await page.locator('#billing-city').blur();
-
 	await page.locator('#billing-postcode').fill('');
 	await page.locator('#billing-postcode').fill(customerDetails.postcode);
 	await page.locator('#billing-postcode').blur();
@@ -156,6 +152,10 @@ export async function blockFillBillingDetails(page, customerDetails) {
 			.locator('select#billing-state')
 			.selectOption(customerDetails.state);
 	}
+
+	await page.locator('#billing-city').fill('');
+	await page.locator('#billing-city').fill(customerDetails.city);
+	await page.locator('#billing-city').blur();
 }
 
 /**

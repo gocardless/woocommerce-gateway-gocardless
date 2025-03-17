@@ -102,6 +102,7 @@ test.describe('Instant Bank Payment Tests', () => {
 
 		await blockPlaceOrder(page);
 
+		await page.waitForTimeout(3000);
 		// Make sure Instant Bank Payment is available.
 		const dropinIframe2 = await page
 			.frameLocator('iframe[name^="gocardless-dropin-iframe"]')
