@@ -73,6 +73,7 @@ test.describe('Instant Bank Payment Tests', () => {
 			{ ...customer.billing, ...supportedCountry },
 			true
 		);
+		await page.waitForTimeout(3000);
 		await blockPlaceOrder(page);
 
 		// Make sure Instant Bank Payment is available.
@@ -100,6 +101,7 @@ test.describe('Instant Bank Payment Tests', () => {
 			true
 		);
 
+		await page.waitForTimeout(3000);
 		await blockPlaceOrder(page);
 
 		// Make sure Instant Bank Payment is available.

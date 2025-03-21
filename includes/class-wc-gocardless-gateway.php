@@ -1564,7 +1564,8 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 			wc_reduce_stock_levels( $order_id );
 		}
 
-		if ( function_exists( 'wc_empty_cart' ) ) {
+		// Empty cart.
+		if ( function_exists( 'wc_empty_cart' ) && WC()->cart && WC()->session ) {
 			wc_empty_cart();
 		}
 	}
