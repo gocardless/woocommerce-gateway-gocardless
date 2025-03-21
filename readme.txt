@@ -140,6 +140,11 @@ Yes, it uses [GoCardless](https://gocardless.com/) ([privacy policy](https://goc
 
 == Changelog ==
 
+= 2.9.3 - 2025-03-24 =
+* Dev - Bump WooCommerce "tested up to" version 9.8.
+* Dev - Bump WooCommerce minimum supported version to 9.6.
+* Dev - Bump WordPress minimum supported version to 6.6.
+
 = 2.9.2 - 2025-02-18 =
 * Dev - Fix QIT E2E tests and add support for a few new test types.
 * Dev - Bump `path-to-regexp` from 0.1.7 to 0.1.12 and `express` from 4.18.2 to 4.21.2.
