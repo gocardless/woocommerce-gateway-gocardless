@@ -39,6 +39,13 @@ test.describe('Email Tests', () => {
 		page,
 	}) => {
 		await clearEmailLogs(adminPage);
+
+		// Update new order email subject.
+		await adminPage.goto( '/wp-admin/admin.php?page=wc-settings&tab=email&section=wc_email_new_order' );
+		await adminPage.locator( '#woocommerce_new_order_subject' ).fill( '[{site_title}]: New order #{order_number}' );
+		await adminPage.locator( 'button.woocommerce-save-button' ).click();
+		await expect( adminPage.locator( '#message', { hasText: 'Your settings have been saved.' } ) ).toBeVisible();
+
 		await addToCart(page, products.simple);
 		await goToCheckout(page, true);
 		await fillBillingDetails(page, customer.billing, true);
