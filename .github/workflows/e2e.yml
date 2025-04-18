@@ -62,6 +62,8 @@ jobs:
           unzip -o woocommerce-pre-orders.zip
           unzip -o woocommerce-subscriptions.zip
           cd ..
+        env:
+          GH_TOKEN: ${{ secrets.BOT_GH_TOKEN }}
 
       - name: Set the plugin and core version config
         run: ./tests/e2e/bin/set-core-version.js --core=${{ env.CORE_VERSION }} --plugin=./${{ github.event.repository.name }}
@@ -75,7 +77,6 @@ jobs:
         env:
           GOCARDLESS_EMAIL: ${{secrets.GOCARDLESS_EMAIL}}
           GOCARDLESS_PASSWORD: ${{secrets.GOCARDLESS_PASSWORD}}
-          GH_TOKEN: ${{ secrets.BOT_GH_TOKEN }}
 
       - name: Update Success Label
         if: |
