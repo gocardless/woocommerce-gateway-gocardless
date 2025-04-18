@@ -19,7 +19,7 @@ jobs:
     name: E2E Test
     runs-on: ubuntu-latest
     env:
-      CORE_VERSION: ${{ contains(github.event.pull_request.labels.*.name, 'needs: WP RC test') && 'WordPress/WordPress#master' || 'latest' }}
+      CORE_VERSION: "${{(contains(github.event.pull_request.labels.*.name, 'needs: WP RC test') && 'WordPress/WordPress#master') || 'latest'}}"
 
     steps:
       - name: Checkout
