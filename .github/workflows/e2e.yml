@@ -11,18 +11,28 @@ on:
       - develop
 
 jobs:
+  build:
+    uses: gocardless/woocommerce-gateway-gocardless/.github/workflows/generate-zip.yml@develop
+
   e2e:
-    if: "${{ ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'needs: e2e testing') ) ||  github.event_name == 'push' }}"
+    needs: build
     name: E2E Test
     runs-on: ubuntu-latest
     env:
-      GOCARDLESS_EMAIL: ${{secrets.GOCARDLESS_EMAIL}}
-      GOCARDLESS_PASSWORD: ${{secrets.GOCARDLESS_PASSWORD}}
-      GH_TOKEN: ${{ secrets.BOT_GH_TOKEN }}
+      CORE_VERSION: "${{(contains(github.event.pull_request.labels.*.name, 'needs: WP RC test') && 'WordPress/WordPress#master') || 'latest'}}"
 
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      
+      - name: Download build zip
+        uses: actions/download-artifact@b14cf4c92620c250e1c074ab0a5800e37df86765 # v4.2.0
+        with:
+          name: ${{ github.event.repository.name }}
+
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: ${{ github.event.repository.name }}
 
       - uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
         with:
@@ -40,9 +50,6 @@ jobs:
       - name: Node install
         run: npm ci
 
-      - name: Build
-        run: npm run build
-
       - name: Install Playwright Browsers
         run: npx playwright install chromium
 
@@ -54,19 +61,21 @@ jobs:
           unzip -o woocommerce-pre-orders.zip
           unzip -o woocommerce-subscriptions.zip
           cd ..
+        env:
+          GH_TOKEN: ${{ secrets.BOT_GH_TOKEN }}
 
-      - name: Set the core version
-        if: "${{ contains(github.event.pull_request.labels.*.name, 'needs: WP RC test') }}"
-        id: run-rc-test
-        run: ./tests/e2e/bin/set-core-version.js WordPress/WordPress#master
+      - name: Set the plugin and core version config
+        run: ./tests/e2e/bin/set-core-version.js --core=${{ env.CORE_VERSION }} --plugin=./${{ github.event.repository.name }}
 
       - name: Setup WP environment
         run: npm run env:start
 
       - name: Run E2E Foundational Test
         id: gocardless_e2e_tests
-        if: ${{ github.event_name == 'pull_request' }}
-        run: npm run test:e2e-foundational
+        run: npm run test:e2e
+        env:
+          GOCARDLESS_EMAIL: ${{secrets.GOCARDLESS_EMAIL}}
+          GOCARDLESS_PASSWORD: ${{secrets.GOCARDLESS_PASSWORD}}
 
       - name: Update Success Label
         if: |
@@ -109,10 +118,6 @@ jobs:
               repo: context.repo.repo,
               labels: ['status: e2e tests failing']
             })
-
-      - name: Run E2E Smoke Test
-        if: ${{ github.event_name == 'push' }}
-        run: npm run test:e2e
 
       - uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
         if: always()
