@@ -5,6 +5,7 @@ on:
     branches:
       - develop
       - trunk
+      - smoke-testing
   pull_request:
     types: [opened, synchronize, reopened, labeled]
     branches:
