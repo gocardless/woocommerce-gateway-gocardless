@@ -83,7 +83,7 @@ class WC_GoCardless_API {
 		'GI',
 		'GG',
 		'JE',
-		'IM'
+		'IM',
 	);
 
 	/**
