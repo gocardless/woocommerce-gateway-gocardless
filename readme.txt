@@ -1,8 +1,8 @@
-=== WooCommerce GoCardless Gateway ===
+=== GoCardless for WooCommerce ===
 Contributors: gocardless, woocommerce, automattic
 Tags:         gocardless, woocommerce, direct debit, instant bank pay
 Tested up to: 6.7
-Stable tag:   2.8.3
+Stable tag:   2.9.3
 License:      GPL-3.0-or-later
 License URI:  https://spdx.org/licenses/GPL-3.0-or-later.html
 
@@ -10,7 +10,7 @@ Extends WooCommerce with a GoCardless gateway. A GoCardless merchant account is 
 
 == Description ==
 
-This is a feature plugin for accepting payments via [GoCardless](https://gocardless.com/).  It requires [WooCommerce](https://wordpress.org/plugins/woocommerce/) to be installed before the WooCommerce GoCardless Gateway can be activated.
+This is a feature plugin for accepting payments via [GoCardless](https://gocardless.com/).  It requires [WooCommerce](https://wordpress.org/plugins/woocommerce/) to be installed before GoCardless for WooCommerce can be activated.
 
 = Compatibility =
 
@@ -140,6 +140,35 @@ Yes, it uses [GoCardless](https://gocardless.com/) ([privacy policy](https://goc
 
 == Changelog ==
 
+= 2.9.3 - 2025-03-24 =
+* Dev - Bump WooCommerce "tested up to" version 9.8.
+* Dev - Bump WooCommerce minimum supported version to 9.6.
+* Dev - Bump WordPress minimum supported version to 6.6.
+
+= 2.9.2 - 2025-02-18 =
+* Dev - Fix QIT E2E tests and add support for a few new test types.
+* Dev - Bump `path-to-regexp` from 0.1.7 to 0.1.12 and `express` from 4.18.2 to 4.21.2.
+* Dev - Bump `http-proxy-middleware` from 2.0.6 to 2.0.7.
+* Dev - Bump `braces` from 3.0.2 to 3.0.3.
+* Dev - Bump `webpack-dev-middleware` from 5.3.3 to 5.3.4.
+* Dev - Bump `nanoid` from 3.3.7 to 3.3.8.
+* Dev - Bump `micromatch` from 4.0.5 to 4.0.8.
+* Dev - Bump `serialize-javascript` from 6.0.1 to 6.0.2.
+* Dev - Bump `webpack` from 5.88.2 to 5.97.1.
+
+= 2.9.1 - 2025-02-12 =
+* Fix - Ensure the final release asset includes the `build` directory.
+
+= 2.9.0 - 2025-02-12 =
+* Add - Handle the payment "chargeback_settled" webhook event.
+* Fix - Ensure subscription renewals work properly after a failed renewal order.
+* Update - Plugin ownership from WooCommerce to GoCardless.
+* Dev - Bump WooCommerce "tested up to" version 9.6.
+* Dev - Bump WooCommerce minimum supported version to 9.4.
+* Dev - Added release and repo management actions.
+* Dev - Exclude the WooCommerce Comment Hook sniff from our PHPCS configuration.
+* Dev - Updates GitHub `actions/cache`, `actions/upload` and `actions/download` to v4 due to deprecation.
+
 = 2.8.3 - 2024-12-09 =
 * Dev - Bump WooCommerce "tested up to" version 9.5.
 * Dev - Bump WooCommerce minimum supported version to 9.3.
@@ -215,4 +244,4 @@ Yes, it uses [GoCardless](https://gocardless.com/) ([privacy policy](https://goc
 * Dev - Bump WooCommerce minimum supported version to 8.2.
 * Dev - Bump PHP minimum supported version to 7.4.
 
-[See changelog details prior to 2024 here](https://github.com/woocommerce/woocommerce-gateway-gocardless/blob/trunk/changelog.txt).
+[See changelog details prior to 2024 here](https://github.com/gocardless/woocommerce-gateway-gocardless/blob/trunk/changelog.txt).

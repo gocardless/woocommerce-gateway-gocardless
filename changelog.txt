@@ -1,4 +1,33 @@
-*** WooCommerce GoCardless Gateway Changelog ***
+*** GoCardless for WooCommerce Changelog ***
+
+2025-03-24 - version 2.9.3
+* Dev - Bump WooCommerce "tested up to" version 9.8.
+* Dev - Bump WooCommerce minimum supported version to 9.6.
+* Dev - Bump WordPress minimum supported version to 6.6.
+
+2025-02-18 - version 2.9.2
+* Dev - Fix QIT E2E tests and add support for a few new test types.
+* Dev - Bump `path-to-regexp` from 0.1.7 to 0.1.12 and `express` from 4.18.2 to 4.21.2.
+* Dev - Bump `http-proxy-middleware` from 2.0.6 to 2.0.7.
+* Dev - Bump `braces` from 3.0.2 to 3.0.3.
+* Dev - Bump `webpack-dev-middleware` from 5.3.3 to 5.3.4.
+* Dev - Bump `nanoid` from 3.3.7 to 3.3.8.
+* Dev - Bump `micromatch` from 4.0.5 to 4.0.8.
+* Dev - Bump `serialize-javascript` from 6.0.1 to 6.0.2.
+* Dev - Bump `webpack` from 5.88.2 to 5.97.1.
+
+2025-02-12 - version 2.9.1
+* Fix - Ensure the final release asset includes the `build` directory.
+
+2025-02-12 - version 2.9.0
+* Add - Handle the payment "chargeback_settled" webhook event.
+* Fix - Ensure subscription renewals work properly after a failed renewal order.
+* Update - Plugin ownership from WooCommerce to GoCardless.
+* Dev - Bump WooCommerce "tested up to" version 9.6.
+* Dev - Bump WooCommerce minimum supported version to 9.4.
+* Dev - Added release and repo management actions.
+* Dev - Exclude the WooCommerce Comment Hook sniff from our PHPCS configuration.
+* Dev - Updates GitHub `actions/cache`, `actions/upload` and `actions/download` to v4 due to deprecation.
 
 2024-12-09 - version 2.8.3
 * Dev - Bump WooCommerce "tested up to" version 9.5.
@@ -222,7 +251,7 @@
 * Fix - Fatal error caused by calling empty cart during renewal order.
 
 2017-03-01 - version 2.4.2
-* Fix - Before payment is confirm, order status should be on-hold instead of processing.
+* Fix - Before payment is confirmed, order status should be on-hold instead of processing.
 * Fix - Truncate the description sent to GoCardless if over 100 characters.
 * Fix - Issue where recurring payment indicator in Subscriptions setting does not show GoCardless supports that.
 * Enhancement - Added support for Subscriptions switching support.

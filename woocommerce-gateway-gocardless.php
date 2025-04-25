@@ -1,10 +1,10 @@
 <?php //phpcs:ignore WordPress.Files.FileName.InvalidClassFileName -- Main plugin file
 /**
- * Plugin Name:          WooCommerce GoCardless Gateway
+ * Plugin Name:          GoCardless for WooCommerce
  * Plugin URI:           https://www.woocommerce.com/products/gocardless/
  * Description:          Extends both WooCommerce and WooCommerce Subscriptions with the GoCardless Payment Gateway. A GoCardless merchant account is required.
- * Version:              2.8.3
- * Requires at least:    6.5
+ * Version:              2.9.3
+ * Requires at least:    6.6
  * Requires PHP:         7.4
  * PHP tested up to:     8.3
  * Author:               GoCardless
@@ -12,8 +12,8 @@
  * License:              GPL-3.0-or-later
  * License URI:          https://spdx.org/licenses/GPL-3.0-or-later.html
  * Requires Plugins:     woocommerce
- * WC requires at least: 9.4
- * WC tested up to:      9.6
+ * WC requires at least: 9.6
+ * WC tested up to:      9.8
  *
  * Copyright: © 2023-2025 WooCommerce
  * Copyright: © 2025 GoCardless
@@ -38,7 +38,7 @@ class WC_GoCardless {
 	 *
 	 * @var string
 	 */
-	public $version = '2.8.3'; // WRCS: DEFINED_VERSION.
+	public $version = '2.9.3'; // WRCS: DEFINED_VERSION.
 
 	/**
 	 * Plugin's absolute path.
@@ -363,7 +363,6 @@ class WC_GoCardless {
 	 * not satisified.
 	 *
 	 * @see https://gocardless.com/faq/merchants/international-payments/
-	 * @see https://github.com/woocommerce/woocommerce-gateway-gocardless/issues/59
 	 *
 	 * @since 2.4.6
 	 * @version 2.4.6

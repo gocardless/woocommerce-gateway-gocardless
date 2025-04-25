@@ -1,5 +1,5 @@
 {
-    "name": "woocommerce/woocommerce-gateway-gocardless",
+    "name": "gocardless/woocommerce-gateway-gocardless",
     "description": "WooCommerce Gateway GoCardless",
     "type": "wordpress-plugin",
     "homepage": "https://woocommerce.com/products/gocardless/",

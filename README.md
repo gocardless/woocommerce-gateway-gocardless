@@ -1,14 +1,14 @@
-# WooCommerce GoCardless Gateway
+# GoCardless for WooCommerce
 
 > Extends WooCommerce with a GoCardless gateway. A GoCardless merchant account is required.
 
-![WordPress tested up to version](https://img.shields.io/badge/WordPress-v6.5%20tested-success.svg) [![GPLv3+ License](https://img.shields.io/github/license/woocommerce/woocommerce-gateway-gocardless.svg)](https://github.com/woocommerce/woocommerce-gateway-gocardless/blob/trunk/LICENSE.md)
-[![E2E test](https://github.com/woocommerce/woocommerce-gateway-gocardless/actions/workflows/e2e.yml/badge.svg)](https://github.com/woocommerce/woocommerce-gateway-gocardless/actions/workflows/e2e.yml) [![QIT Tests](https://github.com/woocommerce/woocommerce-gateway-gocardless/actions/workflows/qit.yml/badge.svg)](https://github.com/woocommerce/woocommerce-gateway-gocardless/actions/workflows/qit.yml) [![PHP Unit](https://github.com/woocommerce/woocommerce-gateway-gocardless/actions/workflows/phpunit.yml/badge.svg)](https://github.com/woocommerce/woocommerce-gateway-gocardless/actions/workflows/phpunit.yml)
-[![PHP Compatibility](https://github.com/woocommerce/woocommerce-gateway-gocardless/actions/workflows/php-compatibility.yml/badge.svg)](https://github.com/woocommerce/woocommerce-gateway-gocardless/actions/workflows/php-compatibility.yml) [![PHP Coding Standards](https://github.com/woocommerce/woocommerce-gateway-gocardless/actions/workflows/phpcs.yml/badge.svg)](https://github.com/woocommerce/woocommerce-gateway-gocardless/actions/workflows/phpcs.yml)
+![WordPress tested up to version](https://img.shields.io/badge/WordPress-v6.5%20tested-success.svg) [![GPLv3+ License](https://img.shields.io/github/license/gocardless/woocommerce-gateway-gocardless.svg)](https://github.com/gocardless/woocommerce-gateway-gocardless/blob/trunk/LICENSE.md)
+[![E2E test](https://github.com/gocardless/woocommerce-gateway-gocardless/actions/workflows/e2e.yml/badge.svg)](https://github.com/gocardless/woocommerce-gateway-gocardless/actions/workflows/e2e.yml) [![QIT Tests](https://github.com/gocardless/woocommerce-gateway-gocardless/actions/workflows/qit.yml/badge.svg)](https://github.com/gocardless/woocommerce-gateway-gocardless/actions/workflows/qit.yml) [![PHP Unit](https://github.com/gocardless/woocommerce-gateway-gocardless/actions/workflows/phpunit.yml/badge.svg)](https://github.com/gocardless/woocommerce-gateway-gocardless/actions/workflows/phpunit.yml)
+[![PHP Compatibility](https://github.com/gocardless/woocommerce-gateway-gocardless/actions/workflows/php-compatibility.yml/badge.svg)](https://github.com/gocardless/woocommerce-gateway-gocardless/actions/workflows/php-compatibility.yml) [![PHP Coding Standards](https://github.com/gocardless/woocommerce-gateway-gocardless/actions/workflows/phpcs.yml/badge.svg)](https://github.com/gocardless/woocommerce-gateway-gocardless/actions/workflows/phpcs.yml)
 
 ## Overview
 
-This is a feature plugin for accepting payments via [GoCardless](https://gocardless.com/). It requires [WooCommerce](https://wordpress.org/plugins/woocommerce/) to be installed before the WooCommerce GoCardless Gateway can be activated.
+This is a feature plugin for accepting payments via [GoCardless](https://gocardless.com/). It requires [WooCommerce](https://wordpress.org/plugins/woocommerce/) to be installed before GoCardless for WooCommerce can be activated.
 
 ## Compatibility
 
@@ -42,8 +42,8 @@ Properly connected GoCardless configuration:
 ### Requirements
 
 - PHP: 7.4+
-- WordPress: 6.3+
-- WooCommerce: 8.7+
+- WordPress: 6.5+
+- WooCommerce: 9.4+
 - Node: v20
 - NPM: v10
 
