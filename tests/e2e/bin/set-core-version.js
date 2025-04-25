@@ -1,34 +1,48 @@
 #!/usr/bin/env node
 
-const fs = require( 'fs' );
-const { exit } = require( 'process' );
+const fs = require('fs');
 
-const path = `${ process.cwd() }/.wp-env.override.json`;
+const path = `${process.cwd()}/.wp-env.json`;
 
-// eslint-disable-next-line import/no-dynamic-require
-const config = fs.existsSync( path ) ? require( path ) : {};
+let config = fs.existsSync(path)
+	? require(path)
+	: {
+			plugins: [
+				'https://downloads.wordpress.org/plugin/woocommerce.zip',
+				'https://downloads.wordpress.org/plugin/email-log.zip',
+				'.',
+			],
+		};
 
-const args = process.argv.slice( 2 );
-
-if ( args.length === 0 ) exit( 0 );
-
-if ( args[ 0 ] === 'latest' ) {
-	if ( fs.existsSync( path ) ) {
-		fs.unlinkSync( path );
+const args = {};
+process.argv.slice(2, process.argv.length).forEach((arg) => {
+	if (arg.slice(0, 2) === '--') {
+		const param = arg.split('=');
+		const paramName = param[0].slice(2, param[0].length);
+		const paramValue = param.length > 1 ? param[1] : true;
+		if (paramName === 'plugin') {
+			// Replace "." with paramValue in the plugins array
+            config.plugins = config.plugins.map((plugin) =>
+                plugin === '.' ? paramValue : plugin
+            );
+		} else {
+			args[paramName] = paramValue;
+		}
 	}
-	exit( 0 );
+});
+
+if ('latest' === args.core) {
+	delete args.core;
+	delete config.core;
 }
 
-config.core = args[ 0 ];
-
-// eslint-disable-next-line no-useless-escape
-if ( ! config.core.match( /^WordPress\/WordPress\#/ ) ) {
-	config.core = `WordPress/WordPress#${ config.core }`;
-}
+config = {
+	...config,
+	...args,
+};
 
 try {
-	fs.writeFileSync( path, JSON.stringify( config ) );
-} catch ( err ) {
-	// eslint-disable-next-line no-console
-	console.error( err );
+	fs.writeFileSync(path, JSON.stringify(config));
+} catch (err) {
+	console.error(err);
 }
