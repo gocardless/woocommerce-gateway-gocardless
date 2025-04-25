@@ -1887,6 +1887,16 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				break;
 		}
 
+		/*
+		* Skip the Pending Cancel status for subscriptions.
+		*
+		* Subscriptions orders are updated to the "processing" status without confirmed payment.
+		* If a payment is cancelled, the subscription must be cancelled immediately.
+		*
+		* @see https://github.com/woocommerce/woocommerce-gateway-gocardless-private/issues/75
+		*/
+		add_filter( 'woocommerce_subscription_use_pending_cancel', '__return_false' );
+
 		if ( ! empty( $new_status ) ) {
 			$note = ! empty( $event['details']['description'] ) ? $event['details']['description'] : '';
 			$order->update_status( $new_status, $note );
@@ -1919,6 +1929,9 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				$subscription->cancel_order( $note );
 			}
 		}
+
+		// Remove the filter added above.
+		remove_filter( 'woocommerce_subscription_use_pending_cancel', '__return_false' );
 
 		return true;
 	}
