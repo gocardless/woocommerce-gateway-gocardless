@@ -85,6 +85,7 @@ class WC_GoCardless {
 		add_action( 'plugins_loaded', array( $this, 'init' ), 11 );
 		add_filter( 'woocommerce_payment_gateways', array( $this, 'register_gateway' ) );
 		add_action( 'admin_notices', array( $this, 'environment_check' ) );
+		add_action( 'init', array( $this, 'load_plugin_textdomain' ) );
 
 		$this->plugin_path = untrailingslashit( plugin_dir_path( __FILE__ ) );
 		$this->plugin_url  = untrailingslashit( plugins_url( '/', __FILE__ ) );
@@ -237,10 +238,15 @@ class WC_GoCardless {
 		$reports_handler = new WC_GoCardless_Reports();
 		$reports_handler->init();
 
+		add_action( 'init', array( $this, 'init_order_admin' ) );
+	}
+
+	/**
+	 * Load plugin text domain for translation.
+	 */
+	public function load_plugin_textdomain() {
 		// Localisation.
 		load_plugin_textdomain( 'woocommerce-gateway-gocardless', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
-
-		add_action( 'init', array( $this, 'init_order_admin' ) );
 	}
 
 	/**
