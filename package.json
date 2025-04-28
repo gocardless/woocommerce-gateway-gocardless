@@ -1,6 +1,6 @@
 {
 	"name": "woocommerce-gateway-gocardless",
-	"version": "2.9.3",
+	"version": "2.9.4",
 	"description": "GoCardless for WooCommerce",
 	"homepage": "https://woocommerce.com/products/gocardless/",
 	"license": "GPL-3.0-or-later",
