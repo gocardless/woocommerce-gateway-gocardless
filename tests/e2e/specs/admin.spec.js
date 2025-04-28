@@ -66,10 +66,22 @@ test.describe('Admin Tests', () => {
 		const goCardless = await page.locator(
 			'table.wc_gateways tr[data-gateway_id="gocardless"]'
 		);
-		await expect(goCardless).toBeVisible();
-		await expect(goCardless.locator('td.name a')).toContainText(
-			'Bank pay (open banking and direct debit via GoCardless)'
-		);
+		await page.waitForTimeout(2000);
+
+		// Check if GoCardless is visible in the list of payment gateways
+		if ( await goCardless.isVisible() ) {
+			await expect(goCardless).toBeVisible();
+			await expect(goCardless.locator('td.name a')).toContainText(
+				'Bank pay (open banking and direct debit via GoCardless)'
+			);
+		} else {
+			await expect( page.locator(
+				'.settings-payment-gateways #gocardless'
+			) ).toBeVisible();
+			await expect( page.locator(
+				'.settings-payment-gateways #gocardless .woocommerce-list__item-title'
+			) ).toContainText('GoCardless');
+		}
 	});
 
 	// Covers critical flow: GoCardless Settings > Connect.
