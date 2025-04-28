@@ -3,7 +3,7 @@
  * Plugin Name:          GoCardless for WooCommerce
  * Plugin URI:           https://www.woocommerce.com/products/gocardless/
  * Description:          Extends both WooCommerce and WooCommerce Subscriptions with the GoCardless Payment Gateway. A GoCardless merchant account is required.
- * Version:              2.9.3
+ * Version:              2.9.4
  * Requires at least:    6.6
  * Requires PHP:         7.4
  * PHP tested up to:     8.3
@@ -38,7 +38,7 @@ class WC_GoCardless {
 	 *
 	 * @var string
 	 */
-	public $version = '2.9.3'; // WRCS: DEFINED_VERSION.
+	public $version = '2.9.4'; // WRCS: DEFINED_VERSION.
 
 	/**
 	 * Plugin's absolute path.
@@ -85,6 +85,7 @@ class WC_GoCardless {
 		add_action( 'plugins_loaded', array( $this, 'init' ), 11 );
 		add_filter( 'woocommerce_payment_gateways', array( $this, 'register_gateway' ) );
 		add_action( 'admin_notices', array( $this, 'environment_check' ) );
+		add_action( 'init', array( $this, 'load_plugin_textdomain' ) );
 
 		$this->plugin_path = untrailingslashit( plugin_dir_path( __FILE__ ) );
 		$this->plugin_url  = untrailingslashit( plugins_url( '/', __FILE__ ) );
@@ -237,10 +238,15 @@ class WC_GoCardless {
 		$reports_handler = new WC_GoCardless_Reports();
 		$reports_handler->init();
 
+		add_action( 'init', array( $this, 'init_order_admin' ) );
+	}
+
+	/**
+	 * Load plugin text domain for translation.
+	 */
+	public function load_plugin_textdomain() {
 		// Localisation.
 		load_plugin_textdomain( 'woocommerce-gateway-gocardless', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
-
-		add_action( 'init', array( $this, 'init_order_admin' ) );
 	}
 
 	/**
