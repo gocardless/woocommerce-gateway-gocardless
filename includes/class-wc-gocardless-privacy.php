@@ -22,7 +22,17 @@ class WC_GoCardless_Privacy extends WC_Abstract_Privacy {
 	 * Constructor
 	 */
 	public function __construct() {
-		parent::__construct( __( 'Direct Debit (GoCardless)', 'woocommerce-gateway-gocardless' ) );
+		parent::__construct();
+
+		// Initialize data exporters and erasers.
+		add_action( 'init', array( $this, 'register_erasers_exporters' ) );
+	}
+
+	/**
+	 * Initial registration of privacy erasers and exporters.
+	 */
+	public function register_erasers_exporters() {
+		$this->name = __( 'Direct Debit (GoCardless)', 'woocommerce-gateway-gocardless' );
 
 		$this->add_exporter( 'woocommerce-gateway-gocardless-order-data', __( 'WooCommerce GoCardless Order Data', 'woocommerce-gateway-gocardless' ), array( $this, 'order_data_exporter' ) );
 
