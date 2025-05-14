@@ -140,6 +140,9 @@ Yes, it uses [GoCardless](https://gocardless.com/) ([privacy policy](https://goc
 
 == Changelog ==
 
+= 2.9.5 - 2025-05-15 =
+* Fix - Ensure all supported SEPA zone countries are included.
+
 = 2.9.4 - 2025-04-28 =
 * Fix - Ensure that the subscription is cancelled immediately when the payment is cancelled.
 * Fix - Resolved "translation loading was triggered too early" issue in WordPress 6.7.
