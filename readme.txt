@@ -2,7 +2,7 @@
 Contributors: gocardless, woocommerce, automattic
 Tags:         gocardless, woocommerce, direct debit, instant bank pay
 Tested up to: 6.8
-Stable tag:   2.9.4
+Stable tag:   2.9.5
 License:      GPL-3.0-or-later
 License URI:  https://spdx.org/licenses/GPL-3.0-or-later.html
 
@@ -139,6 +139,9 @@ Yes, it uses [GoCardless](https://gocardless.com/) ([privacy policy](https://goc
 3. GoCardless settings screen showing a store connected to ad configured with GoCardless to use the ACH direct debit scheme.
 
 == Changelog ==
+
+= 2.9.5 - 2025-05-15 =
+* Fix - Ensure all supported SEPA zone countries are included.
 
 = 2.9.4 - 2025-04-28 =
 * Fix - Ensure that the subscription is cancelled immediately when the payment is cancelled.

@@ -69,6 +69,21 @@ class WC_GoCardless_API {
 		'SI',
 		'ES',
 		'US',
+		'AD',
+		'AX',
+		'GF',
+		'GP',
+		'MQ',
+		'YT',
+		'BL',
+		'MF',
+		'RE',
+		'PM',
+		'VA',
+		'GI',
+		'GG',
+		'JE',
+		'IM',
 	);
 
 	/**
