@@ -98,10 +98,7 @@ final class WC_GoCardless_Gateway_Blocks_Support extends AbstractPaymentMethodTy
 			'showSavedCards'      => $this->should_show_saved_bank_accounts(),
 			'showSaveOption'      => $this->should_show_saved_bank_accounts(),
 			'supportedCountries'  => WC_GoCardless_API::get_supported_countries(),
-			'supportedCurrencies' => WC_GoCardless_API::get_supported_currencies(),
-			'isTest'              => 'yes' === $this->settings['testmode'],
-			'wcAjaxUrl'           => WC_AJAX::get_endpoint( '%%endpoint%%' ),
-			'billingRequestNonce' => wp_create_nonce( 'wc_gocardless_complete_billing_request_flow' ),
+			'supportedCurrencies' => WC_GoCardless_API::get_supported_currencies()
 		);
 	}
 
