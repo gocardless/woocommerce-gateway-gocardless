@@ -98,7 +98,7 @@ final class WC_GoCardless_Gateway_Blocks_Support extends AbstractPaymentMethodTy
 			'showSavedCards'      => $this->should_show_saved_bank_accounts(),
 			'showSaveOption'      => $this->should_show_saved_bank_accounts(),
 			'supportedCountries'  => WC_GoCardless_API::get_supported_countries(),
-			'supportedCurrencies' => WC_GoCardless_API::get_supported_currencies()
+			'supportedCurrencies' => WC_GoCardless_API::get_supported_currencies(),
 		);
 	}
 

@@ -913,7 +913,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 			),
 			'links'              => array( 'billing_request' => $billing_request_id ),
 			'redirect_uri'       => $this->get_success_redirect_url( $order ),
-			'exit_uri'           => $order->get_checkout_payment_url()
+			'exit_uri'           => $order->get_checkout_payment_url(),
 		);
 
 		/**
@@ -1240,7 +1240,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	public function gocardless_endpoint_handler() {
 		try {
 			if ( empty( $_GET['request'] ) ) { //phpcs:ignore WordPress.Security.NonceVerification
-				throw new Exception( message: esc_html__( 'Missing request type.', 'woocommerce-gateway-gocardless' ) );
+				throw new Exception( esc_html__( 'Missing request type.', 'woocommerce-gateway-gocardless' ) );
 			}
 
 			switch ( $_GET['request'] ) { //phpcs:ignore WordPress.Security.NonceVerification
@@ -1275,7 +1275,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 			$order_id           = absint( $_GET['order_id'] ); //phpcs:ignore WordPress.Security.NonceVerification
 			$billing_request_id = sanitize_text_field( wp_unslash( $_GET['billing_request_id'] ) ); //phpcs:ignore WordPress.Security.NonceVerification
 			$order              = wc_get_order( $order_id );
-			
+
 			if ( ! $order ) {
 				throw new Exception( esc_html__( 'Order not found.', 'woocommerce-gateway-gocardless' ) );
 			}
@@ -1284,8 +1284,8 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 
 			$save_bank_accounts  = 'yes' === $this->get_option( 'saved_bank_accounts', 'no' );
 			$save_customer_token = (
-				! empty( $_GET['save_customer_token'] ) &&
-				'yes' === wc_clean( wp_unslash( $_GET['save_customer_token'] ) ) &&
+				! empty( $_GET['save_customer_token'] ) && //phpcs:ignore WordPress.Security.NonceVerification
+				'yes' === wc_clean( wp_unslash( $_GET['save_customer_token'] ) ) && //phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				get_current_user_id() &&
 				$save_bank_accounts
 			);
