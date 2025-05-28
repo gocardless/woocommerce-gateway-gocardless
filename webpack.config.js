@@ -13,11 +13,6 @@ module.exports = {
 	],
 	entry: {
 		index: path.resolve(process.cwd(), 'client/blocks', 'index.js'),
-		'wc-gocardless-checkout': path.resolve(
-			process.cwd(),
-			'client',
-			'wc-gocardless-checkout.js'
-		),
 		'customer-reports': path.resolve(
 			process.cwd(),
 			'client',
