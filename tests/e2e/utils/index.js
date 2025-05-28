@@ -299,78 +299,72 @@ export async function blockPlaceGoCardlessOrder(page, options) {
  */
 export async function handleGoCardlessPayment(page, options) {
 	const { customerBilling = customer.billing, currency = 'USD' } = options;
-	// Locate GoCardless iframe
-	const dropinIframe = await page
-		.frameLocator('iframe[name^="gocardless-dropin-iframe"]')
-		.first();
-
-	await page.waitForTimeout(5000);
-	await dropinIframe
+	await page
 		.getByTestId('loading-spinner')
 		.waitFor({ state: 'detached' });
 	await page.waitForTimeout(1000);
 
-	if (await dropinIframe.getByText(/Instant bank pay/).isVisible()) {
-		if (await dropinIframe.locator('#given_name').isVisible()) {
-			await dropinIframe
+	if (await page.getByText(/Instant bank pay/).isVisible()) {
+		if (await page.locator('#given_name').isVisible()) {
+			await page
 				.locator('#given_name')
 				.fill(customer.billing.firstname);
-			await dropinIframe
+			await page
 				.locator('#family_name')
 				.fill(customer.billing.lastname);
 			await expect(
-				dropinIframe.getByRole('button', { name: 'Continue' })
+				page.getByRole('button', { name: 'Continue' })
 			).toBeVisible();
-			await dropinIframe
+			await page
 				.getByRole('button', { name: 'Continue' })
 				.click({ force: true });
 		}
 		// Select bank
-		await dropinIframe
+		await page
 			.getByTestId('CONSENT_AUTHORISED_READ_REFUND_ACCOUNT_SANDBOX_BANK')
 			.click();
 
 		// Fill bank details
 		let filledBankDetails = false;
-		if ( await dropinIframe
+		if ( await page
 			.getByTestId('branch_code').isVisible()
 		) {
-			await dropinIframe
+			await page
 				.getByTestId('branch_code')
 				.fill(gbBankDetails.bankCode);
 			filledBankDetails = true;
 		}
-		if ( await dropinIframe
+		if ( await page
 			.getByTestId('account_number').isVisible()
 		) {
-			await dropinIframe
+			await page
 				.getByTestId('account_number')
 				.fill(gbBankDetails.accountNumber);
 			filledBankDetails = true;
 		}
 		if (filledBankDetails) {
 			await expect(
-				dropinIframe.getByRole('button', { name: 'Continue' })
+				page.getByRole('button', { name: 'Continue' })
 			).toBeVisible();
-			await dropinIframe
+			await page
 				.getByRole('button', { name: 'Continue' })
 				.click({ force: true });
 		}
 
 		// Final Confirmation
 		await expect(
-			dropinIframe.getByTestId('billing-request.bank-confirm.header')
+			page.getByTestId('billing-request.bank-confirm.header')
 		).toBeVisible();
 		if (
-			await dropinIframe
+			await page
 				.getByTestId('billing-request.bank-confirm.default-cta-button')
 				.isVisible()
 		) {
-			await dropinIframe
+			await page
 				.getByTestId('billing-request.bank-confirm.default-cta-button')
 				.click();
 		} else {
-			await dropinIframe
+			await page
 				.getByTestId(
 					'billing-request.bank-confirm.direct-debit-cta-button'
 				)
@@ -379,70 +373,70 @@ export async function handleGoCardlessPayment(page, options) {
 
 		// Pay (Bank confirmation)
 		await expect(
-			dropinIframe.getByRole('button', { name: 'Continue to manual web login' })
+			page.getByRole('button', { name: 'Continue to manual web login' })
 		).toBeVisible();
-		await dropinIframe
+		await page
 			.getByRole('button', { name: 'Continue to manual web login' })
 			.click({ force: true });
 		return;
 	}
 
 	// Fill GoCardless payment details
-	await dropinIframe.locator('#currencySelector').selectOption(currency);
-	await dropinIframe
+	await page.locator('#currencySelector').selectOption(currency);
+	await page
 		.locator('#country_code')
 		.selectOption(customerBilling.country);
-	await dropinIframe.locator('#given_name').fill(customerBilling.firstname);
-	await dropinIframe.locator('#family_name').fill(customerBilling.lastname);
-	await dropinIframe
+	await page.locator('#given_name').fill(customerBilling.firstname);
+	await page.locator('#family_name').fill(customerBilling.lastname);
+	await page
 		.locator('#address_line1')
 		.fill(customerBilling.addressfirstline);
-	await dropinIframe
+	await page
 		.locator('#address_line2')
 		.fill(customerBilling.addresssecondline);
-	await dropinIframe.locator('#city').fill(customerBilling.city);
-	await dropinIframe.locator('#postal_code').fill(customerBilling.postcode);
-	if (await dropinIframe.locator('#region').isVisible()) {
-		await dropinIframe
+	await page.locator('#city').fill(customerBilling.city);
+	await page.locator('#postal_code').fill(customerBilling.postcode);
+	if (await page.locator('#region').isVisible()) {
+		await page
 			.locator('#region')
 			.selectOption(customerBilling.state);
 	}
 	await expect(
-		dropinIframe.getByRole('button', { name: 'Continue' })
+		page.getByRole('button', { name: 'Continue' })
 	).toBeVisible();
-	await dropinIframe
+	await page
 		.getByRole('button', { name: 'Continue' })
 		.click({ force: true });
 
 	// Fill bank details
 	if (currency === 'USD') {
-		await dropinIframe
+		await page
 			.locator('#account_holder_name')
 			.fill(customerBilling.firstname + ' ' + customerBilling.lastname);
-		await dropinIframe.locator('#bank_code').fill(bankDetails.bankCode);
-		await dropinIframe
+		await page.locator('#bank_code').fill(bankDetails.bankCode);
+		await page
 			.locator('#account_number')
 			.fill(bankDetails.accountNumber);
-		await dropinIframe
+		await page
 			.locator('select[name="account_type"]')
 			.selectOption(bankDetails.accountType);
 	} else {
-		await dropinIframe
+		await page
 			.getByTestId('branch_code')
 			.fill(gbBankDetails.bankCode);
-		await dropinIframe
+		await page
 			.getByTestId('account_number')
 			.fill(gbBankDetails.accountNumber);
 	}
 	await expect(
-		dropinIframe.getByRole('button', { name: 'Continue' })
+		page.getByRole('button', { name: 'Continue' })
 	).toBeVisible();
-	await dropinIframe
+	await page
 		.getByRole('button', { name: 'Continue' })
 		.click({ force: true });
 
 	// Final Confirmation
-	await dropinIframe
+	await page
 		.getByTestId('billing-request.bank-confirm.direct-debit-cta-button')
 		.click();
 }
