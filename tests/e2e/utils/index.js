@@ -299,10 +299,11 @@ export async function blockPlaceGoCardlessOrder(page, options) {
  */
 export async function handleGoCardlessPayment(page, options) {
 	const { customerBilling = customer.billing, currency = 'USD' } = options;
+	await page.waitForTimeout(4000);
+	await page.waitForLoadState('networkidle');
 	await page
 		.getByTestId('loading-spinner')
 		.waitFor({ state: 'detached' });
-	await page.waitForTimeout(1000);
 
 	if (await page.getByText(/Instant bank pay/).isVisible()) {
 		if (await page.locator('#given_name').isVisible()) {
@@ -439,6 +440,7 @@ export async function handleGoCardlessPayment(page, options) {
 	await page
 		.getByTestId('billing-request.bank-confirm.direct-debit-cta-button')
 		.click();
+	await page.waitForTimeout(2000);
 }
 
 /**
@@ -482,10 +484,11 @@ export async function handleGoCardlessPaymentSchemeWise(
 	scheme = 'ach'
 ) {
 	const { customerBilling = customer.billing, currency = 'USD' } = options;
+	await page.waitForTimeout(4000);
+	await page.waitForLoadState('networkidle');
 	await page
 		.getByTestId('loading-spinner')
 		.waitFor({ state: 'detached' });
-	await page.waitForTimeout(1000);
 
 	if (await page.getByText(/Instant bank pay/).isVisible()) {
 		return handleGoCardlessPayment(page, options);
@@ -593,6 +596,7 @@ export async function handleGoCardlessPaymentSchemeWise(
 	await page
 		.getByTestId('billing-request.bank-confirm.direct-debit-cta-button')
 		.click();
+	await page.waitForTimeout(2000);
 }
 
 /**
