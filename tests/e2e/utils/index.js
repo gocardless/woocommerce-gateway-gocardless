@@ -482,62 +482,56 @@ export async function handleGoCardlessPaymentSchemeWise(
 	scheme = 'ach'
 ) {
 	const { customerBilling = customer.billing, currency = 'USD' } = options;
-	// Locate GoCardless iframe
-	const dropinIframe = await page
-		.frameLocator('iframe[name^="gocardless-dropin-iframe"]')
-		.first();
-
-	await page.waitForTimeout(5000);
-	await dropinIframe
+	await page
 		.getByTestId('loading-spinner')
 		.waitFor({ state: 'detached' });
 	await page.waitForTimeout(1000);
 
-	if (await dropinIframe.getByText(/Instant bank pay/).isVisible()) {
+	if (await page.getByText(/Instant bank pay/).isVisible()) {
 		return handleGoCardlessPayment(page, options);
 	}
 
 	// Fill GoCardless payment details
 	const data = bankData[scheme] || bankDetails;
-	await dropinIframe.locator('#currencySelector').selectOption(currency);
+	await page.locator('#currencySelector').selectOption(currency);
 
 	await page.waitForTimeout(2500); // Add waiting time to avoid flakiness.
 	if (scheme === 'sepa_core') {
-		await dropinIframe
+		await page
 			.getByTestId('country-residence-selector')
 			.selectOption('DK');
 	} else {
-		await dropinIframe
+		await page
 			.locator('#given_name')
 			.fill(customerBilling.firstname);
-		await dropinIframe
+		await page
 			.locator('#family_name')
 			.fill(customerBilling.lastname);
 	}
 
 	if (scheme === 'betalingsservice') {
-		dropinIframe.locator('#danish_identity_number').fill(data.idNumber);
+		page.locator('#danish_identity_number').fill(data.idNumber);
 	}
 	await expect(
-		dropinIframe.getByRole('button', { name: 'Continue' })
+		page.getByRole('button', { name: 'Continue' })
 	).toBeVisible();
-	await dropinIframe
+	await page
 		.getByRole('button', { name: 'Continue' })
 		.click({ force: true });
 
 	// Fill bank details
 	switch (scheme) {
 		case 'ach':
-			await dropinIframe
+			await page
 				.locator('#account_holder_name')
 				.fill(
 					customerBilling.firstname + ' ' + customerBilling.lastname
 				);
-			await dropinIframe.locator('#bank_code').fill(data.bankCode);
-			await dropinIframe
+			await page.locator('#bank_code').fill(data.bankCode);
+			await page
 				.locator('#account_number')
 				.fill(data.accountNumber);
-			await dropinIframe
+			await page
 				.locator('select[name="account_type"]')
 				.selectOption(data.accountType);
 			break;
@@ -545,58 +539,58 @@ export async function handleGoCardlessPaymentSchemeWise(
 		case 'bacs':
 		case 'becs':
 		case 'autogiro':
-			await dropinIframe.getByTestId('branch_code').fill(data.bankCode);
-			await dropinIframe
+			await page.getByTestId('branch_code').fill(data.bankCode);
+			await page
 				.getByTestId('account_number')
 				.fill(data.accountNumber);
 			break;
 
 		case 'becs_nz':
-			await dropinIframe.getByTestId('bank_code').fill(data.bankCode);
-			await dropinIframe.getByTestId('branch_code').fill(data.branchCode);
-			await dropinIframe
+			await page.getByTestId('bank_code').fill(data.bankCode);
+			await page.getByTestId('branch_code').fill(data.branchCode);
+			await page
 				.getByTestId('account_number')
 				.fill(data.accountNumber);
-			await dropinIframe
+			await page
 				.getByTestId('account_number_suffix')
 				.fill(data.accountNumberSuffix);
 			break;
 
 		case 'pad':
-			await dropinIframe.getByTestId('bank_code').fill(data.bankCode);
-			await dropinIframe.getByTestId('branch_code').fill(data.branchCode);
-			await dropinIframe
+			await page.getByTestId('bank_code').fill(data.bankCode);
+			await page.getByTestId('branch_code').fill(data.branchCode);
+			await page
 				.getByTestId('account_number')
 				.fill(data.accountNumber);
 			break;
 
 		case 'betalingsservice':
 		case 'sepa_core':
-			await dropinIframe.getByTestId('bank_code').fill(data.bankCode);
-			await dropinIframe
+			await page.getByTestId('bank_code').fill(data.bankCode);
+			await page
 				.getByTestId('account_number')
 				.fill(data.accountNumber);
 			break;
 
 		default:
-			await dropinIframe
+			await page
 				.getByTestId('branch_code')
 				.fill(gbBankDetails.bankCode);
-			await dropinIframe
+			await page
 				.getByTestId('account_number')
 				.fill(gbBankDetails.accountNumber);
 			break;
 	}
 
 	await expect(
-		dropinIframe.getByRole('button', { name: 'Continue' })
+		page.getByRole('button', { name: 'Continue' })
 	).toBeVisible();
-	await dropinIframe
+	await page
 		.getByRole('button', { name: 'Continue' })
 		.click({ force: true });
 
 	// Final Confirmation
-	await dropinIframe
+	await page
 		.getByTestId('billing-request.bank-confirm.direct-debit-cta-button')
 		.click();
 }
