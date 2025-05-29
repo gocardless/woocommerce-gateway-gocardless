@@ -2559,9 +2559,8 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	 *
 	 * @since 2.4.0
 	 *
-	 * @param array            $item          Item of payment method.
-	 * @param WC_Payment_Token $payment_token The payment token associated with
-	 *                                        this method entry.
+	 * @param array                                    $item          Item of payment method.
+	 * @param WC_GoCardless_Payment_Token_Direct_Debit $payment_token The payment token associated with this method entry.
 	 *
 	 * @return array Filtered item for direct debit.
 	 */

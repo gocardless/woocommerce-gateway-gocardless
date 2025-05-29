@@ -60,15 +60,6 @@ final class WC_GoCardless_Gateway_Blocks_Support extends AbstractPaymentMethodTy
 				: $dependencies;
 		}
 
-		// Register GoCardless Drop-in script.
-		wp_register_script(
-			'gocardless-dropin',
-			'https://pay.gocardless.com/billing/static/dropin/v2/initialise.js',
-			array(),
-			$version,
-			true
-		);
-
 		wp_register_script(
 			'wc-gocardless-blocks-integration',
 			wc_gocardless()->plugin_url . '/build/index.js',
@@ -81,7 +72,7 @@ final class WC_GoCardless_Gateway_Blocks_Support extends AbstractPaymentMethodTy
 			'woocommerce-gateway-gocardless'
 		);
 
-		return array( 'gocardless-dropin', 'wc-gocardless-blocks-integration' );
+		return array( 'wc-gocardless-blocks-integration' );
 	}
 
 	/**
