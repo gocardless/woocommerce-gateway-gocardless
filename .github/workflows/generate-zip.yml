@@ -1,4 +1,4 @@
-name: Generate ZIP file
+name: Build release zip
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ on:
 
 jobs:
   generate-zip-file:
-    name: Generate ZIP file
+    name: Build release zip
     runs-on: ubuntu-latest
 
     steps:
