@@ -302,11 +302,8 @@ test.describe('Admin Tests', () => {
 		await page.locator('#place_order').click();
 
 		// Make sure Direct Debit Scheme is SEPA Core.
-		const dropinIframe = await page
-			.frameLocator('iframe[name^="gocardless-dropin-iframe"]')
-			.first();
 		await expect(
-			dropinIframe.locator('span[aria-label="sepa"]').first()
+			page.locator('span[aria-label="sepa"]').first()
 		).toBeAttached();
 		await goToCheckout(page);
 
@@ -338,11 +335,8 @@ test.describe('Admin Tests', () => {
 
 		// Place order
 		await page.locator('#place_order').click();
-		const dropinIframe1 = await page
-			.frameLocator('iframe[name^="gocardless-dropin-iframe"]')
-			.first();
 		await expect(
-			dropinIframe1.locator('span[aria-label="sepa"]').first()
+			page.locator('span[aria-label="sepa"]').first()
 		).not.toBeAttached();
 		await goToCheckout(page);
 	});
