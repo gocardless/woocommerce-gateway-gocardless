@@ -1619,17 +1619,28 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				throw new Exception( esc_html__( 'Missing events in payload.', 'woocommerce-gateway-gocardless' ) );
 			}
 
+			wc_gocardless()->log( sprintf( '%s - Handling webhook. Payload: %s', __METHOD__, print_r( $payload, true ) ) );
+
 			$args = array( $payload );
 
 			// Process the webhook payload asynchronously.
-			WC()->queue()->schedule_single(
+			$action_id = WC()->queue()->schedule_single(
 				WC()->call_function( 'time' ) + 1,
 				'woocommerce_gocardless_process_webhook_payload_async',
 				$args,
 				'woocommerce-gocardless-webhook'
 			);
 
+			// If the action is not scheduled, return error to GoCardless, to get a retry.
+			if ( empty( $action_id ) ) {
+				wc_gocardless()->log( sprintf( '%s - Failed to schedule action to process webhook.', __METHOD__ ) );
+				header( 'HTTP/1.1 500 Internal Server Error' );
+				throw new Exception( esc_html__( 'Failed to schedule action to process webhook.', 'woocommerce-gateway-gocardless' ) );
+			}
+
+			wc_gocardless()->log( sprintf( '%s - Action scheduled with ID %d, to process webhook.', __METHOD__, $action_id ) );
 		} catch ( Exception $e ) {
+			wc_gocardless()->log( sprintf( '%s - Error when handling webhook: %s', __METHOD__, $e->getMessage() ) );
 			wp_send_json_error( array( 'message' => $e->getMessage() ) );
 		}
 	}
