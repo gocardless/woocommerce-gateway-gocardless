@@ -417,7 +417,7 @@ export async function handleGoCardlessPayment(page, options) {
 	// Fill bank details
 	if (currency === 'USD') {
 		await dropinIframe
-			.locator('#accountHolderName')
+			.locator('#account_holder_name')
 			.fill(customerBilling.firstname + ' ' + customerBilling.lastname);
 		await dropinIframe.locator('#bank_code').fill(bankDetails.bankCode);
 		await dropinIframe
@@ -535,7 +535,7 @@ export async function handleGoCardlessPaymentSchemeWise(
 	switch (scheme) {
 		case 'ach':
 			await dropinIframe
-				.locator('#accountHolderName')
+				.locator('#account_holder_name')
 				.fill(
 					customerBilling.firstname + ' ' + customerBilling.lastname
 				);
