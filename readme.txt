@@ -242,22 +242,4 @@ Yes, it uses [GoCardless](https://gocardless.com/) ([privacy policy](https://goc
 * Tweak - Improved the process of adding the webhook secret information.
 * Tweak - Update the payment method title to "Pay by bank" and change the logo to the GoCardless logo.
 
-= 2.6.4 - 2024-04-01 =
-* Dev - Bump WooCommerce "tested up to" version 8.7.
-* Dev - Bump WooCommerce minimum supported version to 8.4.
-* Dev - Bump WordPress "tested up to" version 6.5.
-
-= 2.6.3 - 2024-02-05 =
-* Fix - Allow customers to update subscription payment methods via Woo Subscriptions.
-* Dev - Bump WooCommerce "tested up to" version 8.5.
-* Dev - Bump WooCommerce minimum supported version to 8.3.
-* Dev - Bump WordPress minimum supported version to 6.3.
-
-= 2.6.2 - 2024-01-08 =
-* Tweak - Bump PHP "tested up to" version 8.3.
-* Dev - Declare compatibility with Product Editor.
-* Dev - Bump WooCommerce "tested up to" version 8.4.
-* Dev - Bump WooCommerce minimum supported version to 8.2.
-* Dev - Bump PHP minimum supported version to 7.4.
-
 [See changelog details prior to 2024 here](https://github.com/gocardless/woocommerce-gateway-gocardless/blob/trunk/changelog.txt).
