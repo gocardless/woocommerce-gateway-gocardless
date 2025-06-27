@@ -12,8 +12,8 @@
  * License:              GPL-3.0-or-later
  * License URI:          https://spdx.org/licenses/GPL-3.0-or-later.html
  * Requires Plugins:     woocommerce
- * WC requires at least: 9.6
- * WC tested up to:      9.8
+ * WC requires at least: 9.8
+ * WC tested up to:      10.0
  *
  * Copyright: © 2023-2025 WooCommerce
  * Copyright: © 2025 GoCardless
