@@ -224,6 +224,20 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 
 				<?php if ( ! empty( $access_token ) ) : ?>
 					<span class="gocardless-connected"><span style="color: #00a32a">&#9679;</span>&nbsp;<?php esc_html_e( 'Connected', 'woocommerce-gateway-gocardless' ); ?></span>
+
+					<?php if ( $this->testmode ) : ?>
+						<div class="wcgc-sandbox-mode-notice">
+							<span>
+								<?php
+								printf(
+									'<strong>%1$s</strong> %2$s',
+									esc_html__( 'GoCardless is connected in sandbox mode.', 'woocommerce-gateway-gocardless' ),
+									esc_html__( 'You need to connect a live GoCardless account before you can accept real bank payments.', 'woocommerce-gateway-gocardless' )
+								);
+								?>
+							</span>
+						</div>
+					<?php endif; ?>
 				<?php endif; ?>
 
 				<?php if ( empty( $access_token ) ) : ?>
