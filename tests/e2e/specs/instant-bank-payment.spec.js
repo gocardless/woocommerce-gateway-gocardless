@@ -58,11 +58,8 @@ test.describe('Instant Bank Payment Tests', () => {
 		await fillBillingDetails(page, customer.billing, true);
 		await blockPlaceOrder(page);
 		// Make sure Instant Bank Payment is not available for USA.
-		const dropinIframe = await page
-			.frameLocator('iframe[name^="gocardless-dropin-iframe"]')
-			.first();
 		await expect(
-			dropinIframe.getByText('Instant bank pay').first()
+			page.getByText('Instant bank pay').first()
 		).not.toBeVisible();
 
 		// GBP & GB
@@ -77,11 +74,8 @@ test.describe('Instant Bank Payment Tests', () => {
 		await blockPlaceOrder(page);
 
 		// Make sure Instant Bank Payment is available.
-		const dropinIframe1 = await page
-			.frameLocator('iframe[name^="gocardless-dropin-iframe"]')
-			.first();
 		await expect(
-			dropinIframe1.getByText('Instant bank pay').first()
+			page.getByText('Instant bank pay').first()
 		).toBeVisible();
 
 		// EUR & DE
@@ -105,11 +99,8 @@ test.describe('Instant Bank Payment Tests', () => {
 		await blockPlaceOrder(page);
 
 		// Make sure Instant Bank Payment is available.
-		const dropinIframe2 = await page
-			.frameLocator('iframe[name^="gocardless-dropin-iframe"]')
-			.first();
 		await expect(
-			dropinIframe2.getByText('Instant bank pay').first()
+			page.getByText('Instant bank pay').first()
 		).toBeVisible();
 	});
 
@@ -136,11 +127,8 @@ test.describe('Instant Bank Payment Tests', () => {
 		await blockPlaceOrder(page);
 
 		// Make sure Instant Bank Payment is not available.
-		const dropinIframe = await page
-			.frameLocator('iframe[name^="gocardless-dropin-iframe"]')
-			.first();
 		await expect(
-			dropinIframe.getByText('Instant bank pay').first()
+			page.getByText('Instant bank pay').first()
 		).not.toBeVisible();
 
 		// Enable Instant Bank Payment.
@@ -161,11 +149,8 @@ test.describe('Instant Bank Payment Tests', () => {
 		await blockPlaceOrder(page);
 
 		// Make sure Instant Bank Payment is available.
-		const dropinIframe1 = await page
-			.frameLocator('iframe[name^="gocardless-dropin-iframe"]')
-			.first();
 		await expect(
-			dropinIframe1.getByText('Instant bank pay').first()
+			page.getByText('Instant bank pay').first()
 		).toBeVisible();
 	});
 
