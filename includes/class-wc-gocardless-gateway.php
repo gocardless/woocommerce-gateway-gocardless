@@ -115,12 +115,6 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 		// Payment-token-API related hook.
 		add_filter( 'woocommerce_payment_methods_list_item', array( $this, 'saved_payment_methods_list_item' ), 99, 2 );
 		add_action( 'woocommerce_account_payment_methods_column_method', array( $this, 'saved_payment_methods_column_method' ) );
-
-		// Order Pay (Receipt) page handling for complete billing request flow.
-		add_filter( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
-
-		// Update the logged_in cookie in current request, after a guest user is created to avoid nonce inconsistencies.
-		add_action( 'set_logged_in_cookie', array( $this, 'set_cookie_on_current_request' ) );
 	}
 
 	/**
@@ -230,6 +224,20 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 
 				<?php if ( ! empty( $access_token ) ) : ?>
 					<span class="gocardless-connected"><span style="color: #00a32a">&#9679;</span>&nbsp;<?php esc_html_e( 'Connected', 'woocommerce-gateway-gocardless' ); ?></span>
+
+					<?php if ( $this->testmode ) : ?>
+						<div class="wcgc-sandbox-mode-notice">
+							<span>
+								<?php
+								printf(
+									'<strong>%1$s</strong> %2$s',
+									esc_html__( 'GoCardless is connected in sandbox mode.', 'woocommerce-gateway-gocardless' ),
+									esc_html__( 'You need to connect a live GoCardless account before you can accept real bank payments.', 'woocommerce-gateway-gocardless' )
+								);
+								?>
+							</span>
+						</div>
+					<?php endif; ?>
 				<?php endif; ?>
 
 				<?php if ( empty( $access_token ) ) : ?>
@@ -701,18 +709,6 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 			$this->saved_payment_methods();
 			$this->save_payment_method_checkbox();
 		}
-		if ( is_wc_endpoint_url( 'order-pay' ) ) {
-			?>
-			<div id="wc-gocardless-hidden-fields">
-				<input name="wc-gocardless-billing-request-id" type="hidden" value="" />
-			</div>
-			<?php
-		}
-		?>
-		<noscript>
-			<?php esc_html_e( 'Since your browser does not support or has disabled JavaScript, you will not be able to use the GoCardless payment method. To proceed with your payment, please enable JavaScript in your current browser or switch to a browser that supports JavaScript.', 'woocommerce-gateway-gocardless' ); ?>
-		</noscript>
-		<?php
 	}
 
 	/**
@@ -930,6 +926,8 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				'postal_code'   => $order->get_billing_postcode(),
 			),
 			'links'              => array( 'billing_request' => $billing_request_id ),
+			'redirect_uri'       => $this->get_success_redirect_url( $order ),
+			'exit_uri'           => $order->get_checkout_payment_url(),
 		);
 
 		/**
@@ -950,7 +948,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				'message' => $billing_request_flow->get_error_message(),
 			);
 		}
-		if ( empty( $billing_request_flow['billing_request_flows']['id'] ) ) {
+		if ( empty( $billing_request_flow['billing_request_flows']['id'] ) || empty( $billing_request_flow['billing_request_flows']['authorisation_url'] ) ) {
 			return array(
 				'result'  => 'failure',
 				'message' => esc_html__( 'Error processing checkout. Please try again.', 'woocommerce-gateway-gocardless' ),
@@ -961,45 +959,10 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 		wc_gocardless()->log( sprintf( '%s - Billing request flow created: %s', __METHOD__, print_r( $billing_request_flow, true ) ) );
 
 		$response = array(
-			'result'                  => 'success',
-			'redirect'                => $order->get_checkout_payment_url(),
-			'billing_request_flow_id' => $billing_request_flow['billing_request_flows']['id'],
+			'result'   => 'success',
+			'redirect' => esc_url_raw( $billing_request_flow['billing_request_flows']['authorisation_url'] ),
 		);
 
-		// Update nonce if the customer is created.
-		if ( did_action( 'woocommerce_created_customer' ) > 0 ) {
-			$response['billing_request_nonce'] = wp_create_nonce( 'wc_gocardless_complete_billing_request_flow' );
-		}
-
-		return $response;
-	}
-
-	/**
-	 * Process payment for pay page.
-	 *
-	 * @param WC_Order $order Order object.
-	 * @return array Returns array with redirect url succeed, otherwise array with error message is returned.
-	 */
-	public function process_payment_for_pay_page( WC_Order $order ) {
-		$billing_request_id = isset( $_POST['wc-gocardless-billing-request-id'] ) ? sanitize_text_field( wp_unslash( $_POST['wc-gocardless-billing-request-id'] ) ) : ''; //phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verification is already handled on the WooCommerce side.
-		if ( empty( $billing_request_id ) ) {
-			wc_add_notice( esc_html__( 'Billing request ID is required.', 'woocommerce-gateway-gocardless' ), 'error' );
-			return array(
-				'result'  => 'failure',
-				'message' => esc_html__( 'Billing request ID is required.', 'woocommerce-gateway-gocardless' ),
-			);
-		}
-
-		$save_token = (
-			! empty( $_POST['wc-gocardless-new-payment-method'] ) //phpcs:ignore WordPress.Security.NonceVerification -- Nonce verification is already handled on the WooCommerce side.
-			&& $this->saved_bank_accounts
-			&& get_current_user_id()
-		);
-
-		$response = $this->handle_billing_request_complete( $order, $billing_request_id, $save_token );
-		if ( 'failure' === $response['result'] ) {
-			wc_add_notice( $response['message'], 'error' );
-		}
 		return $response;
 	}
 
@@ -1129,22 +1092,6 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Set logged_in cookie with current request using new login session (to ensure consistent nonce).
-	 * Only apply during the checkout process with the account creation.
-	 *
-	 * @param string $cookie Cookie value.
-	 */
-	public function set_cookie_on_current_request( $cookie ) {
-		if ( defined( 'WOOCOMMERCE_CHECKOUT' ) && WOOCOMMERCE_CHECKOUT && did_action( 'woocommerce_created_customer' ) > 0 ) {
-			if ( ! defined( 'LOGGED_IN_COOKIE' ) ) {
-				return;
-			}
-
-			$_COOKIE[ LOGGED_IN_COOKIE ] = $cookie;
-		}
-	}
-
-	/**
 	 * Process the payment and return the result
 	 *
 	 * @param int $order_id Order ID.
@@ -1156,11 +1103,6 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 
 		if ( $this->_is_processing_payment_with_saved_token() ) {
 			return $this->_process_payment_with_saved_token( $order );
-		}
-
-		if ( isset( $_GET['pay_for_order'] ) ) { //phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verification is already handled on the WooCommerce side.
-			// Pay for order page.
-			return $this->process_payment_for_pay_page( $order );
 		}
 
 		return $this->_process_payment_with_billing_request_flow( $order );
@@ -1249,22 +1191,22 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 
 	/**
 	 * Get success redirect URL.
+	 * URL to redirect after successfull GoCardless transcation.
 	 *
 	 * @since 2.4.0
-	 * @deprecated 2.7.0
 	 *
 	 * @param WC_Order|int $order Order object or ID.
 	 *
 	 * @return string Success redirect URL.
 	 */
 	public function get_success_redirect_url( $order ) {
-		wc_deprecated_function( __METHOD__, '2.7.0' );
-
-		$order    = wc_get_order( $order );
-		$order_id = wc_gocardless_get_order_prop( $order, 'id' );
-		$params   = array(
-			'request'  => 'redirect_flow',
-			'order_id' => $order_id,
+		$order              = wc_get_order( $order );
+		$order_id           = wc_gocardless_get_order_prop( $order, 'id' );
+		$billing_request_id = $this->get_order_resource( $order_id, 'billing_request', 'id' );
+		$params             = array(
+			'request'            => 'billing_request_flow',
+			'order_id'           => $order_id,
+			'billing_request_id' => $billing_request_id,
 		);
 
 		$save_token = (
@@ -1274,10 +1216,10 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 		);
 
 		if ( $save_token ) {
-			$params['save_customer_token'] = 'true';
+			$params['save_customer_token'] = 'yes';
 		}
 
-		$url = add_query_arg( $params, WC()->api_request_url( __CLASS__, true ) );
+		$url = add_query_arg( $params, WC()->api_request_url( 'WC_Gateway_GoCardless', true ) );
 
 		return $url;
 	}
@@ -1316,6 +1258,9 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 			}
 
 			switch ( $_GET['request'] ) { //phpcs:ignore WordPress.Security.NonceVerification
+				case 'billing_request_flow':
+					$this->handle_billing_request_flow();
+					break;
 				case 'webhook':
 					$this->_handle_webhook();
 					break;
@@ -1326,6 +1271,72 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 		} catch ( Exception $e ) {
 			header( 'HTTP/1.1 400 Bad request' );
 			wp_send_json_error( array( 'message' => $e->getMessage() ) );
+		}
+	}
+
+	/**
+	 * Handle redirect back from GoCardless for billing request flow.
+	 *
+	 * @since 2.9.6
+	 *
+	 * @return void
+	 */
+	protected function handle_billing_request_flow() {
+		try {
+			if ( empty( $_GET['billing_request_id'] ) || empty( $_GET['order_id'] ) ) { //phpcs:ignore WordPress.Security.NonceVerification
+				throw new Exception( esc_html__( 'Invalid billing request flow request.', 'woocommerce-gateway-gocardless' ) );
+			}
+			$order_id           = absint( $_GET['order_id'] ); //phpcs:ignore WordPress.Security.NonceVerification
+			$billing_request_id = sanitize_text_field( wp_unslash( $_GET['billing_request_id'] ) ); //phpcs:ignore WordPress.Security.NonceVerification
+			$order              = wc_get_order( $order_id );
+
+			if ( ! $order ) {
+				throw new Exception( esc_html__( 'Order not found.', 'woocommerce-gateway-gocardless' ) );
+			}
+
+			wc_gocardless()->log( sprintf( '%s - Maybe redirected from GoCardless with billing_request_id "%s" and order ID %s', __METHOD__, $billing_request_id, $order_id ) );
+
+			$save_bank_accounts  = 'yes' === $this->get_option( 'saved_bank_accounts', 'no' );
+			$save_customer_token = (
+				! empty( $_GET['save_customer_token'] ) && //phpcs:ignore WordPress.Security.NonceVerification
+				'yes' === wc_clean( wp_unslash( $_GET['save_customer_token'] ) ) && //phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				get_current_user_id() &&
+				$save_bank_accounts
+			);
+
+			$response = $this->handle_billing_request_complete( $order, $billing_request_id, $save_customer_token );
+			if ( 'success' === $response['result'] ) {
+				wp_safe_redirect( $response['redirect'] );
+				exit;
+			} else {
+				wc_add_notice( $response['message'], 'error' );
+				wp_safe_redirect( wc_get_page_permalink( 'checkout' ) );
+				exit;
+			}
+		} catch ( Exception $e ) {
+			wc_gocardless()->log( sprintf( '%s - Error when handling billing request flow request: %s', __METHOD__, $e->getMessage() ) );
+
+			$order           = wc_get_order( $order_id );
+			$current_user_id = get_current_user_id();
+
+			$error_message = __( 'We were unable to process your order.', 'woocommerce-gateway-gocardless' );
+
+			// Only include the "Cancel order" URL for users that own the order.
+			if ( $current_user_id && $current_user_id === $order->get_customer_id() ) {
+				/* translators: Link to retry cancel order */
+				$error_message = sprintf( __( 'We were unable to process your order, <a href="%s">click here to try again</a>.', 'woocommerce-gateway-gocardless' ), $order->get_cancel_order_url() );
+			}
+
+			$error_message = sprintf(
+				'%1$s %2$s<br><br>%3$s',
+				$error_message,
+				__( 'If the problem still persists please contact us with the details below.', 'woocommerce-gateway-gocardless' ),
+				$e->getMessage()
+			);
+
+			wc_add_notice( $error_message, 'error' );
+
+			wp_safe_redirect( wc_get_page_permalink( 'checkout' ) );
 		}
 	}
 
@@ -1619,17 +1630,28 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				throw new Exception( esc_html__( 'Missing events in payload.', 'woocommerce-gateway-gocardless' ) );
 			}
 
+			wc_gocardless()->log( sprintf( '%s - Handling webhook. Payload: %s', __METHOD__, print_r( $payload, true ) ) );
+
 			$args = array( $payload );
 
 			// Process the webhook payload asynchronously.
-			WC()->queue()->schedule_single(
+			$action_id = WC()->queue()->schedule_single(
 				WC()->call_function( 'time' ) + 1,
 				'woocommerce_gocardless_process_webhook_payload_async',
 				$args,
 				'woocommerce-gocardless-webhook'
 			);
 
+			// If the action is not scheduled, return error to GoCardless, to get a retry.
+			if ( empty( $action_id ) ) {
+				wc_gocardless()->log( sprintf( '%s - Failed to schedule action to process webhook.', __METHOD__ ) );
+				header( 'HTTP/1.1 500 Internal Server Error' );
+				throw new Exception( esc_html__( 'Failed to schedule action to process webhook.', 'woocommerce-gateway-gocardless' ) );
+			}
+
+			wc_gocardless()->log( sprintf( '%s - Action scheduled with ID %d, to process webhook.', __METHOD__, $action_id ) );
 		} catch ( Exception $e ) {
+			wc_gocardless()->log( sprintf( '%s - Error when handling webhook: %s', __METHOD__, $e->getMessage() ) );
 			wp_send_json_error( array( 'message' => $e->getMessage() ) );
 		}
 	}
@@ -2562,9 +2584,8 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	 *
 	 * @since 2.4.0
 	 *
-	 * @param array            $item          Item of payment method.
-	 * @param WC_Payment_Token $payment_token The payment token associated with
-	 *                                        this method entry.
+	 * @param array                                    $item          Item of payment method.
+	 * @param WC_GoCardless_Payment_Token_Direct_Debit $payment_token The payment token associated with this method entry.
 	 *
 	 * @return array Filtered item for direct debit.
 	 */
@@ -2655,61 +2676,6 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				array( 'order_id' => $order_id )
 			);
 		}
-	}
-
-	/**
-	 * Enqueue scripts on order page for payment dropin.
-	 *
-	 * @return void
-	 */
-	public function enqueue_scripts() {
-		// Only load scripts on checkout page, if access token is available and gateway is enabled.
-		if ( ! is_checkout() || ! $this->access_token || 'yes' !== $this->enabled ) {
-			return;
-		}
-
-		$asset_path   = wc_gocardless()->plugin_path . '/build/wc-gocardless-checkout.asset.php';
-		$version      = wc_gocardless()->version;
-		$dependencies = array();
-		if ( file_exists( $asset_path ) ) {
-			$asset        = require $asset_path;
-			$version      = is_array( $asset ) && isset( $asset['version'] )
-				? $asset['version']
-				: $version;
-			$dependencies = is_array( $asset ) && isset( $asset['dependencies'] )
-				? $asset['dependencies']
-				: $dependencies;
-		}
-
-		wp_enqueue_script(
-			'gocardless-dropin',
-			'https://pay.gocardless.com/billing/static/dropin/v2/initialise.js',
-			array(),
-			$version,
-			true
-		);
-
-		wp_enqueue_script(
-			'wc-gocardless-checkout-js',
-			wc_gocardless()->plugin_url . '/build/wc-gocardless-checkout.js',
-			$dependencies,
-			$version,
-			true
-		);
-
-		wp_localize_script(
-			'wc-gocardless-checkout-js',
-			'wc_gocardless_checkout_params',
-			array(
-				'is_test'                        => $this->testmode,
-				'ajax_url'                       => WC_AJAX::get_endpoint( '%%endpoint%%' ),
-				'create_billing_request_nonce'   => wp_create_nonce( 'wc_gocardless_create_billing_request_flow' ),
-				'complete_billing_request_nonce' => wp_create_nonce( 'wc_gocardless_complete_billing_request_flow' ),
-				'is_order_pay_page'              => is_checkout() && is_wc_endpoint_url( 'order-pay' ),
-				'order_id'                       => absint( get_query_var( 'order-pay' ) ),
-				'generic_error'                  => __( 'An error occurred while processing the payment.', 'woocommerce-gateway-gocardless' ),
-			)
-		);
 	}
 
 	/**

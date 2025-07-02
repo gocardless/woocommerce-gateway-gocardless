@@ -2,7 +2,7 @@
 Contributors: gocardless, woocommerce, automattic
 Tags:         gocardless, woocommerce, direct debit, instant bank pay
 Tested up to: 6.8
-Stable tag:   2.9.5
+Stable tag:   2.9.6
 License:      GPL-3.0-or-later
 License URI:  https://spdx.org/licenses/GPL-3.0-or-later.html
 
@@ -140,6 +140,13 @@ Yes, it uses [GoCardless](https://gocardless.com/) ([privacy policy](https://goc
 
 == Changelog ==
 
+= 2.9.6 - 2025-07-02 =
+* Add - Respond with an error to the GoCardless webhook call if the scheduling action fails.
+* Add - A notice indicating that GoCardless is connected in sandbox mode if the merchant is connected to a sandbox account.
+* Update - Replaced JavaScript Drop-in with the redirect-to-GoCardless approach for the transaction/direct debit setup.
+* Dev - Bump WooCommerce "tested up to" version 10.0.
+* Dev - Bump WooCommerce minimum supported version to 9.8.
+
 = 2.9.5 - 2025-05-15 =
 * Fix - Ensure all supported SEPA zone countries are included.
 
@@ -234,23 +241,5 @@ Yes, it uses [GoCardless](https://gocardless.com/) ([privacy policy](https://goc
 * Fix - Replace the middleware URL from `connect.woocommerce.com` to `api.woocommerce.com/integrations`.
 * Tweak - Improved the process of adding the webhook secret information.
 * Tweak - Update the payment method title to "Pay by bank" and change the logo to the GoCardless logo.
-
-= 2.6.4 - 2024-04-01 =
-* Dev - Bump WooCommerce "tested up to" version 8.7.
-* Dev - Bump WooCommerce minimum supported version to 8.4.
-* Dev - Bump WordPress "tested up to" version 6.5.
-
-= 2.6.3 - 2024-02-05 =
-* Fix - Allow customers to update subscription payment methods via Woo Subscriptions.
-* Dev - Bump WooCommerce "tested up to" version 8.5.
-* Dev - Bump WooCommerce minimum supported version to 8.3.
-* Dev - Bump WordPress minimum supported version to 6.3.
-
-= 2.6.2 - 2024-01-08 =
-* Tweak - Bump PHP "tested up to" version 8.3.
-* Dev - Declare compatibility with Product Editor.
-* Dev - Bump WooCommerce "tested up to" version 8.4.
-* Dev - Bump WooCommerce minimum supported version to 8.2.
-* Dev - Bump PHP minimum supported version to 7.4.
 
 [See changelog details prior to 2024 here](https://github.com/gocardless/woocommerce-gateway-gocardless/blob/trunk/changelog.txt).

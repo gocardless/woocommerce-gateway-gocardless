@@ -39,3 +39,14 @@
     color: #d63638;
     margin-top: 6px;
 }
+
+.wcgc-sandbox-mode-notice {
+    margin-top: 12px;
+    align-items: center;
+    background-color: #fff2d7;
+    color: #4d3716;
+    display: flex;
+    font-size: 13px;
+    padding: 12px;
+    width: max-content;
+}
