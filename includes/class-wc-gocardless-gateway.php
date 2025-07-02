@@ -1277,7 +1277,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	/**
 	 * Handle redirect back from GoCardless for billing request flow.
 	 *
-	 * @since x.x.x
+	 * @since 2.9.6
 	 *
 	 * @return void
 	 */
