@@ -9,7 +9,7 @@ module.exports = defineConfig({
   testDir: "../../tests",
 
   /* Maximum time one test can run for. */
-  timeout: 90 * 1000,
+  timeout: 120 * 1000,
 
   expect: {
     /**
