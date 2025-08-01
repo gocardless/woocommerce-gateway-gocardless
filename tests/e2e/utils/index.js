@@ -695,19 +695,30 @@ export async function goToCheckout(page, isBlock = false) {
  * @param {Page}   page    Playwright page object
  * @param {string} orderId Order ID
  */
-export async function validateGoCardlessPayment(page, orderId) {
-	const nRetries = 5;
+export async function validateGoCardlessPayment(page, orderId, isSub = false) {
+	const nRetries = 8;
 	for (let i = 0; i < nRetries; i++) {
 		await page.goto(`/wp-admin/post.php?post=${orderId}&action=edit`);
 		const orderStatus = await page
 			.locator('#order_status')
 			.evaluate((el) => el.value);
-		if (orderStatus === 'wc-processing') {
+		const note = await page
+			.locator(
+				'#woocommerce-gocardless-webhook-events ul.order_notes li',
+				{ hasText: 'payments confirmed' }
+			)
+			.first()
+			.isVisible();
+		if (isSub && note) {
+			break;
+		} else if (!isSub && orderStatus === 'wc-processing') {
+			await page.waitForTimeout(5000);
 			break;
 		} else {
 			await page.waitForTimeout(10000); // wait for webhook to be processed
 		}
 	}
+	await page.goto(`/wp-admin/post.php?post=${orderId}&action=edit`);
 	await expect(
 		await page.locator('#order_status').evaluate((el) => el.value)
 	).toEqual('wc-processing');
