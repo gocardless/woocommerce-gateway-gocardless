@@ -127,11 +127,15 @@ test.describe('Pre-Orders Tests', () => {
 				.locator('select[name="order_status"]')
 				.evaluate((el) => el.value);
 			if (orderStatus === 'wc-pre-ordered') {
+				await adminPage.waitForTimeout(5000);
 				break;
 			} else {
-				await page.waitForTimeout(10000); // wait for webhook to be processed
+				await adminPage.waitForTimeout(10000); // wait for webhook to be processed
 			}
 		}
+		await adminPage.goto(
+			`/wp-admin/post.php?post=${orderId}&action=edit`
+		);
 		const orderStatus = await adminPage
 			.locator('select[name="order_status"]')
 			.evaluate((el) => el.value);
