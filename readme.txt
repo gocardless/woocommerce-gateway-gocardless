@@ -140,6 +140,13 @@ Yes, it uses [GoCardless](https://gocardless.com/) ([privacy policy](https://goc
 
 == Changelog ==
 
+= 2.9.7 - 2025-08-05 =
+* Add - Improved subscription cancellation by cancelling "Pending Submission" payments and preventing retries on non-cancellable payments.
+* Fix - Ensure webhook events are handled properly without any issues.
+* Dev - Bump WordPress minimum supported version to 6.7.
+* Dev - Bump WooCommerce "tested up to" version 10.1.
+* Dev - Bump WooCommerce minimum supported version to 9.9.
+
 = 2.9.6 - 2025-07-02 =
 * Add - Respond with an error to the GoCardless webhook call if the scheduling action fails.
 * Add - A notice indicating that GoCardless is connected in sandbox mode if the merchant is connected to a sandbox account.
