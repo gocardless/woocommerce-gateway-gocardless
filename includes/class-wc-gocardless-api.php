@@ -402,6 +402,23 @@ class WC_GoCardless_API {
 	}
 
 	/**
+	 * Update payment.
+	 *
+	 * @param string $payment_id Payment ID.
+	 * @param array  $params     Parameters to update payment.
+	 *
+	 * @return array|WP_Error
+	 */
+	public static function update_payment( $payment_id, $params = array() ) {
+		$args = array(
+			'method' => 'PUT',
+			'body'   => wp_json_encode( array( 'payments' => $params ) ),
+		);
+
+		return self::_request( 'payments/' . $payment_id, $args );
+	}
+
+	/**
 	 * Get a single payment from given payment_id.
 	 *
 	 * @param string $payment_id Payment ID.
@@ -417,7 +434,7 @@ class WC_GoCardless_API {
 	 *
 	 * @param string $payment_id Payment ID.
 	 *
-	 * @return array
+	 * @return array|WP_Error
 	 */
 	public static function cancel_payment( $payment_id ) {
 		$args = array(
