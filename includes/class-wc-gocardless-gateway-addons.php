@@ -334,7 +334,7 @@ class WC_GoCardless_Gateway_Addons extends WC_GoCardless_Gateway {
 	 * If the payment is pending submission, we can cancel it.
 	 * Otherwise, update the retry_if_possible to false to avoid the payment being retried (except for paid_out and cancelled payment states).
 	 *
-	 * @since x.x.x
+	 * @since 2.9.7
 	 *
 	 * @param WC_Subscription $subscription Subscription object.
 	 */
