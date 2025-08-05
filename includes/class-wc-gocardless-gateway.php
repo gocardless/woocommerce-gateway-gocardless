@@ -1632,24 +1632,43 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 
 			wc_gocardless()->log( sprintf( '%s - Handling webhook. Payload: %s', __METHOD__, print_r( $payload, true ) ) );
 
-			$args = array( $payload );
+			$webhook_payload = $payload;
+			$schedule_failed = false;
 
-			// Process the webhook payload asynchronously.
-			$action_id = WC()->queue()->schedule_single(
-				WC()->call_function( 'time' ) + 1,
-				'woocommerce_gocardless_process_webhook_payload_async',
-				$args,
-				'woocommerce-gocardless-webhook'
-			);
+			/*
+			 * Loop through each event to schedule the action for each event separately.
+			 * This is to avoid the issue where the webhook payload is too large and the action not get scheduled.
+			 *
+			 * @see https://github.com/gocardless/woocommerce-gateway-gocardless/issues/79
+			 */
+			foreach ( $payload['events'] as $event ) {
+				// Update the webhook payload with the current event only.
+				$webhook_payload['events'] = array( $event );
 
-			// If the action is not scheduled, return error to GoCardless, to get a retry.
-			if ( empty( $action_id ) ) {
+				// Schedule the action to process the webhook payload asynchronously.
+				$action_id = WC()->queue()->schedule_single(
+					time() + 1,
+					'woocommerce_gocardless_process_webhook_payload_async',
+					array( $webhook_payload ),
+					'woocommerce-gocardless-webhook'
+				);
+
+				// If any action fail to schedule, mark the schedule as failed, and return error to GoCardless, to get a retry.
+				if ( empty( $action_id ) ) {
+					$schedule_failed = true;
+					break;
+				}
+
+				$webhook_payload['events'] = array();
+				wc_gocardless()->log( sprintf( '%s - Action scheduled with ID %d, to process webhook.', __METHOD__, $action_id ) );
+			}
+
+			// Return error to GoCardless, to get a retry.
+			if ( $schedule_failed ) {
 				wc_gocardless()->log( sprintf( '%s - Failed to schedule action to process webhook.', __METHOD__ ) );
 				header( 'HTTP/1.1 500 Internal Server Error' );
 				throw new Exception( esc_html__( 'Failed to schedule action to process webhook.', 'woocommerce-gateway-gocardless' ) );
 			}
-
-			wc_gocardless()->log( sprintf( '%s - Action scheduled with ID %d, to process webhook.', __METHOD__, $action_id ) );
 		} catch ( Exception $e ) {
 			wc_gocardless()->log( sprintf( '%s - Error when handling webhook: %s', __METHOD__, $e->getMessage() ) );
 			wp_send_json_error( array( 'message' => $e->getMessage() ) );
