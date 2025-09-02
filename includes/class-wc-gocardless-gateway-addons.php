@@ -33,11 +33,50 @@ class WC_GoCardless_Gateway_Addons extends WC_GoCardless_Gateway {
 			// Cancel in-progress payment on subscription cancellation.
 			add_action( 'woocommerce_subscription_pending-cancel_' . $this->id, array( $this, 'maybe_cancel_subscription_payment' ) );
 			add_action( 'woocommerce_subscription_cancelled_' . $this->id, array( $this, 'maybe_cancel_subscription_payment' ) );
+			
+			// Status synchronization for parent orders
+			add_action( 'woocommerce_subscription_status_updated', array( $this, 'sync_parent_order_status' ), 10, 3 );
 		}
 
 		if ( class_exists( 'WC_Pre_Orders_Order' ) ) {
 			add_action( 'wc_pre_orders_process_pre_order_completion_payment_' . $this->id, array( $this, 'process_payment_for_released_pre_order' ) );
 		}
+	}
+
+	/**
+	 * Synchronize parent order status when all subscriptions are cancelled.
+	 *
+	 * @since 2.9.8
+	 * @param WC_Subscription $subscription The subscription object.
+	 * @param string $new_status The new subscription status.
+	 * @param string $old_status The old subscription status.
+	 */
+	public function sync_parent_order_status( $subscription, $new_status, $old_status ) {
+		// Only process GoCardless subscriptions becoming cancelled
+		if ( $this->id !== $subscription->get_payment_method() || 'cancelled' !== $new_status ) {
+			return;
+		}
+		
+		$parent_order = $subscription->get_parent();
+		if ( ! $parent_order || ! $parent_order->has_status( array( 'pending', 'on-hold' ) ) ) {
+			return;
+		}
+		
+		// Check if all subscriptions for this order are cancelled
+		$subscriptions = wcs_get_subscriptions_for_order( $parent_order );
+		foreach ( $subscriptions as $sub ) {
+			if ( ! $sub->has_status( 'cancelled' ) ) {
+				return; // Not all cancelled, don't update parent
+			}
+		}
+		
+		// All subscriptions cancelled, update parent order
+		$parent_order->update_status( 
+			'cancelled', 
+			__( 'Order cancelled - all subscriptions have been cancelled.', 'woocommerce-gateway-gocardless' ) 
+		);
+		$parent_order->delete_meta_data( '_gocardless_payment_pending' );
+		$parent_order->save();
 	}
 
 	/**

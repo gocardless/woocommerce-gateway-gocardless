@@ -1921,6 +1921,8 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				break;
 			case 'cancelled':
 				$new_status = 'cancelled';
+				// Centralized cancellation handling
+				$this->handle_subscription_cancellation( $order, __( 'Payment cancelled.', 'woocommerce-gateway-gocardless' ) );
 				break;
 			case 'charged_back':
 			case 'chargeback_settled':
@@ -2066,11 +2068,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				$this->_maybe_update_subscriptions_with_mandate( $subscriptions, $subscription_id );
 				break;
 			case 'cancelled':
-				// Only cancel WCS subscriptions when the order missing mandate.
-				$mandate_in_order = $this->get_order_resource( $order_id, 'mandate', 'id' );
-				if ( ! $mandate_in_order && class_exists( 'WC_Subscriptions_Manager' ) ) {
-					WC_Subscriptions_Manager::cancel_subscriptions_for_order( $order_id );
-				}
+				$this->handle_subscription_cancellation( wc_get_order( $order_id ), __( 'Subscription cancelled.', 'woocommerce-gateway-gocardless' ) );
 				break;
 		}
 	}
@@ -2315,11 +2313,58 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 		if ( empty( $payment ) && empty( $mandate ) ) {
 			$order->update_status( 'cancelled', __( 'Billing request cancelled.', 'woocommerce-gateway-gocardless' ) );
 			$this->update_order_resource( $order, 'billing_request', $billing_request );
+			$this->handle_subscription_cancellation( $order, __( 'Billing request cancelled by customer.', 'woocommerce-gateway-gocardless' ) );
 		}
 
 		return true;
 	}
 
+	/**
+	 * Centralized handler for subscription cancellation.
+	 * Ensures consistent status updates across orders and subscriptions.
+	 *
+	 * @since 2.9.8
+	 * @param WC_Order $order The order object.
+	 * @param string $reason The cancellation reason.
+	 */
+	protected function handle_subscription_cancellation( $order, $reason = '' ) {
+		if ( ! function_exists( 'wcs_order_contains_subscription' ) ) {
+			return;
+		}
+		
+		// Handle parent orders with subscriptions
+		if ( wcs_order_contains_subscription( $order ) ) {
+			$subscriptions = wcs_get_subscriptions_for_order( $order );
+			
+			foreach ( $subscriptions as $subscription ) {
+				if ( ! $subscription->has_status( 'cancelled' ) ) {
+					$subscription->update_status( 'cancelled', $reason );
+					// Clear pending payment metadata
+					$subscription->delete_meta_data( '_gocardless_pending_payment_id' );
+					$subscription->delete_meta_data( '_gocardless_payment_pending' );
+					$subscription->delete_meta_data( '_gocardless_billing_request_id' );
+					$subscription->save_meta_data();
+				}
+			}
+			
+			// Update parent order if needed
+			if ( $order->has_status( array( 'pending', 'on-hold' ) ) ) {
+				$order->update_status( 'cancelled', $reason );
+			}
+		}
+		
+		// Handle renewal orders
+		$subscriptions = wcs_get_subscriptions_for_renewal_order( $order );
+		foreach ( $subscriptions as $subscription ) {
+			if ( ! $subscription->has_status( 'cancelled' ) ) {
+				$subscription->update_status( 'cancelled', $reason );
+			}
+		}
+		
+		// Fire action for other plugins
+		do_action( 'woocommerce_gocardless_subscription_cancelled', $order, $reason );
+	}
+	
 	/**
 	 * Update GoCardless resource in order meta.
 	 *
