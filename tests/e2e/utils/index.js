@@ -648,7 +648,9 @@ export async function connectWithGoCardless(page) {
 		.click();
 	await page.locator('#email').fill(goCardlessConfig.email);
 	await page.locator('#password').fill(goCardlessConfig.password);
-	await page.locator('#terms_and_conditions').check();
+	if (await page.locator('#terms_and_conditions').isVisible()) {
+		await page.locator('#terms_and_conditions').check();
+	}
 	await page.getByRole('button', { name: 'Connect Account' }).click();
 	await page.locator('.redirect-button').click();
 
