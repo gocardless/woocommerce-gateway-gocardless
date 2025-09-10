@@ -144,6 +144,10 @@ export async function blockFillBillingDetails(page, customerDetails) {
 	await page.locator('#billing-postcode').fill(customerDetails.postcode);
 	await page.locator('#billing-postcode').blur();
 
+	await page.locator('#billing-city').fill('');
+	await page.locator('#billing-city').fill(customerDetails.city);
+	await page.locator('#billing-city').blur();
+
 	if (
 		customerDetails.state &&
 		(await page.locator('select#billing-state').isVisible())
@@ -152,10 +156,6 @@ export async function blockFillBillingDetails(page, customerDetails) {
 			.locator('select#billing-state')
 			.selectOption(customerDetails.state);
 	}
-
-	await page.locator('#billing-city').fill('');
-	await page.locator('#billing-city').fill(customerDetails.city);
-	await page.locator('#billing-city').blur();
 }
 
 /**
@@ -787,8 +787,8 @@ export async function createPreOrderProduct(page, options = {}) {
 		.fill(product.availabilityDate);
 	await page.locator('#_wc_pre_orders_fee').fill(product.preOrderFee);
 	await page
-		.locator('#_wc_pre_orders_when_to_charge')
-		.selectOption(product.whenToCharge);
+		.locator( `input[name="_wc_pre_orders_when_to_charge"][value="${ product.whenToCharge }"]` )
+		.check();
 
 	await page.locator('#publish').waitFor();
 	await page.locator('#publish').click();
@@ -828,6 +828,7 @@ export async function completePreOrder(page, orderId) {
 		.check();
 	await page.locator('#bulk-action-selector-top').selectOption('complete');
 	await page.locator('#doaction').click();
+	await page.locator('#confirm-complete-btn').click();
 }
 
 /**
