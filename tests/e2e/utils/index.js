@@ -698,7 +698,7 @@ export async function goToCheckout(page, isBlock = false) {
  * @param {string} orderId Order ID
  */
 export async function validateGoCardlessPayment(page, orderId, isSub = false) {
-	const nRetries = 8;
+	const nRetries = 10;
 	for (let i = 0; i < nRetries; i++) {
 		await page.goto(`/wp-admin/post.php?post=${orderId}&action=edit`);
 		const orderStatus = await page
@@ -839,7 +839,7 @@ export async function completePreOrder(page, orderId) {
  */
 export async function processRefund(page, amount) {
 	await page.locator('.refund-items').click();
-	await page.locator('.refund_order_item_qty').fill('1');
+	await page.locator('.refund_order_item_qty').last().fill('1');
 	if (await page.locator('#refund_amount').isEditable()) {
 		await page.locator('#refund_amount').fill('');
 	}
