@@ -1894,11 +1894,21 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 			return false;
 		}
 
-		wc_gocardless()->log( sprintf( '%s - Handling payment event with action "%s" for order #%s', __METHOD__, $event['action'], $order->get_order_number() ) );
+		wc_gocardless()->log( sprintf( '%s - Handling payment event with action "%s" for order #%s (current status: %s)', __METHOD__, $event['action'], $order->get_order_number(), $order->get_status() ) );
 		$new_status = '';
 		switch ( $event['action'] ) {
 			case 'paid_out':
 			case 'confirmed':
+				// Handle case where paid_out event arrives after failed event
+				// This fixes issue #7: https://github.com/gocardless/woocommerce-gateway-gocardless/issues/7
+				$current_status = $order->get_status();
+				if ( 'failed' === $current_status ) {
+					wc_gocardless()->log( sprintf( '%s - Order #%s is in failed status, transitioning to processing before payment_complete()', __METHOD__, $order->get_order_number() ) );
+					$order->update_status( 'processing', __( 'Payment received after initial failure - updating status', 'woocommerce-gateway-gocardless' ) );
+				} elseif ( 'cancelled' === $current_status ) {
+					wc_gocardless()->log( sprintf( '%s - Order #%s is in cancelled status, transitioning to processing before payment_complete()', __METHOD__, $order->get_order_number() ) );
+					$order->update_status( 'processing', __( 'Payment received after cancellation - updating status', 'woocommerce-gateway-gocardless' ) );
+				}
 				$order->payment_complete( $event['links']['payment'] );
 				break;
 			case 'failed':
