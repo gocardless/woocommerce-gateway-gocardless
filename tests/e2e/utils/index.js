@@ -144,6 +144,10 @@ export async function blockFillBillingDetails(page, customerDetails) {
 	await page.locator('#billing-postcode').fill(customerDetails.postcode);
 	await page.locator('#billing-postcode').blur();
 
+	await page.locator('#billing-city').fill('');
+	await page.locator('#billing-city').fill(customerDetails.city);
+	await page.locator('#billing-city').blur();
+
 	if (
 		customerDetails.state &&
 		(await page.locator('select#billing-state').isVisible())
@@ -152,10 +156,6 @@ export async function blockFillBillingDetails(page, customerDetails) {
 			.locator('select#billing-state')
 			.selectOption(customerDetails.state);
 	}
-
-	await page.locator('#billing-city').fill('');
-	await page.locator('#billing-city').fill(customerDetails.city);
-	await page.locator('#billing-city').blur();
 }
 
 /**
@@ -648,7 +648,9 @@ export async function connectWithGoCardless(page) {
 		.click();
 	await page.locator('#email').fill(goCardlessConfig.email);
 	await page.locator('#password').fill(goCardlessConfig.password);
-	await page.locator('#terms_and_conditions').check();
+	if (await page.locator('#terms_and_conditions').isVisible()) {
+		await page.locator('#terms_and_conditions').check();
+	}
 	await page.getByRole('button', { name: 'Connect Account' }).click();
 	await page.locator('.redirect-button').click();
 
@@ -696,7 +698,7 @@ export async function goToCheckout(page, isBlock = false) {
  * @param {string} orderId Order ID
  */
 export async function validateGoCardlessPayment(page, orderId, isSub = false) {
-	const nRetries = 8;
+	const nRetries = 10;
 	for (let i = 0; i < nRetries; i++) {
 		await page.goto(`/wp-admin/post.php?post=${orderId}&action=edit`);
 		const orderStatus = await page
@@ -785,8 +787,8 @@ export async function createPreOrderProduct(page, options = {}) {
 		.fill(product.availabilityDate);
 	await page.locator('#_wc_pre_orders_fee').fill(product.preOrderFee);
 	await page
-		.locator('#_wc_pre_orders_when_to_charge')
-		.selectOption(product.whenToCharge);
+		.locator( `input[name="_wc_pre_orders_when_to_charge"][value="${ product.whenToCharge }"]` )
+		.check();
 
 	await page.locator('#publish').waitFor();
 	await page.locator('#publish').click();
@@ -826,6 +828,7 @@ export async function completePreOrder(page, orderId) {
 		.check();
 	await page.locator('#bulk-action-selector-top').selectOption('complete');
 	await page.locator('#doaction').click();
+	await page.locator('#confirm-complete-btn').click();
 }
 
 /**
@@ -836,7 +839,7 @@ export async function completePreOrder(page, orderId) {
  */
 export async function processRefund(page, amount) {
 	await page.locator('.refund-items').click();
-	await page.locator('.refund_order_item_qty').fill('1');
+	await page.locator('.refund_order_item_qty').last().fill('1');
 	if (await page.locator('#refund_amount').isEditable()) {
 		await page.locator('#refund_amount').fill('');
 	}
