@@ -159,6 +159,9 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 		// Clear the available scheme transient.
 		delete_transient( 'wc_gocardless_available_scheme_identifiers' );
 
+		// Clear option which displays notice to connect GoCardless.
+		delete_option( 'wc_gocardless_access_token_unauthorized' );
+
 		// Delete notice that informs merchant to connect with GoCardless.
 		WC_Admin_Notices::remove_notice( 'gocardless_connect_prompt' );
 
@@ -2921,7 +2924,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	 * @return array
 	 */
 	public function get_available_scheme_identifiers() {
-		$transient_key = 'wc_gocardless_available_scheme_identifiers';
+		$transient_key = 'wc_gocardless_available_scheme_identifiers2';
 		$schemes       = get_transient( $transient_key );
 		if ( false !== $schemes ) {
 			return $schemes;
