@@ -721,8 +721,7 @@ export async function validateGoCardlessPayment(page, orderId, isSub = false) {
 			.isVisible();
 		if (isSub && note) {
 			break;
-		} else if (!isSub && orderStatus === 'wc-processing') {
-			await page.waitForTimeout(10000);
+		} else if (!isSub && orderStatus === 'wc-processing' && note) {
 			break;
 		} else {
 			await page.waitForTimeout(10000); // wait for webhook to be processed
