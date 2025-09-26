@@ -592,6 +592,8 @@ class WC_GoCardless_Order_Admin {
 		// Check if access token is there.
 		$settings = get_option( 'woocommerce_gocardless_settings', array() );
 		if ( ! empty( $settings['access_token'] ) ) {
+			// Remove the option to display notice, as we have an access token now (in case it missed to remove while connect to GoCardless).
+			delete_option( 'wc_gocardless_access_token_unauthorized' );
 			return;
 		}
 		?>
