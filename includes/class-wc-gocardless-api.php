@@ -213,7 +213,7 @@ class WC_GoCardless_API {
 			if ( 401 === $response_code && 'invalid_api_usage' === $parsed_resp['error']['type'] ) {
 				// Unauthorized response code, disconnect from GoCardless.
 				wc_gocardless()->log( sprintf( '%s - Unauthorized response code, disconnecting from GoCardless', __METHOD__ ) );
-				$settings = get_option( 'woocommerce_gocardless_settings', array() );
+				$settings                 = get_option( 'woocommerce_gocardless_settings', array() );
 				$settings['access_token'] = '';
 				update_option( 'woocommerce_gocardless_settings', $settings );
 

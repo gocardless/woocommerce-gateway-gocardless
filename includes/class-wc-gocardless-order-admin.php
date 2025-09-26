@@ -600,11 +600,12 @@ class WC_GoCardless_Order_Admin {
 			<?php
 			echo wp_kses(
 				sprintf(
+					/* translators: %s: settings URL */
 					__( 'The connection to your <strong>GoCardless</strong> account has been disconnected because the access token is no longer active or valid. Please <a href="%s">connect</a> your GoCardless account to continue accepting payments.', 'woocommerce-gateway-gocardless' ),
 					wc_gocardless()->get_setting_url()
 				),
 				array(
-					'a' => array(
+					'a'      => array(
 						'href' => array(),
 					),
 					'strong' => array(),
