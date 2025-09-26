@@ -155,6 +155,7 @@ export async function blockFillBillingDetails(page, customerDetails) {
 		await page
 			.locator('select#billing-state')
 			.selectOption(customerDetails.state);
+		await page.locator('select#billing-state').blur();
 	}
 }
 
@@ -408,6 +409,13 @@ export async function handleGoCardlessPayment(page, options) {
 	await page
 		.getByRole('button', { name: 'Continue' })
 		.click({ force: true });
+
+	await page.waitForTimeout(3000);
+	if ( await page.getByTestId('checkout-as-guest').isVisible() ) {
+		await page
+			.getByTestId('checkout-as-guest')
+			.click({ force: true });
+	}
 
 	// Fill bank details
 	if (currency === 'USD') {
