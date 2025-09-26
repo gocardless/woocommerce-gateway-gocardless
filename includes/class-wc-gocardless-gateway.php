@@ -2924,7 +2924,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	 * @return array
 	 */
 	public function get_available_scheme_identifiers() {
-		$transient_key = 'wc_gocardless_available_scheme_identifiers2';
+		$transient_key = 'wc_gocardless_available_scheme_identifiers';
 		$schemes       = get_transient( $transient_key );
 		if ( false !== $schemes ) {
 			return $schemes;

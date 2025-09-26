@@ -217,6 +217,9 @@ class WC_GoCardless_API {
 				$settings['access_token'] = '';
 				update_option( 'woocommerce_gocardless_settings', $settings );
 
+				// Clear the available scheme transient.
+				delete_transient( 'wc_gocardless_available_scheme_identifiers' );
+
 				wc_gocardless()->log( sprintf( '%s - Disconnected from GoCardless', __METHOD__ ) );
 
 				// Add option to display notice to connect GoCardless again.
