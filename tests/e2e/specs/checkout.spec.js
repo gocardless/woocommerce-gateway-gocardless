@@ -252,7 +252,7 @@ test.describe('Checkout Tests', () => {
 				saveMethod: false,
 				isBlock,
 			});
-			await validateGoCardlessPayment(adminPage, orderId);
+			await validateGoCardlessPayment(adminPage, orderId, true);
 			await adminPage
 				.locator('.woocommerce_subscriptions_related_orders tr td a')
 				.first()
@@ -276,7 +276,7 @@ test.describe('Checkout Tests', () => {
 				saveMethod: false,
 				isBlock,
 			});
-			await validateGoCardlessPayment(adminPage, orderId);
+			await validateGoCardlessPayment(adminPage, orderId, true);
 			await adminPage
 				.locator('.woocommerce_subscriptions_related_orders tr td a')
 				.first()
@@ -301,7 +301,7 @@ test.describe('Checkout Tests', () => {
 			saveMethod: false,
 			isBlock: true,
 		});
-		await validateGoCardlessPayment(adminPage, orderId);
+		await validateGoCardlessPayment(adminPage, orderId, true);
 		await adminPage
 			.locator('.woocommerce_subscriptions_related_orders tr td a')
 			.first()

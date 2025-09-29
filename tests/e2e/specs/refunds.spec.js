@@ -55,6 +55,7 @@ test.describe('Refunds Tests', () => {
 		await clearCart(page);
 		await addToCart(page, products.simple2);
 		await goToCheckout(page, isBlock);
+		await page.waitForTimeout(1000);
 		await fillBillingDetails(
 			page,
 			{ ...customer.billing, email: 'test-pay_out@test.com' },
@@ -115,6 +116,7 @@ test.describe('Refunds Tests', () => {
 		const isBlock = true;
 		await addToCart(page, products.simple);
 		await goToCheckout(page, isBlock);
+		await page.waitForTimeout(1000);
 		await fillBillingDetails(page, customerBilling, isBlock);
 
 		const orderId = await placeGoCardlessOrder(page, {

@@ -29,6 +29,10 @@ class WC_GoCardless_Gateway_Addons extends WC_GoCardless_Gateway {
 			// Allow store managers to manually set GoCardless as the payment method on a subscription.
 			add_filter( 'woocommerce_subscription_payment_meta', array( $this, 'add_subscription_payment_meta' ), 10, 2 );
 			add_action( 'woocommerce_subscription_validate_payment_meta', array( $this, 'validate_subscription_payment_meta' ), 10, 2 );
+
+			// Cancel in-progress payment on subscription cancellation.
+			add_action( 'woocommerce_subscription_pending-cancel_' . $this->id, array( $this, 'maybe_cancel_subscription_payment' ) );
+			add_action( 'woocommerce_subscription_cancelled_' . $this->id, array( $this, 'maybe_cancel_subscription_payment' ) );
 		}
 
 		if ( class_exists( 'WC_Pre_Orders_Order' ) ) {
@@ -320,6 +324,65 @@ class WC_GoCardless_Gateway_Addons extends WC_GoCardless_Gateway {
 
 			if ( 0 !== strpos( $payment_meta['post_meta']['_gocardless_mandate_id']['value'], 'MD' ) ) {
 				throw new Exception( esc_html__( 'Invalid GoCardless Mandate ID. A valid "GoCardless Mandate ID" must begin with "MD".', 'woocommerce-gateway-gocardless' ) );
+			}
+		}
+	}
+
+	/**
+	 * Cancel the order payment on subscription cancellation.
+	 *
+	 * If the payment is pending submission, we can cancel it.
+	 * Otherwise, update the retry_if_possible to false to avoid the payment being retried (except for paid_out and cancelled payment states).
+	 *
+	 * @since 2.9.7
+	 *
+	 * @param WC_Subscription $subscription Subscription object.
+	 */
+	public function maybe_cancel_subscription_payment( $subscription ) {
+		if ( ! $subscription ) {
+			return;
+		}
+		wc_gocardless()->log( sprintf( '%s - Subscription cancelled/Pending cancellation, checking if payment should be cancelled', __METHOD__ ) );
+
+		$last_order = $subscription->get_last_order( 'all' );
+		if ( ! $last_order ) {
+			return;
+		}
+
+		$payment_id = $this->get_order_resource( $last_order->get_id(), 'payment', 'id' );
+		$payment    = WC_GoCardless_API::get_payment( $payment_id );
+		if ( is_wp_error( $payment ) || empty( $payment['payments'] ) ) {
+			wc_gocardless()->log( sprintf( '%s - Failed to retrieve payment.', __METHOD__ ) );
+			return;
+		}
+
+		$gocardless_status = $payment['payments']['status'] ?? '';
+		wc_gocardless()->log( sprintf( '%s - GoCardless payment status: %s', __METHOD__, $gocardless_status ) );
+
+		// If the payment is pending submission, we can cancel it.
+		if ( 'pending_submission' === $gocardless_status ) {
+			$response = WC_GoCardless_API::cancel_payment( $payment_id );
+			if ( ! is_wp_error( $response ) ) {
+				wc_gocardless()->log( sprintf( '%s - Payment cancelled', __METHOD__ ) );
+			} else {
+				wc_gocardless()->log( sprintf( '%s - Failed to cancel payment: %s', __METHOD__, $response->get_error_message() ) );
+			}
+		} elseif (
+			! in_array(
+				$gocardless_status,
+				array(
+					'paid_out',
+					'cancelled',
+				),
+				true
+			)
+		) {
+			// We can't cancel the payment, so we update it to not retry if possible to avoid the payment being retried.
+			$response = WC_GoCardless_API::update_payment( $payment_id, array( 'retry_if_possible' => false ) );
+			if ( ! is_wp_error( $response ) ) {
+				wc_gocardless()->log( sprintf( '%s - Payment updated with retry_if_possible set to false', __METHOD__ ) );
+			} else {
+				wc_gocardless()->log( sprintf( '%s - Failed to update payment: %s', __METHOD__, $response->get_error_message() ) );
 			}
 		}
 	}

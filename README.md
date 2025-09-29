@@ -42,8 +42,8 @@ Properly connected GoCardless configuration:
 ### Requirements
 
 - PHP: 7.4+
-- WordPress: 6.5+
-- WooCommerce: 9.4+
+- WordPress: 6.6+
+- WooCommerce: 9.8+
 - Node: v20
 - NPM: v10
 
