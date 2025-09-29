@@ -155,6 +155,7 @@ export async function blockFillBillingDetails(page, customerDetails) {
 		await page
 			.locator('select#billing-state')
 			.selectOption(customerDetails.state);
+		await page.locator('select#billing-state').blur();
 	}
 }
 
@@ -408,6 +409,13 @@ export async function handleGoCardlessPayment(page, options) {
 	await page
 		.getByRole('button', { name: 'Continue' })
 		.click({ force: true });
+
+	await page.waitForTimeout(3000);
+	if ( await page.getByTestId('checkout-as-guest').isVisible() ) {
+		await page
+			.getByTestId('checkout-as-guest')
+			.click({ force: true });
+	}
 
 	// Fill bank details
 	if (currency === 'USD') {
@@ -713,8 +721,7 @@ export async function validateGoCardlessPayment(page, orderId, isSub = false) {
 			.isVisible();
 		if (isSub && note) {
 			break;
-		} else if (!isSub && orderStatus === 'wc-processing') {
-			await page.waitForTimeout(10000);
+		} else if (!isSub && orderStatus === 'wc-processing' && note) {
 			break;
 		} else {
 			await page.waitForTimeout(10000); // wait for webhook to be processed
@@ -873,5 +880,43 @@ export async function clearCart(page) {
 		for (const button of removeBtns) {
 			await button.click();
 		}
+	}
+}
+
+/**
+ * Updates the access token using the E2E test REST endpoint.
+ *
+ * Requires the `gocardless-e2e/v1/update-access-token` endpoint to be available.
+ *
+ * @param {import('@playwright/test').Page} page - The Playwright page object.
+ * @param {string} accessToken - The access token to update.
+ * @throws {Error} If the request fails or the response indicates an error.
+ */
+export async function updateAccessToken( page, accessToken ) {
+	const response = await page.request.post(
+		'/wp-json/gocardless-e2e/v1/update-access-token',
+		{
+			data: {
+				access_token: accessToken,
+			},
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		}
+	);
+
+	if ( ! response.ok() ) {
+		const errorBody = await response.text();
+		throw new Error(
+			`Failed to update access token. HTTP ${ response.status() }: ${ errorBody }`
+		);
+	}
+
+	const result = await response.json();
+
+	if ( ! result.success ) {
+		throw new Error(
+			`Access token update failed: ${ result.error || 'Unknown error' }`
+		);
 	}
 }
