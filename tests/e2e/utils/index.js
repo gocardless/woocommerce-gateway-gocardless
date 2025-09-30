@@ -550,6 +550,14 @@ export async function handleGoCardlessPaymentSchemeWise(
 		case 'bacs':
 		case 'becs':
 		case 'autogiro':
+			if (scheme === 'bacs') {
+				await page.waitForTimeout(3000);
+				if ( await page.getByTestId('checkout-as-guest').isVisible() ) {
+					await page
+						.getByTestId('checkout-as-guest')
+						.click({ force: true });
+				}
+			}
 			await page.getByTestId('branch_code').fill(data.bankCode);
 			await page
 				.getByTestId('account_number')
