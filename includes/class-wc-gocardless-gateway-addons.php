@@ -46,7 +46,7 @@ class WC_GoCardless_Gateway_Addons extends WC_GoCardless_Gateway {
 	/**
 	 * Synchronize parent order status when all subscriptions are cancelled.
 	 *
-	 * @since 2.9.8
+	 * @since x.x.x
 	 * @param WC_Subscription $subscription The subscription object.
 	 * @param string $new_status The new subscription status.
 	 * @param string $old_status The old subscription status.
