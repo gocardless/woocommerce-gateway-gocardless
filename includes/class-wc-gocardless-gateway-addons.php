@@ -36,6 +36,9 @@ class WC_GoCardless_Gateway_Addons extends WC_GoCardless_Gateway {
 			
 			// Status synchronization for parent orders
 			add_action( 'woocommerce_subscription_status_updated', array( $this, 'sync_parent_order_status' ), 10, 3 );
+
+			// Skip pending-cancel for subscriptions with unconfirmed payments
+			add_filter( 'woocommerce_subscription_use_pending_cancel', array( $this, 'maybe_skip_pending_cancel_status' ), 10, 2 );
 		}
 
 		if ( class_exists( 'WC_Pre_Orders_Order' ) ) {
@@ -71,12 +74,57 @@ class WC_GoCardless_Gateway_Addons extends WC_GoCardless_Gateway {
 		}
 		
 		// All subscriptions cancelled, update parent order
-		$parent_order->update_status( 
-			'cancelled', 
-			__( 'Order cancelled - all subscriptions have been cancelled.', 'woocommerce-gateway-gocardless' ) 
+		$parent_order->update_status(
+			'cancelled',
+			__( 'Order cancelled - all subscriptions have been cancelled.', 'woocommerce-gateway-gocardless' )
 		);
 		$parent_order->delete_meta_data( '_gocardless_payment_pending' );
 		$parent_order->save();
+	}
+
+	/**
+	 * Skip pending-cancel status for subscriptions with unconfirmed payments.
+	 *
+	 * When a user manually cancels a subscription before the GoCardless payment is confirmed
+	 * (which can take 2-7 days), the subscription should cancel immediately rather than going
+	 * to pending-cancellation status. This aligns with the expected behavior where unpaid
+	 * subscriptions should be cancelled immediately.
+	 *
+	 * @since x.x.x
+	 * @param bool $use_pending_cancel Whether to use pending-cancel status.
+	 * @param WC_Subscription $subscription The subscription object.
+	 * @return bool
+	 */
+	public function maybe_skip_pending_cancel_status( $use_pending_cancel, $subscription ) {
+		// Only process GoCardless subscriptions
+		if ( $this->id !== $subscription->get_payment_method() ) {
+			return $use_pending_cancel;
+		}
+
+		$parent_order = $subscription->get_parent();
+		if ( ! $parent_order ) {
+			return $use_pending_cancel;
+		}
+
+		// Check payment confirmation status
+		$payment_status = $parent_order->get_meta( '_gocardless_payment_status', true );
+
+		// Confirmed statuses that indicate payment has gone through
+		$confirmed_statuses = array( 'confirmed', 'paid_out' );
+
+		// If no payment status or payment not confirmed, skip pending-cancel
+		if ( empty( $payment_status ) || ! in_array( $payment_status, $confirmed_statuses, true ) ) {
+			wc_gocardless()->log( sprintf(
+				'%s - Skipping pending-cancel for subscription #%s (parent order #%s has unconfirmed payment status: %s)',
+				__METHOD__,
+				$subscription->get_id(),
+				$parent_order->get_id(),
+				$payment_status ?: 'none'
+			) );
+			return false;
+		}
+
+		return $use_pending_cancel;
 	}
 
 	/**
