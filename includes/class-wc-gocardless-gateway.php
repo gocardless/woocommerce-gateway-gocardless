@@ -2068,7 +2068,11 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				$this->_maybe_update_subscriptions_with_mandate( $subscriptions, $subscription_id );
 				break;
 			case 'cancelled':
-				$this->handle_subscription_cancellation( wc_get_order( $order_id ), __( 'Subscription cancelled.', 'woocommerce-gateway-gocardless' ) );
+				// Only cancel WCS subscriptions when the order missing mandate.
+				$mandate_in_order = $this->get_order_resource( $order_id, 'mandate', 'id' );
+				if ( ! $mandate_in_order && class_exists( 'WC_Subscriptions_Manager' ) ) {
+					WC_Subscriptions_Manager::cancel_subscriptions_for_order( $order_id );
+				}
 				break;
 		}
 	}
