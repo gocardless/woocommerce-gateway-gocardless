@@ -2323,7 +2323,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	 * Centralized handler for subscription cancellation.
 	 * Ensures consistent status updates across orders and subscriptions.
 	 *
-	 * @since 2.9.8
+	 * @since x.x.x
 	 * @param WC_Order $order The order object.
 	 * @param string $reason The cancellation reason.
 	 */
