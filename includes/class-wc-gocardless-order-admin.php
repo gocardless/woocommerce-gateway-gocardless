@@ -581,7 +581,7 @@ class WC_GoCardless_Order_Admin {
 	/**
 	 * Display notice for access token unauthorized.
 	 *
-	 * @since x.x.x
+	 * @since 2.9.8
 	 */
 	public function display_access_token_unauthorized_notice() {
 		// Check if option is set to display notice.
