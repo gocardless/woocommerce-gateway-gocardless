@@ -13,7 +13,7 @@ on:
 
 jobs:
   build:
-    uses: gocardless/woocommerce-gateway-gocardless/.github/workflows/generate-zip.yml@fix/double-release-zip
+    uses: gocardless/woocommerce-gateway-gocardless/.github/workflows/generate-zip.yml@develop
 
   e2e:
     needs: build
