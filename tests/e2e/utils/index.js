@@ -144,6 +144,10 @@ export async function blockFillBillingDetails(page, customerDetails) {
 	await page.locator('#billing-postcode').fill(customerDetails.postcode);
 	await page.locator('#billing-postcode').blur();
 
+	await page.locator('#billing-city').fill('');
+	await page.locator('#billing-city').fill(customerDetails.city);
+	await page.locator('#billing-city').blur();
+
 	if (
 		customerDetails.state &&
 		(await page.locator('select#billing-state').isVisible())
@@ -151,11 +155,8 @@ export async function blockFillBillingDetails(page, customerDetails) {
 		await page
 			.locator('select#billing-state')
 			.selectOption(customerDetails.state);
+		await page.locator('select#billing-state').blur();
 	}
-
-	await page.locator('#billing-city').fill('');
-	await page.locator('#billing-city').fill(customerDetails.city);
-	await page.locator('#billing-city').blur();
 }
 
 /**
@@ -409,6 +410,13 @@ export async function handleGoCardlessPayment(page, options) {
 		.getByRole('button', { name: 'Continue' })
 		.click({ force: true });
 
+	await page.waitForTimeout(3000);
+	if ( await page.getByTestId('checkout-as-guest').isVisible() ) {
+		await page
+			.getByTestId('checkout-as-guest')
+			.click({ force: true });
+	}
+
 	// Fill bank details
 	if (currency === 'USD') {
 		await page
@@ -542,6 +550,14 @@ export async function handleGoCardlessPaymentSchemeWise(
 		case 'bacs':
 		case 'becs':
 		case 'autogiro':
+			if (scheme === 'bacs') {
+				await page.waitForTimeout(3000);
+				if ( await page.getByTestId('checkout-as-guest').isVisible() ) {
+					await page
+						.getByTestId('checkout-as-guest')
+						.click({ force: true });
+				}
+			}
 			await page.getByTestId('branch_code').fill(data.bankCode);
 			await page
 				.getByTestId('account_number')
@@ -648,7 +664,9 @@ export async function connectWithGoCardless(page) {
 		.click();
 	await page.locator('#email').fill(goCardlessConfig.email);
 	await page.locator('#password').fill(goCardlessConfig.password);
-	await page.locator('#terms_and_conditions').check();
+	if (await page.locator('#terms_and_conditions').isVisible()) {
+		await page.locator('#terms_and_conditions').check();
+	}
 	await page.getByRole('button', { name: 'Connect Account' }).click();
 	await page.locator('.redirect-button').click();
 
@@ -696,7 +714,7 @@ export async function goToCheckout(page, isBlock = false) {
  * @param {string} orderId Order ID
  */
 export async function validateGoCardlessPayment(page, orderId, isSub = false) {
-	const nRetries = 8;
+	const nRetries = 10;
 	for (let i = 0; i < nRetries; i++) {
 		await page.goto(`/wp-admin/post.php?post=${orderId}&action=edit`);
 		const orderStatus = await page
@@ -711,8 +729,7 @@ export async function validateGoCardlessPayment(page, orderId, isSub = false) {
 			.isVisible();
 		if (isSub && note) {
 			break;
-		} else if (!isSub && orderStatus === 'wc-processing') {
-			await page.waitForTimeout(10000);
+		} else if (!isSub && orderStatus === 'wc-processing' && note) {
 			break;
 		} else {
 			await page.waitForTimeout(10000); // wait for webhook to be processed
@@ -785,8 +802,8 @@ export async function createPreOrderProduct(page, options = {}) {
 		.fill(product.availabilityDate);
 	await page.locator('#_wc_pre_orders_fee').fill(product.preOrderFee);
 	await page
-		.locator('#_wc_pre_orders_when_to_charge')
-		.selectOption(product.whenToCharge);
+		.locator( `input[name="_wc_pre_orders_when_to_charge"][value="${ product.whenToCharge }"]` )
+		.check();
 
 	await page.locator('#publish').waitFor();
 	await page.locator('#publish').click();
@@ -826,6 +843,7 @@ export async function completePreOrder(page, orderId) {
 		.check();
 	await page.locator('#bulk-action-selector-top').selectOption('complete');
 	await page.locator('#doaction').click();
+	await page.locator('#confirm-complete-btn').click();
 }
 
 /**
@@ -836,7 +854,7 @@ export async function completePreOrder(page, orderId) {
  */
 export async function processRefund(page, amount) {
 	await page.locator('.refund-items').click();
-	await page.locator('.refund_order_item_qty').fill('1');
+	await page.locator('.refund_order_item_qty').last().fill('1');
 	if (await page.locator('#refund_amount').isEditable()) {
 		await page.locator('#refund_amount').fill('');
 	}
@@ -870,5 +888,43 @@ export async function clearCart(page) {
 		for (const button of removeBtns) {
 			await button.click();
 		}
+	}
+}
+
+/**
+ * Updates the access token using the E2E test REST endpoint.
+ *
+ * Requires the `gocardless-e2e/v1/update-access-token` endpoint to be available.
+ *
+ * @param {import('@playwright/test').Page} page - The Playwright page object.
+ * @param {string} accessToken - The access token to update.
+ * @throws {Error} If the request fails or the response indicates an error.
+ */
+export async function updateAccessToken( page, accessToken ) {
+	const response = await page.request.post(
+		'/wp-json/gocardless-e2e/v1/update-access-token',
+		{
+			data: {
+				access_token: accessToken,
+			},
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		}
+	);
+
+	if ( ! response.ok() ) {
+		const errorBody = await response.text();
+		throw new Error(
+			`Failed to update access token. HTTP ${ response.status() }: ${ errorBody }`
+		);
+	}
+
+	const result = await response.json();
+
+	if ( ! result.success ) {
+		throw new Error(
+			`Access token update failed: ${ result.error || 'Unknown error' }`
+		);
 	}
 }

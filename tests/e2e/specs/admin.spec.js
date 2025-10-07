@@ -14,6 +14,7 @@ const {
 	goToCheckout,
 	saveSettings,
 	fillBillingDetails,
+	updateAccessToken,
 } = require('../utils');
 const {
 	paymentMethodTitle,
@@ -339,5 +340,41 @@ test.describe('Admin Tests', () => {
 			page.locator('span[aria-label="sepa"]').first()
 		).not.toBeAttached();
 		await goToCheckout(page);
+	});
+
+	test('GoCardless account should disconnect and display notice if access token is invalid - @foundational', async ({
+		page,
+		browser,
+	}) => {
+		// Make sure GoCardless is connected.
+		await connectWithGoCardless(page);
+
+		// Update the access token to invalid.
+		await updateAccessToken(page, 'invalid_access_token');
+
+		await page.goto(
+			'/wp-admin/admin.php?page=wc-settings&tab=checkout&section=gocardless'
+		);
+
+		// Reload the page.
+		await page.goto(
+			'/wp-admin/admin.php?page=wc-settings&tab=checkout&section=gocardless'
+		);
+
+		await expect(
+			page.locator('.notice-warning p', { hasText: /The connection to your GoCardless account has been disconnected because the access token is no longer active or valid/ })
+		).toBeVisible();
+
+		// Connect with GoCardless again and make sure the notice is no longer visible.
+		const adminPage = await browser.newPage({
+			storageState: process.env.ADMINSTATE,
+		});
+		await connectWithGoCardless(adminPage);
+		await adminPage.goto(
+			'/wp-admin/admin.php?page=wc-settings&tab=checkout&section=gocardless'
+		);
+		await expect(
+			adminPage.locator('.notice-warning p', { hasText: /The connection to your GoCardless account has been disconnected because the access token is no longer active or valid/ })
+		).not.toBeVisible();
 	});
 });

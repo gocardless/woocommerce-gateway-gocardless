@@ -174,7 +174,8 @@ class WC_GoCardless_API {
 			return $resp;
 		}
 
-		$parsed_resp = json_decode( wp_remote_retrieve_body( $resp ), true );
+		$response_code = wp_remote_retrieve_response_code( $resp );
+		$parsed_resp   = json_decode( wp_remote_retrieve_body( $resp ), true );
 		if ( is_null( $parsed_resp ) ) {
 			wc_gocardless()->log( sprintf( '%s - Failed to decode JSON resp %s', __METHOD__, print_r( wp_remote_retrieve_body( $resp ), true ) ) ); //phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 			return new WP_Error( 'error_json_decode', esc_html__( 'Error decoding JSON response', 'woocommerce-gateway-gocardless' ) );
@@ -196,6 +197,33 @@ class WC_GoCardless_API {
 				'Forbidden request' === $message
 			) {
 				return new WP_Error( 'error_gocardless_create_refund', esc_html__( 'GoCardless refund endpoint is disabled by default. Please contact api@gocardless.com to enable it for you.', 'woocommerce-gateway-gocardless' ) );
+			}
+
+			/*
+			 * Error Handling for 401 unauthorized response code.
+			 *
+			 * If API respond with 401 unauthorized response code, it means:
+			 *
+			 * - `access_token_not_found` (the access token was not recognised); or
+			 * - `access_token_revoked` (the user has revoked your access to their account); or
+			 * - `access_token_not_active` (the access token is inactive for another reason)
+			 *
+			 * We need to disconnect from GoCardless and display a notice to the user to connect again.
+			 */
+			if ( 401 === $response_code && 'invalid_api_usage' === $parsed_resp['error']['type'] ) {
+				// Unauthorized response code, disconnect from GoCardless.
+				wc_gocardless()->log( sprintf( '%s - Unauthorized response code, disconnecting from GoCardless', __METHOD__ ) );
+				$settings                 = get_option( 'woocommerce_gocardless_settings', array() );
+				$settings['access_token'] = '';
+				update_option( 'woocommerce_gocardless_settings', $settings );
+
+				// Clear the available scheme transient.
+				delete_transient( 'wc_gocardless_available_scheme_identifiers' );
+
+				wc_gocardless()->log( sprintf( '%s - Disconnected from GoCardless', __METHOD__ ) );
+
+				// Add option to display notice to connect GoCardless again.
+				update_option( 'wc_gocardless_access_token_unauthorized', true );
 			}
 
 			$new_mandate = null;

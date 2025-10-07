@@ -1,6 +1,6 @@
 {
 	"name": "woocommerce-gateway-gocardless",
-	"version": "2.9.7",
+	"version": "2.9.8",
 	"description": "GoCardless for WooCommerce",
 	"homepage": "https://woocommerce.com/products/gocardless/",
 	"license": "GPL-3.0-or-later",
@@ -33,7 +33,7 @@
 		"@woocommerce/dependency-extraction-webpack-plugin": "^3.0.1",
 		"@woocommerce/eslint-plugin": "^2.3.0",
 		"@woocommerce/woocommerce-rest-api": "^1.0.1",
-		"@wordpress/env": "^10.2.0",
+		"@wordpress/env": "^10.28.0",
 		"@wordpress/scripts": "^30.11.0",
 		"prettier": "^3.3.2"
 	},

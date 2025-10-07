@@ -25,6 +25,7 @@ class WC_GoCardless_Order_Admin {
 		$this->add_order_actions();
 
 		add_action( 'admin_notices', array( $this, 'display_connection_notices' ) );
+		add_action( 'admin_notices', array( $this, 'display_access_token_unauthorized_notice' ) );
 
 		// GoCardless Connect/Disconnect actions.
 		add_action( 'admin_post_wc_connect_gocardless', array( $this, 'connect_gocardless' ) );
@@ -575,5 +576,46 @@ class WC_GoCardless_Order_Admin {
 		delete_transient( 'wc_gocardless_connection_notice' );
 
 		return $notice;
+	}
+
+	/**
+	 * Display notice for access token unauthorized.
+	 *
+	 * @since 2.9.8
+	 */
+	public function display_access_token_unauthorized_notice() {
+		// Check if option is set to display notice.
+		if ( ! get_option( 'wc_gocardless_access_token_unauthorized' ) ) {
+			return;
+		}
+
+		// Check if access token is there.
+		$settings = get_option( 'woocommerce_gocardless_settings', array() );
+		if ( ! empty( $settings['access_token'] ) ) {
+			// Remove the option to display notice, as we have an access token now (in case it missed to remove while connect to GoCardless).
+			delete_option( 'wc_gocardless_access_token_unauthorized' );
+			return;
+		}
+		?>
+		<div class="notice notice-warning">
+			<p>
+			<?php
+			echo wp_kses(
+				sprintf(
+					/* translators: %s: settings URL */
+					__( 'The connection to your <strong>GoCardless</strong> account has been disconnected because the access token is no longer active or valid. Please <a href="%s">connect</a> your GoCardless account to continue accepting payments.', 'woocommerce-gateway-gocardless' ),
+					wc_gocardless()->get_setting_url()
+				),
+				array(
+					'a'      => array(
+						'href' => array(),
+					),
+					'strong' => array(),
+				)
+			);
+			?>
+			</p>
+		</div>
+		<?php
 	}
 }

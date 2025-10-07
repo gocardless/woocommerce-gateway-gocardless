@@ -291,3 +291,51 @@ function test_wc_gocardless_simulate_billing_request_fulfilled_webhook() {
 		]
 	);
 }
+
+/**
+ * Registers a REST API endpoint to update the access token.
+ * This is used in E2E tests to update the access token.
+ *
+ * Route: POST /wp-json/gocardless-e2e/v1/update-access-token
+ * Body:  { "access_token": "1234567890" }
+ */
+add_action( 'rest_api_init', function () {
+	register_rest_route( 'gocardless-e2e/v1', '/update-access-token', array(
+		'methods'             => 'POST',
+		'callback'            => 'gocardless_e2e_update_access_token_callback',
+		'permission_callback' => '__return_true',
+		'args'                => array(
+			'access_token' => array(
+				'type'     => 'string',
+				'required' => true,
+			),
+		),
+	) );
+} );
+
+/**
+ * Updates the access token.
+ *
+ * @param WP_REST_Request $request The request object.
+ * @return WP_REST_Response The response object.
+ */
+function gocardless_e2e_update_access_token_callback( $request ) {
+	$access_token = $request->get_param( 'access_token' );
+	if ( empty( $access_token ) ) {
+		return new WP_REST_Response( array(
+			'error' => __( 'Access token is required.', 'gocardless-e2e' )
+		), 400 );
+	}
+
+	$settings = get_option( 'woocommerce_gocardless_settings', array() );
+	$settings['access_token'] = sanitize_text_field( $access_token );
+	update_option( 'woocommerce_gocardless_settings', $settings );
+
+	// Delete the available scheme transient, to request the available schemes again, to test the flow.
+	delete_transient( 'wc_gocardless_available_scheme_identifiers' );
+
+	return rest_ensure_response( array(
+		'success' => true,
+		'message' => __( 'Access token updated.', 'gocardless-e2e' ),
+	) );
+}
