@@ -1921,8 +1921,6 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				break;
 			case 'cancelled':
 				$new_status = 'cancelled';
-				// Centralized cancellation handling
-				$this->handle_subscription_cancellation( $order, __( 'Payment cancelled.', 'woocommerce-gateway-gocardless' ) );
 				break;
 			case 'charged_back':
 			case 'chargeback_settled':
