@@ -68,7 +68,7 @@ class WC_GoCardless_Gateway_Addons extends WC_GoCardless_Gateway {
 				? $subscription->get_last_order( 'all' )
 				: $subscription->get_parent();
 
-			if ( $check_order ) {
+			if ( $check_order && is_a( $check_order, 'WC_Abstract_Order' ) ) {
 				// Check payment confirmation status from stored metadata
 				$payment_status = $check_order->get_meta( '_gocardless_payment_status', true );
 
