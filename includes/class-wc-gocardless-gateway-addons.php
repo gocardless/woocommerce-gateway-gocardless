@@ -61,7 +61,7 @@ class WC_GoCardless_Gateway_Addons extends WC_GoCardless_Gateway {
 
 		// Handle pending-cancel -> cancelled transition for unconfirmed payments.
 		// This checks the most recent order's payment status (parent or latest renewal).
-		// This metadata is updated via webhooks and is sufficiently reliable for this use case.
+		// Fetches fresh status from GoCardless API to avoid edge cases with webhook delays.
 		if ( 'pending-cancel' === $new_status && 'pending-cancel' !== $old_status ) {
 			// Get the most recent order (parent or latest renewal) for payment status check
 			$check_order = is_callable( array( $subscription, 'get_last_order' ) )
@@ -69,8 +69,23 @@ class WC_GoCardless_Gateway_Addons extends WC_GoCardless_Gateway {
 				: $subscription->get_parent();
 
 			if ( $check_order && is_a( $check_order, 'WC_Abstract_Order' ) ) {
-				// Check payment confirmation status from stored metadata
-				$payment_status = $check_order->get_meta( '_gocardless_payment_status', true );
+				// Get fresh payment status from GoCardless API
+				$payment_id     = $this->get_order_resource( $check_order->get_id(), 'payment', 'id' );
+				$payment_status = '';
+
+				if ( $payment_id ) {
+					$payment = WC_GoCardless_API::get_payment( $payment_id );
+					if ( is_wp_error( $payment ) || empty( $payment['payments'] ) ) {
+						wc_gocardless()->log( sprintf(
+							'%s - Failed to retrieve payment for order #%s',
+							__METHOD__,
+							$check_order->get_id()
+						) );
+						// Continue with empty $payment_status (triggers cancellation - safe default)
+					} elseif ( ! empty( $payment['payments']['status'] ) ) {
+						$payment_status = $payment['payments']['status'];
+					}
+				}
 
 				// Confirmed statuses that indicate payment has gone through
 				$confirmed_statuses = array( 'confirmed', 'paid_out' );
