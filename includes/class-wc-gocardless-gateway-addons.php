@@ -45,7 +45,8 @@ class WC_GoCardless_Gateway_Addons extends WC_GoCardless_Gateway {
 
 	/**
 	 * Synchronize parent order status when all subscriptions are cancelled.
-	 * Also intercepts pending-cancel transitions for subscriptions with unconfirmed payments.
+	 * Also intercepts pending-cancel transitions for subscriptions with unconfirmed payments,
+	 * checking the most recent order (parent or renewal) to determine if payment is confirmed.
 	 *
 	 * @since x.x.x
 	 * @param WC_Subscription $subscription The subscription object.
@@ -58,12 +59,18 @@ class WC_GoCardless_Gateway_Addons extends WC_GoCardless_Gateway {
 			return;
 		}
 
-		// Handle pending-cancel -> cancelled transition for unconfirmed payments
+		// Handle pending-cancel -> cancelled transition for unconfirmed payments.
+		// This checks the most recent order's payment status (parent or latest renewal).
+		// This metadata is updated via webhooks and is sufficiently reliable for this use case.
 		if ( 'pending-cancel' === $new_status && 'pending-cancel' !== $old_status ) {
-			$parent_order = $subscription->get_parent();
-			if ( $parent_order ) {
-				// Check payment confirmation status
-				$payment_status = $parent_order->get_meta( '_gocardless_payment_status', true );
+			// Get the most recent order (parent or latest renewal) for payment status check
+			$check_order = is_callable( array( $subscription, 'get_last_order' ) )
+				? $subscription->get_last_order( 'all' )
+				: $subscription->get_parent();
+
+			if ( $check_order ) {
+				// Check payment confirmation status from stored metadata
+				$payment_status = $check_order->get_meta( '_gocardless_payment_status', true );
 
 				// Confirmed statuses that indicate payment has gone through
 				$confirmed_statuses = array( 'confirmed', 'paid_out' );
@@ -71,10 +78,10 @@ class WC_GoCardless_Gateway_Addons extends WC_GoCardless_Gateway {
 				// If no payment status or payment not confirmed, cancel immediately
 				if ( empty( $payment_status ) || ! in_array( $payment_status, $confirmed_statuses, true ) ) {
 					wc_gocardless()->log( sprintf(
-						'%s - Cancelling subscription #%s immediately (parent order #%s has unconfirmed payment status: %s)',
+						'%s - Cancelling subscription #%s immediately (order #%s has unconfirmed payment status: %s)',
 						__METHOD__,
 						$subscription->get_id(),
-						$parent_order->get_id(),
+						$check_order->get_id(),
 						$payment_status ?: 'none'
 					) );
 					$subscription->update_status( 'cancelled', __( 'Subscription cancelled - payment not confirmed.', 'woocommerce-gateway-gocardless' ) );
@@ -106,7 +113,6 @@ class WC_GoCardless_Gateway_Addons extends WC_GoCardless_Gateway {
 			'cancelled',
 			__( 'Order cancelled - all subscriptions have been cancelled.', 'woocommerce-gateway-gocardless' )
 		);
-		$parent_order->delete_meta_data( '_gocardless_payment_pending' );
 		$parent_order->save();
 	}
 
