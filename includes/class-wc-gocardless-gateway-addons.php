@@ -54,8 +54,8 @@ class WC_GoCardless_Gateway_Addons extends WC_GoCardless_Gateway {
 	 * @param string          $old_status   The old subscription status.
 	 */
 	public function sync_parent_order_status( $subscription, $new_status, $old_status ) {
-		// Only process GoCardless subscriptions.
-		if ( $this->id !== $subscription->get_payment_method() ) {
+		// Only process GoCardless subscriptions and subscription cancellation triggered by the customer.
+		if ( $this->id !== $subscription->get_payment_method() || ! isset( $_GET['change_subscription_to'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
 		}
 
