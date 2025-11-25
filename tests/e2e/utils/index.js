@@ -306,7 +306,7 @@ export async function handleGoCardlessPayment(page, options) {
 		.getByTestId('loading-spinner')
 		.waitFor({ state: 'detached' });
 
-	if (await page.getByText(/Instant bank pay/).isVisible()) {
+	if (await page.getByText(/Instant bank pay|Make a one-off/).isVisible()) {
 		if (await page.locator('#given_name').isVisible()) {
 			await page
 				.locator('#given_name')
@@ -321,10 +321,17 @@ export async function handleGoCardlessPayment(page, options) {
 				.getByRole('button', { name: 'Continue' })
 				.click({ force: true });
 		}
+		
+		if ( await page.getByRole('button', { name: 'Choose' }).isVisible() ) {
+			await page.getByRole('button', { name: 'Choose' }).click();
+		}
+
 		// Select bank
 		await page
 			.getByTestId('CONSENT_AUTHORISED_READ_REFUND_ACCOUNT_SANDBOX_BANK')
 			.click();
+
+		await page.getByRole('button', { name: 'Change' }).last().waitFor();
 
 		// Fill bank details
 		let filledBankDetails = false;
@@ -354,9 +361,6 @@ export async function handleGoCardlessPayment(page, options) {
 		}
 
 		// Final Confirmation
-		await expect(
-			page.getByTestId('billing-request.bank-confirm.header')
-		).toBeVisible();
 		if (
 			await page
 				.getByTestId('billing-request.bank-confirm.default-cta-button')
@@ -365,7 +369,11 @@ export async function handleGoCardlessPayment(page, options) {
 			await page
 				.getByTestId('billing-request.bank-confirm.default-cta-button')
 				.click();
-		} else {
+		} else if (
+			await page
+				.getByTestId('billing-request.bank-confirm.direct-debit-cta-button')
+				.isVisible()
+		) {
 			await page
 				.getByTestId(
 					'billing-request.bank-confirm.direct-debit-cta-button'
@@ -375,10 +383,10 @@ export async function handleGoCardlessPayment(page, options) {
 
 		// Pay (Bank confirmation)
 		await expect(
-			page.getByRole('button', { name: 'Continue to manual web login' })
+			page.getByTestId('bank-auth-link-button')
 		).toBeVisible();
 		await page
-			.getByRole('button', { name: 'Continue to manual web login' })
+			.getByTestId('bank-auth-link-button')
 			.click({ force: true });
 		return;
 	}
@@ -498,7 +506,9 @@ export async function handleGoCardlessPaymentSchemeWise(
 		.getByTestId('loading-spinner')
 		.waitFor({ state: 'detached' });
 
-	if (await page.getByText(/Instant bank pay/).isVisible()) {
+	const isInstantBankPay = await page.getByText(/Instant bank pay/).isVisible();
+	const isMakeOneOffPayment = await page.getByText(/Make a one-off payment/).isVisible();
+	if ( isInstantBankPay || isMakeOneOffPayment ) {
 		return handleGoCardlessPayment(page, options);
 	}
 
@@ -756,6 +766,7 @@ export async function validateGoCardlessPayment(page, orderId, isSub = false) {
  */
 export async function clearEmailLogs(page) {
 	await page.goto('/wp-admin/admin.php?page=email-log');
+	await page.goto('/wp-admin/admin.php?page=email-log');
 	const bulkAction = await page.locator('#bulk-action-selector-top');
 	if (await bulkAction.isVisible()) {
 		await page.locator('#cb-select-all-1').check();
@@ -843,7 +854,6 @@ export async function completePreOrder(page, orderId) {
 		.check();
 	await page.locator('#bulk-action-selector-top').selectOption('complete');
 	await page.locator('#doaction').click();
-	await page.locator('#confirm-complete-btn').click();
 }
 
 /**
