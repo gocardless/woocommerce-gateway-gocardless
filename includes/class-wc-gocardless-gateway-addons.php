@@ -34,7 +34,7 @@ class WC_GoCardless_Gateway_Addons extends WC_GoCardless_Gateway {
 			add_action( 'woocommerce_subscription_pending-cancel_' . $this->id, array( $this, 'maybe_cancel_subscription_payment' ) );
 			add_action( 'woocommerce_subscription_cancelled_' . $this->id, array( $this, 'maybe_cancel_subscription_payment' ) );
 
-			// Status synchronization for parent orders
+			// Status synchronization for parent orders.
 			add_action( 'woocommerce_subscription_status_updated', array( $this, 'sync_parent_order_status' ), 10, 3 );
 		}
 
@@ -50,85 +50,75 @@ class WC_GoCardless_Gateway_Addons extends WC_GoCardless_Gateway {
 	 *
 	 * @since x.x.x
 	 * @param WC_Subscription $subscription The subscription object.
-	 * @param string $new_status The new subscription status.
-	 * @param string $old_status The old subscription status.
+	 * @param string          $new_status   The new subscription status.
+	 * @param string          $old_status   The old subscription status.
 	 */
 	public function sync_parent_order_status( $subscription, $new_status, $old_status ) {
-		// Only process GoCardless subscriptions
+		// Only process GoCardless subscriptions.
 		if ( $this->id !== $subscription->get_payment_method() ) {
 			return;
 		}
 
-		// Handle pending-cancel -> cancelled transition for unconfirmed payments.
-		// This checks the most recent order's payment status (parent or latest renewal).
-		// Fetches fresh status from GoCardless API to avoid edge cases with webhook delays.
-		if ( 'pending-cancel' === $new_status && 'pending-cancel' !== $old_status ) {
-			// Get the most recent order (parent or latest renewal) for payment status check
-			$check_order = is_callable( array( $subscription, 'get_last_order' ) )
-				? $subscription->get_last_order( 'all' )
-				: $subscription->get_parent();
+		// Only process Some status -> 'pending-cancel' transition.
+		if ( 'pending-cancel' !== $new_status || 'pending-cancel' === $old_status ) {
+			return;
+		}
 
-			if ( $check_order && is_a( $check_order, 'WC_Abstract_Order' ) ) {
-				// Get fresh payment status from GoCardless API
-				$payment_id     = $this->get_order_resource( $check_order->get_id(), 'payment', 'id' );
-				$payment_status = '';
+		/*
+		 * Handle transition to pending-cancel status for unconfirmed payments.
+		 * This checks the most recent order's payment status (parent or latest renewal) from the
+		 * GoCardless API to avoid edge cases with webhook delays.
+		 */
 
-				if ( $payment_id ) {
-					$payment = WC_GoCardless_API::get_payment( $payment_id );
-					if ( is_wp_error( $payment ) || empty( $payment['payments'] ) ) {
-						wc_gocardless()->log( sprintf(
-							'%s - Failed to retrieve payment for order #%s',
-							__METHOD__,
-							$check_order->get_id()
-						) );
-						// Continue with empty $payment_status (triggers cancellation - safe default)
-					} elseif ( ! empty( $payment['payments']['status'] ) ) {
-						$payment_status = $payment['payments']['status'];
-					}
-				}
+		// Get the most recent order of the subscription.
+		$last_order = is_callable( array( $subscription, 'get_last_order' ) )
+			? $subscription->get_last_order( 'all' )
+			: $subscription->get_parent();
 
-				// Confirmed statuses that indicate payment has gone through
-				$confirmed_statuses = array( 'confirmed', 'paid_out' );
+		// If the last order is not a valid order, return.
+		if ( ! $last_order || ! is_a( $last_order, 'WC_Abstract_Order' ) ) {
+			return;
+		}
 
-				// If no payment status or payment not confirmed, cancel immediately
-				if ( empty( $payment_status ) || ! in_array( $payment_status, $confirmed_statuses, true ) ) {
-					wc_gocardless()->log( sprintf(
-						'%s - Cancelling subscription #%s immediately (order #%s has unconfirmed payment status: %s)',
+		// Get payment status from GoCardless.
+		$payment_id     = $this->get_order_resource( $last_order->get_id(), 'payment', 'id' );
+		$payment_status = '';
+
+		if ( $payment_id ) {
+			$payment = WC_GoCardless_API::get_payment( $payment_id );
+
+			if ( is_wp_error( $payment ) || empty( $payment['payments'] ) ) {
+				wc_gocardless()->log(
+					sprintf(
+						'%s - Failed to retrieve payment for order #%s',
 						__METHOD__,
-						$subscription->get_id(),
-						$check_order->get_id(),
-						$payment_status ?: 'none'
-					) );
-					$subscription->update_status( 'cancelled', __( 'Subscription cancelled - payment not confirmed.', 'woocommerce-gateway-gocardless' ) );
-					return;
-				}
+						$last_order->get_id()
+					)
+				);
+			} else {
+				$payment_status = $payment['payments']['status'] ?? '';
 			}
 		}
 
-		// Only process cancelled status from here
-		if ( 'cancelled' !== $new_status ) {
-			return;
-		}
+		// Payment confirmed statuses that indicate payment has gone through.
+		$confirmed_statuses = array( 'confirmed', 'paid_out' );
 
-		$parent_order = $subscription->get_parent();
-		if ( ! $parent_order || ! $parent_order->has_status( array( 'pending', 'on-hold' ) ) ) {
-			return;
+		// If payment is not confirmed, cancel immediately.
+		if ( ! in_array( $payment_status, $confirmed_statuses, true ) ) {
+			wc_gocardless()->log(
+				sprintf(
+					'%s - Cancelling subscription #%s immediately (order #%s has unconfirmed payment status: %s)',
+					__METHOD__,
+					$subscription->get_id(),
+					$last_order->get_id(),
+					$payment_status ? $payment_status : 'none'
+				)
+			);
+			$subscription->update_status(
+				'cancelled',
+				__( 'Subscription cancelled immediately as payment not confirmed for the last order.', 'woocommerce-gateway-gocardless' )
+			);
 		}
-
-		// Check if all subscriptions for this order are cancelled
-		$subscriptions = wcs_get_subscriptions_for_order( $parent_order );
-		foreach ( $subscriptions as $sub ) {
-			if ( ! $sub->has_status( 'cancelled' ) ) {
-				return; // Not all cancelled, don't update parent
-			}
-		}
-
-		// All subscriptions cancelled, update parent order
-		$parent_order->update_status(
-			'cancelled',
-			__( 'Order cancelled - all subscriptions have been cancelled.', 'woocommerce-gateway-gocardless' )
-		);
-		$parent_order->save();
 	}
 
 	/**
