@@ -36,6 +36,11 @@ jobs:
         run: ls -R
         working-directory: ${{ github.event.repository.name }}
 
+      - uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # v2.36.0
+        with:
+          php-version: '7.4'
+          tools: composer:v2, wp
+
       - uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
         with:
           node-version-file: .nvmrc
