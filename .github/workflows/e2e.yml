@@ -57,14 +57,10 @@ jobs:
 
       - name: Install required WP plugins
         run: |
-          gh release download --repo woocommerce/woocommerce-pre-orders --pattern  woocommerce-pre-orders.zip --dir ./test-plugins
-          gh release download --repo woocommerce/woocommerce-subscriptions --pattern  woocommerce-subscriptions.zip --dir ./test-plugins
-          cd ./test-plugins
-          unzip -o woocommerce-pre-orders.zip
-          unzip -o woocommerce-subscriptions.zip
-          cd ..
-        env:
-          GH_TOKEN: ${{ secrets.BOT_GH_TOKEN }}
+          URL_CONFIG="url.https://${{ secrets.BOT_GH_TOKEN }}:x-oauth-basic@github.com/.insteadOf git@github.com:"
+          git config --global $URL_CONFIG
+          npm run env:install-plugins
+          git config --global --unset $URL_CONFIG
 
       - name: Set the plugin and core version config
         run: ./tests/e2e/bin/set-core-version.js --core=${{ env.CORE_VERSION }} --plugin=./${{ github.event.repository.name }}
