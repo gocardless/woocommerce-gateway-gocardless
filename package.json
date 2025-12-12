@@ -28,7 +28,7 @@
 		"test:e2e-foundational": "npx playwright test --config tests/e2e/playwright.config.js --grep @foundational"
 	},
 	"devDependencies": {
-		"@playwright/test": "^1.44.1",
+		"@playwright/test": "^1.57.0",
 		"@woocommerce/api": "^0.2.0",
 		"@woocommerce/dependency-extraction-webpack-plugin": "^3.0.1",
 		"@woocommerce/eslint-plugin": "^2.3.0",
