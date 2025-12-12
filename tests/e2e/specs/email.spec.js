@@ -57,6 +57,7 @@ test.describe('Email Tests', () => {
 		await validateGoCardlessPayment(adminPage, orderId);
 
 		await adminPage.goto('/wp-admin/admin.php?page=email-log');
+		await adminPage.goto('/wp-admin/admin.php?page=email-log');
 		// Verify store admin email.
 		const emailRow = await adminPage
 			.locator('#the-list tr', {

@@ -59,7 +59,7 @@ test.describe('Instant Bank Payment Tests', () => {
 		await blockPlaceOrder(page);
 		// Make sure Instant Bank Payment is not available for USA.
 		await expect(
-			page.getByText('Instant bank pay').first()
+			page.getByText(/Make a one-off|Instant bank pay/).first()
 		).not.toBeVisible();
 
 		// GBP & GB
@@ -75,7 +75,7 @@ test.describe('Instant Bank Payment Tests', () => {
 
 		// Make sure Instant Bank Payment is available.
 		await expect(
-			page.getByText('Instant bank pay').first()
+			page.getByText(/Make a one-off|Instant bank pay/).first()
 		).toBeVisible();
 
 		// EUR & DE
@@ -100,7 +100,7 @@ test.describe('Instant Bank Payment Tests', () => {
 
 		// Make sure Instant Bank Payment is available.
 		await expect(
-			page.getByText('Instant bank pay').first()
+			page.getByText(/Make a one-off|Instant bank pay/).first()
 		).toBeVisible();
 	});
 
@@ -128,7 +128,7 @@ test.describe('Instant Bank Payment Tests', () => {
 
 		// Make sure Instant Bank Payment is not available.
 		await expect(
-			page.getByText('Instant bank pay').first()
+			page.getByText(/Make a one-off|Instant bank pay/).first()
 		).not.toBeVisible();
 
 		// Enable Instant Bank Payment.
@@ -150,7 +150,7 @@ test.describe('Instant Bank Payment Tests', () => {
 
 		// Make sure Instant Bank Payment is available.
 		await expect(
-			page.getByText('Instant bank pay').first()
+			page.getByText(/Make a one-off|Instant bank pay/).first()
 		).toBeVisible();
 	});
 
