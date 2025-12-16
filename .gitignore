@@ -13,3 +13,4 @@ sftp-config.json
 woocommerce-gateway-gocardless.zip
 
 .DS_Store
+/test-plugins
