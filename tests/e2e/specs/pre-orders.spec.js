@@ -126,8 +126,14 @@ test.describe('Pre-Orders Tests', () => {
 			const orderStatus = await adminPage
 				.locator('select[name="order_status"]')
 				.evaluate((el) => el.value);
-			if (orderStatus === 'wc-pre-ordered') {
-				await adminPage.waitForTimeout(5000);
+			const note = await adminPage
+				.locator(
+					'#woocommerce-gocardless-webhook-events ul.order_notes li',
+					{ hasText: 'payments confirmed' }
+				)
+				.first()
+				.isVisible();
+			if (orderStatus === 'wc-pre-ordered' && note) {
 				break;
 			} else {
 				await adminPage.waitForTimeout(10000); // wait for webhook to be processed
