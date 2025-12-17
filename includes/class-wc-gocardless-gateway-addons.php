@@ -33,10 +33,91 @@ class WC_GoCardless_Gateway_Addons extends WC_GoCardless_Gateway {
 			// Cancel in-progress payment on subscription cancellation.
 			add_action( 'woocommerce_subscription_pending-cancel_' . $this->id, array( $this, 'maybe_cancel_subscription_payment' ) );
 			add_action( 'woocommerce_subscription_cancelled_' . $this->id, array( $this, 'maybe_cancel_subscription_payment' ) );
+
+			// Status synchronization for parent orders.
+			add_action( 'woocommerce_subscription_status_updated', array( $this, 'sync_parent_order_status' ), 10, 3 );
 		}
 
 		if ( class_exists( 'WC_Pre_Orders_Order' ) ) {
 			add_action( 'wc_pre_orders_process_pre_order_completion_payment_' . $this->id, array( $this, 'process_payment_for_released_pre_order' ) );
+		}
+	}
+
+	/**
+	 * Synchronize parent order status when all subscriptions are cancelled.
+	 * Also intercepts pending-cancel transitions for subscriptions with unconfirmed payments,
+	 * checking the most recent order (parent or renewal) to determine if payment is confirmed.
+	 *
+	 * @since 2.9.9
+	 * @param WC_Subscription $subscription The subscription object.
+	 * @param string          $new_status   The new subscription status.
+	 * @param string          $old_status   The old subscription status.
+	 */
+	public function sync_parent_order_status( $subscription, $new_status, $old_status ) {
+		// Only process GoCardless subscriptions and subscription cancellation triggered by the customer.
+		if ( $this->id !== $subscription->get_payment_method() || ! isset( $_GET['change_subscription_to'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return;
+		}
+
+		// Only process Some status -> 'pending-cancel' transition.
+		if ( 'pending-cancel' !== $new_status || 'pending-cancel' === $old_status ) {
+			return;
+		}
+
+		/*
+		 * Handle transition to pending-cancel status for unconfirmed payments.
+		 * This checks the most recent order's payment status (parent or latest renewal) from the
+		 * GoCardless API to avoid edge cases with webhook delays.
+		 */
+
+		// Get the most recent order of the subscription.
+		$last_order = is_callable( array( $subscription, 'get_last_order' ) )
+			? $subscription->get_last_order( 'all' )
+			: $subscription->get_parent();
+
+		// If the last order is not a valid order, return.
+		if ( ! $last_order || ! is_a( $last_order, 'WC_Abstract_Order' ) ) {
+			return;
+		}
+
+		// Get payment status from GoCardless.
+		$payment_id     = $this->get_order_resource( $last_order->get_id(), 'payment', 'id' );
+		$payment_status = '';
+
+		if ( $payment_id ) {
+			$payment = WC_GoCardless_API::get_payment( $payment_id );
+
+			if ( is_wp_error( $payment ) || empty( $payment['payments'] ) ) {
+				wc_gocardless()->log(
+					sprintf(
+						'%s - Failed to retrieve payment for order #%s',
+						__METHOD__,
+						$last_order->get_id()
+					)
+				);
+			} else {
+				$payment_status = $payment['payments']['status'] ?? '';
+			}
+		}
+
+		// Payment confirmed statuses that indicate payment has gone through.
+		$confirmed_statuses = array( 'confirmed', 'paid_out' );
+
+		// If payment is not confirmed, cancel immediately.
+		if ( ! in_array( $payment_status, $confirmed_statuses, true ) ) {
+			wc_gocardless()->log(
+				sprintf(
+					'%s - Cancelling subscription #%s immediately (order #%s has unconfirmed payment status: %s)',
+					__METHOD__,
+					$subscription->get_id(),
+					$last_order->get_id(),
+					$payment_status ? $payment_status : 'none'
+				)
+			);
+			$subscription->update_status(
+				'cancelled',
+				__( 'Subscription cancelled immediately as payment not confirmed for the last order.', 'woocommerce-gateway-gocardless' )
+			);
 		}
 	}
 

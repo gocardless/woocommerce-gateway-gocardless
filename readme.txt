@@ -1,8 +1,8 @@
 === GoCardless for WooCommerce ===
 Contributors: gocardless, woocommerce, automattic
 Tags:         gocardless, woocommerce, direct debit, instant bank pay
-Tested up to: 6.8
-Stable tag:   2.9.8
+Tested up to: 6.9
+Stable tag:   2.9.9
 License:      GPL-3.0-or-later
 License URI:  https://spdx.org/licenses/GPL-3.0-or-later.html
 
@@ -139,6 +139,12 @@ Yes, it uses [GoCardless](https://gocardless.com/) ([privacy policy](https://goc
 3. GoCardless settings screen showing a store connected to ad configured with GoCardless to use the ACH direct debit scheme.
 
 == Changelog ==
+
+= 2.9.9 - 2025-12-17 =
+* Fix - Inconsistent subscription status after cancellation.
+* Dev - Bump WordPress "tested up to" version 6.9.
+* Dev - Bump WooCommerce "tested up to" version 10.4.
+* Dev - Bump WooCommerce minimum supported version to 10.2.
 
 = 2.9.8 - 2025-10-07 =
 * Fix - Automatically disconnect the GoCardless account and display a reconnect notice when the token becomes invalid or inactive.
