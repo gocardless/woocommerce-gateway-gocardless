@@ -140,6 +140,12 @@ Yes, it uses [GoCardless](https://gocardless.com/) ([privacy policy](https://goc
 
 == Changelog ==
 
+= 2.9.9 - 2025-12-17 =
+* Fix - Inconsistent subscription status after cancellation.
+* Dev - Bump WordPress "tested up to" version 6.9.
+* Dev - Bump WooCommerce "tested up to" version 10.4.
+* Dev - Bump WooCommerce minimum supported version to 10.2.
+
 = 2.9.8 - 2025-10-07 =
 * Fix - Automatically disconnect the GoCardless account and display a reconnect notice when the token becomes invalid or inactive.
 * Dev - Bump WooCommerce "tested up to" version 10.2.
