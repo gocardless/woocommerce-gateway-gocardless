@@ -48,7 +48,7 @@ class WC_GoCardless_Gateway_Addons extends WC_GoCardless_Gateway {
 	 * Also intercepts pending-cancel transitions for subscriptions with unconfirmed payments,
 	 * checking the most recent order (parent or renewal) to determine if payment is confirmed.
 	 *
-	 * @since x.x.x
+	 * @since 2.9.9
 	 * @param WC_Subscription $subscription The subscription object.
 	 * @param string          $new_status   The new subscription status.
 	 * @param string          $old_status   The old subscription status.
