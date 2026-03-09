@@ -4,7 +4,7 @@
  * Plugin URI:           https://www.woocommerce.com/products/gocardless/
  * Description:          Extends both WooCommerce and WooCommerce Subscriptions with the GoCardless Payment Gateway. A GoCardless merchant account is required.
  * Version:              2.9.9
- * Requires at least:    6.7
+ * Requires at least:    6.8
  * Requires PHP:         7.4
  * PHP tested up to:     8.3
  * Author:               GoCardless
