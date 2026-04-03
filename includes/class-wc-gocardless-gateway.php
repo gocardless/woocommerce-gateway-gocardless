@@ -802,12 +802,8 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 
 		wc_gocardless()->log( sprintf( '%s - Collecting customer details for order #%s with billing request ID: %s', __METHOD__, $order->get_order_number(), $billing_request_id ), WC_Log_Levels::INFO );
 
-		// Get the IP address of the customer. If the IP address is not valid, use 0.0.0.0 as fallback.
-		$ip_address = filter_var( WC_Geolocation::get_ip_address(), FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE );
-		$ip_address = $ip_address ? $ip_address : '0.0.0.0';
-
 		$customer_details = array(
-			'customer' => array(
+			'customer'                => array(
 				'company_name' => $order->get_billing_company(),
 				'given_name'   => $order->get_billing_first_name(),
 				'family_name'  => $order->get_billing_last_name(),
@@ -820,9 +816,17 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				'postal_code'   => $order->get_billing_postcode(),
 				'country_code'  => $order->get_billing_country(),
 				'region'        => $order->get_billing_state(),
-				'ip_address'    => $ip_address,
 			),
 		);
+
+		// Get the IP address of the customer. If the IP address is not valid, use 0.0.0.0 as fallback.
+		$ip_address = filter_var( WC_Geolocation::get_ip_address(), FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE );
+		$ip_address = $ip_address ? $ip_address : '0.0.0.0';
+
+		// IP address is required for ACH scheme, checking USD currency for handling auto scheme as well.
+		if ( ! empty( $ip_address ) && ( 'ach' === $this->scheme || 'USD' === $order->get_currency() ) ) {
+			$customer_details['customer_billing_detail']['ip_address'] = $ip_address;
+		}
 
 		/**
 		 * Filter the customer details params.

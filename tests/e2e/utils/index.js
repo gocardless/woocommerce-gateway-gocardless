@@ -393,40 +393,6 @@ export async function handleGoCardlessPayment(page, options) {
 		return;
 	}
 
-	// Fill GoCardless payment details
-	await page.locator('#currencySelector').selectOption(currency);
-	await page
-		.locator('#country_code')
-		.selectOption(customerBilling.country);
-	await page.locator('#given_name').fill(customerBilling.firstname);
-	await page.locator('#family_name').fill(customerBilling.lastname);
-	await page
-		.locator('#address_line1')
-		.fill(customerBilling.addressfirstline);
-	await page
-		.locator('#address_line2')
-		.fill(customerBilling.addresssecondline);
-	await page.locator('#city').fill(customerBilling.city);
-	await page.locator('#postal_code').fill(customerBilling.postcode);
-	if (await page.locator('#region').isVisible()) {
-		await page
-			.locator('#region')
-			.selectOption(customerBilling.state);
-	}
-	await expect(
-		page.getByRole('button', { name: 'Continue' })
-	).toBeVisible();
-	await page
-		.getByRole('button', { name: 'Continue' })
-		.click({ force: true });
-
-	await page.waitForTimeout(3000);
-	if ( await page.getByTestId('checkout-as-guest').isVisible() ) {
-		await page
-			.getByTestId('checkout-as-guest')
-			.click({ force: true });
-	}
-
 	// Fill bank details
 	if (currency === 'USD') {
 		await page
@@ -516,31 +482,15 @@ export async function handleGoCardlessPaymentSchemeWise(
 
 	// Fill GoCardless payment details
 	const data = bankData[scheme] || bankDetails;
-	await page.locator('#currencySelector').selectOption(currency);
-
-	await page.waitForTimeout(2500); // Add waiting time to avoid flakiness.
-	if (scheme === 'sepa_core') {
-		await page
-			.getByTestId('country-residence-selector')
-			.selectOption('DK');
-	} else {
-		await page
-			.locator('#given_name')
-			.fill(customerBilling.firstname);
-		await page
-			.locator('#family_name')
-			.fill(customerBilling.lastname);
-	}
-
 	if (scheme === 'betalingsservice') {
-		page.locator('#danish_identity_number').fill(data.idNumber);
+		await page.locator('#danish_identity_number').fill(data.idNumber);
+		await expect(
+			page.getByRole('button', { name: 'Continue' })
+		).toBeVisible();
+		await page
+			.getByRole('button', { name: 'Continue' })
+			.click({ force: true });
 	}
-	await expect(
-		page.getByRole('button', { name: 'Continue' })
-	).toBeVisible();
-	await page
-		.getByRole('button', { name: 'Continue' })
-		.click({ force: true });
 
 	// Fill bank details
 	switch (scheme) {
