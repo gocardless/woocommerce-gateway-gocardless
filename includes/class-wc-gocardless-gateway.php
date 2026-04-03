@@ -803,7 +803,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 		wc_gocardless()->log( sprintf( '%s - Collecting customer details for order #%s with billing request ID: %s', __METHOD__, $order->get_order_number(), $billing_request_id ), WC_Log_Levels::INFO );
 
 		// Get the IP address of the customer. If the IP address is not valid, use 0.0.0.0 as fallback.
-		$ip_address = filter_var( WC_Geolocation::get_ip_address(), FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE );
+		$ip_address = filter_var( WC_Geolocation::get_ip_address(), FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE );
 		$ip_address = $ip_address ? $ip_address : '0.0.0.0';
 
 		$customer_details = array(
