@@ -1,7 +1,7 @@
 === GoCardless for WooCommerce ===
 Contributors: gocardless, woocommerce, automattic
 Tags:         gocardless, woocommerce, direct debit, instant bank pay
-Tested up to: 6.9
+Tested up to: 7.0
 Stable tag:   2.9.9
 License:      GPL-3.0-or-later
 License URI:  https://spdx.org/licenses/GPL-3.0-or-later.html
