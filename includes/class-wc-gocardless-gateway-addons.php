@@ -300,8 +300,9 @@ class WC_GoCardless_Gateway_Addons extends WC_GoCardless_Gateway {
 		$order_id = wc_gocardless_get_order_prop( $order, 'id' );
 		if ( $this->_is_pre_order_charges_upon_release( $order_id ) ) {
 			//phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce verification is already handled on the WooCommerce side.
-			if ( isset( $_POST['wc-gocardless-payment-token'] ) ) {
-				$token_id = wc_clean( wp_unslash( $_POST['wc-gocardless-payment-token'] ) );
+			$token_input = $this->get_payment_token_input_name();
+			if ( isset( $_POST[ $token_input ] ) ) {
+				$token_id = wc_clean( wp_unslash( $_POST[ $token_input ] ) );
 			} else {
 				$token_id = false;
 			}
