@@ -217,6 +217,7 @@ class WC_GoCardless {
 
 		// Includes.
 		require_once $this->plugin_path . '/includes/class-wc-gocardless-payment-token-direct-debit.php';
+		require_once $this->plugin_path . '/includes/class-wc-gocardless-payment-token-payto.php';
 		require_once $this->plugin_path . '/includes/class-wc-gocardless-gateway.php';
 		require_once $this->plugin_path . '/includes/class-wc-gocardless-privacy.php';
 		require_once $this->plugin_path . '/includes/class-wc-gocardless-compat.php';
