@@ -16,6 +16,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 
 	/**
+	 * Gateway ID (subclasses may override, e.g. PayTo).
+	 *
+	 * @var string
+	 */
+	public $id = 'gocardless';
+
+	/**
 	 * Notices to display.
 	 *
 	 * @since 2.4.0
@@ -29,48 +36,47 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	 *
 	 * @var string
 	 */
-	private $access_token;
+	protected $access_token;
 
 	/**
 	 * Webhook secret.
 	 *
 	 * @var string
 	 */
-	private $webhook_secret;
+	protected $webhook_secret;
 
 	/**
 	 * Scheme.
 	 *
 	 * @var string
 	 */
-	private $scheme;
+	protected $scheme;
 
 	/**
 	 * Saved bank accounts.
 	 *
 	 * @var bool
 	 */
-	private $saved_bank_accounts;
+	protected $saved_bank_accounts;
 
 	/**
 	 * Is instant bank pay turned on.
 	 *
 	 * @var bool
 	 */
-	private $instant_bank_pay;
+	protected $instant_bank_pay;
 
 	/**
 	 * Test mode.
 	 *
 	 * @var bool
 	 */
-	private $testmode;
+	protected $testmode;
 
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->id                 = 'gocardless';
 		$this->method_title       = __( 'Bank pay (open banking and direct debit via GoCardless)', 'woocommerce-gateway-gocardless' );
 		$this->method_description = __( 'GoCardless takes bank payments using open banking and direct debit. Enabled in the UK, the Eurozone, Sweden, Denmark, Australia, New Zealand, Canada and United States.', 'woocommerce-gateway-gocardless' );
 		$this->icon               = wc_gocardless()->plugin_url . '/images/gocardless.png';
@@ -102,6 +108,15 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 
 		$this->view_transaction_url = $this->get_transaction_url_format();
 
+		$this->setup_hooks();
+	}
+
+	/**
+	 * Setup hooks for the gateway.
+	 *
+	 * @return void
+	 */
+	protected function setup_hooks() {
 		// Endpoint handler. Handling request such as webhook.
 		add_action( 'woocommerce_api_wc_gateway_gocardless', array( $this, 'gocardless_endpoint_handler' ) );
 
@@ -477,7 +492,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 		);
 
 		$this->form_fields = array(
-			'connection'          => array(
+			'connection'                => array(
 				'type'                    => 'connection',
 				'title'                   => __( 'Connect', 'woocommerce-gateway-gocardless' ),
 				'connect_button_label'    => __( 'Connect with GoCardless', 'woocommerce-gateway-gocardless' ),
@@ -487,37 +502,37 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				'use_sandbox_link_text'   => __( 'Not ready to accept live payments? Click here to connect using sandbox mode.', 'woocommerce-gateway-gocardless' ),
 				'desc_tip'                => true,
 			),
-			'enabled'             => array(
+			'enabled'                   => array(
 				'title'       => __( 'Enable/Disable', 'woocommerce-gateway-gocardless' ),
 				'label'       => __( 'Enable Bank pay (open banking and direct debit via GoCardless)', 'woocommerce-gateway-gocardless' ),
 				'type'        => 'checkbox',
 				'description' => '',
 				'default'     => 'no',
 			),
-			'title'               => array(
+			'title'                     => array(
 				'title'       => __( 'Title', 'woocommerce-gateway-gocardless' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce-gateway-gocardless' ),
 				'default'     => __( 'Pay by bank', 'woocommerce-gateway-gocardless' ),
 				'desc_tip'    => true,
 			),
-			'description'         => array(
+			'description'               => array(
 				'title'       => __( 'Description', 'woocommerce-gateway-gocardless' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce-gateway-gocardless' ),
 				'default'     => __( 'Pay securely via your bank account.', 'woocommerce-gateway-gocardless' ),
 				'desc_tip'    => true,
 			),
-			'access_token'        => array(
+			'access_token'              => array(
 				'type'    => 'hidden',
 				'default' => '',
 			),
-			'webhook_secret'      => array(
+			'webhook_secret'            => array(
 				'title'   => __( 'GoCardless Sync', 'woocommerce-gateway-gocardless' ),
 				'type'    => 'webhook_secret',
 				'default' => $default_webhook_secret,
 			),
-			'instant_bank_pay'    => array(
+			'instant_bank_pay'          => array(
 				'title'       => __( 'Instant Bank Pay', 'woocommerce-gateway-gocardless' ),
 				'label'       => __( 'Enable Instant Bank Pay', 'woocommerce-gateway-gocardless' ),
 				'type'        => 'checkbox',
@@ -525,7 +540,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				'default'     => 'no',
 				'desc_tip'    => true,
 			),
-			'saved_bank_accounts' => array(
+			'saved_bank_accounts'       => array(
 				'title'       => __( 'Saved Bank Accounts', 'woocommerce-gateway-gocardless' ),
 				'label'       => __( 'Enable Payment via Saved Bank Accounts', 'woocommerce-gateway-gocardless' ),
 				'type'        => 'checkbox',
@@ -533,7 +548,15 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				'default'     => 'yes',
 				'desc_tip'    => true,
 			),
-			'scheme'              => array(
+			'fallback_enabled'          => array(
+				'title'       => __( 'Enable Fallback', 'woocommerce-gateway-gocardless' ),
+				'label'       => __( 'Enable fallback to allow customers to complete the Billing Request via Direct Debit', 'woocommerce-gateway-gocardless' ),
+				'type'        => 'checkbox',
+				'description' => __( 'If enabled, customers who are unable to authorise the open banking transaction may be able to complete the billing request via Direct Debit.', 'woocommerce-gateway-gocardless' ),
+				'default'     => 'no',
+				'desc_tip'    => true,
+			),
+			'scheme'                    => array(
 				'title'       => __( 'Direct Debit Scheme', 'woocommerce-gateway-gocardless' ),
 				'type'        => 'select',
 				'class'       => 'wc-enhanced-select',
@@ -542,16 +565,41 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				/* translators: Link to documentation */
 				'description' => sprintf( __( 'The Direct Debit scheme of the mandate. See <a target="_blank" href="%s">this page</a> for  scheme and its supported countries. If ACH, Autogiro, BACS, BECS, BECS NZ, Betalingsservice, PAD or SEPA Core is specified, the payment pages will only allow the set-up of a mandate for the specified scheme. If auto detect is specified, failed validation may occur in case currency in the order is not supported by the scheme.', 'woocommerce-gateway-gocardless' ), 'https://developer.gocardless.com/api-reference#overview-supported-direct-debit-schemes' ),
 			),
-			'testmode'            => array(
+			'testmode'                  => array(
 				'type'    => 'hidden',
 				'default' => 'no',
 			),
-			'logging'             => array(
+			'logging'                   => array(
 				'title'       => __( 'Logging', 'woocommerce-gateway-gocardless' ),
 				'label'       => __( 'Log debug messages', 'woocommerce-gateway-gocardless' ),
 				'type'        => 'checkbox',
 				'description' => __( 'Save debug messages to the WooCommerce System Status log.', 'woocommerce-gateway-gocardless' ),
 				'default'     => 'no',
+				'desc_tip'    => true,
+			),
+			'payto_heading'             => array(
+				'title'       => __( 'PayTo', 'woocommerce-gateway-gocardless' ),
+				'type'        => 'title',
+				'description' => __( 'Configure PayTo payment method for Australian customers.', 'woocommerce-gateway-gocardless' ),
+			),
+			'payto_enabled'             => array(
+				'title'   => __( 'Enable/Disable', 'woocommerce-gateway-gocardless' ),
+				'label'   => __( 'Enable PayTo', 'woocommerce-gateway-gocardless' ),
+				'type'    => 'checkbox',
+				'default' => 'no',
+			),
+			'payto_title'               => array(
+				'title'       => __( 'Title', 'woocommerce-gateway-gocardless' ),
+				'type'        => 'text',
+				'default'     => __( 'PayTo', 'woocommerce-gateway-gocardless' ),
+				'description' => __( 'The title shown to customers at checkout.', 'woocommerce-gateway-gocardless' ),
+				'desc_tip'    => true,
+			),
+			'payto_description'         => array(
+				'title'       => __( 'Description', 'woocommerce-gateway-gocardless' ),
+				'type'        => 'text',
+				'default'     => __( 'Pay securely via PayTo from your Australian bank account.', 'woocommerce-gateway-gocardless' ),
+				'description' => __( 'The description shown to customers at checkout.', 'woocommerce-gateway-gocardless' ),
 				'desc_tip'    => true,
 			),
 		);
@@ -662,7 +710,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	 *
 	 * @return bool Returns true if in checkout settings page.
 	 */
-	private function is_checkout_settings_page() {
+	protected function is_checkout_settings_page() {
 		if ( ! function_exists( 'get_current_screen' ) ) {
 			return false;
 		}
@@ -722,11 +770,35 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	 * @return bool Returns true if processing payment with saved token / mandate
 	 */
 	protected function _is_processing_payment_with_saved_token() {
+		$token_input = $this->get_payment_token_input_name();
+
 		return (
-			isset( $_POST['wc-gocardless-payment-token'] ) //phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verification is already handled on the WooCommerce side.
+			isset( $_POST[ $token_input ] ) //phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verification is already handled on the WooCommerce side.
 			&&
-			'new' !== sanitize_text_field( wp_unslash( $_POST['wc-gocardless-payment-token'] ) ) //phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verification is already handled on the WooCommerce side.
+			'new' !== sanitize_text_field( wp_unslash( $_POST[ $token_input ] ) ) //phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verification is already handled on the WooCommerce side.
 		);
+	}
+
+	/**
+	 * POST field name for saved payment token selection (matches WooCommerce tokenization UI).
+	 *
+	 * @since x.x.x
+	 *
+	 * @return string Input name without brackets.
+	 */
+	protected function get_payment_token_input_name() {
+		return 'wc-' . $this->id . '-payment-token';
+	}
+
+	/**
+	 * POST field name for "save payment method" checkbox.
+	 *
+	 * @since x.x.x
+	 *
+	 * @return string Input name.
+	 */
+	protected function get_new_payment_method_input_name() {
+		return 'wc-' . $this->id . '-new-payment-method';
 	}
 
 	/**
@@ -743,7 +815,8 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	 */
 	protected function _process_payment_with_saved_token( WC_Order $order ) {
 		try {
-			$token_id = isset( $_POST['wc-gocardless-payment-token'] ) ? wc_clean( wp_unslash( $_POST['wc-gocardless-payment-token'] ) ) : ''; //phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verification is done in WooCommerce side.
+			$token_input = $this->get_payment_token_input_name();
+			$token_id    = isset( $_POST[ $token_input ] ) ? wc_clean( wp_unslash( $_POST[ $token_input ] ) ) : ''; //phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verification is done in WooCommerce side.
 			$token    = WC_Payment_Tokens::get( $token_id );
 			if ( ! $token || $token->get_user_id() !== get_current_user_id() ) {
 				throw new Exception( esc_html__( 'Invalid payment method. Please setup a new direct debit account.', 'woocommerce-gateway-gocardless' ) );
@@ -977,7 +1050,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	 * @param WC_Order $order Order object.
 	 * @return bool Returns true if the payment method supports instant payment.
 	 */
-	private function supports_instant_payment( $order ) {
+	protected function supports_instant_payment( $order ) {
 		$is_ibp_enabled = $this->get_option( 'instant_bank_pay', 'no' ) === 'yes';
 		$is_supported   = false;
 
@@ -1030,12 +1103,13 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	 * @param WC_Order $order Order object.
 	 * @return bool Returns true if the order needs mandate.
 	 */
-	private function needs_mandate( $order ) {
+	protected function needs_mandate( $order ) {
 		$needs_mandate = false;
 
 		// Check if customer has checked save payment method.
+		$new_pm_key = $this->get_new_payment_method_input_name();
 		$save_token = (
-			! empty( $_POST['wc-gocardless-new-payment-method'] ) //phpcs:ignore WordPress.Security.NonceVerification -- Nonce verification is already handled on the WooCommerce side.
+			! empty( $_POST[ $new_pm_key ] ) //phpcs:ignore WordPress.Security.NonceVerification -- Nonce verification is already handled on the WooCommerce side.
 			&& $this->saved_bank_accounts
 			&& get_current_user_id()
 		);
@@ -1069,7 +1143,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	 *
 	 * @return boolean
 	 */
-	private function is_change_payment_method_request() {
+	protected function is_change_payment_method_request() {
 		return class_exists( 'WC_Subscriptions_Change_Payment_Gateway' ) && WC_Subscriptions_Change_Payment_Gateway::$is_request_to_change_payment;
 	}
 
@@ -1081,7 +1155,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	 * @param WC_Order $order Order object.
 	 * @return bool Returns true if the order contains pre-orders product which needs to be paid upon release.
 	 */
-	private function is_pre_orders_pay_upon_release( $order ) {
+	protected function is_pre_orders_pay_upon_release( $order ) {
 		if (
 			class_exists( 'WC_Pre_Orders_Order' ) &&
 			$order &&
@@ -1212,8 +1286,9 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 			'billing_request_id' => $billing_request_id,
 		);
 
+		$new_pm_key = $this->get_new_payment_method_input_name();
 		$save_token = (
-			! empty( $_POST['wc-gocardless-new-payment-method'] ) //phpcs:ignore WordPress.Security.NonceVerification -- Nonce verification is already handled on the WooCommerce side.
+			! empty( $_POST[ $new_pm_key ] ) //phpcs:ignore WordPress.Security.NonceVerification -- Nonce verification is already handled on the WooCommerce side.
 			&& $this->saved_bank_accounts
 			&& get_current_user_id()
 		);
@@ -1299,7 +1374,9 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 
 			wc_gocardless()->log( sprintf( '%s - Maybe redirected from GoCardless with billing_request_id "%s" and order ID %s', __METHOD__, $billing_request_id, $order_id ) );
 
-			$save_bank_accounts  = 'yes' === $this->get_option( 'saved_bank_accounts', 'no' );
+			$gateway = wc_gocardless()->get_gateway_for_order( $order );
+
+			$save_bank_accounts  = 'yes' === $gateway->get_option( 'saved_bank_accounts', 'no' );
 			$save_customer_token = (
 				! empty( $_GET['save_customer_token'] ) && //phpcs:ignore WordPress.Security.NonceVerification
 				'yes' === wc_clean( wp_unslash( $_GET['save_customer_token'] ) ) && //phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -1307,7 +1384,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				$save_bank_accounts
 			);
 
-			$response = $this->handle_billing_request_complete( $order, $billing_request_id, $save_customer_token );
+			$response = $gateway->handle_billing_request_complete( $order, $billing_request_id, $save_customer_token );
 			if ( 'success' === $response['result'] ) {
 				wp_safe_redirect( $response['redirect'] );
 				exit;
@@ -1892,7 +1969,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 
 		$order_id       = wc_gocardless_get_order_prop( $order, 'id' );
 		$payment_method = wc_gocardless_get_order_prop( $order, 'payment_method' );
-		if ( 'gocardless' !== $payment_method ) {
+		if ( $this->id !== $payment_method ) {
 			wc_gocardless()->log( sprintf( '%s - Order #%s is not paid via GoCardless', __METHOD__, $order->get_order_number() ) );
 			return false;
 		}
@@ -2161,7 +2238,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 
 		// Make sure the order payment method is GoCardless.
 		$payment_method = wc_gocardless_get_order_prop( $order, 'payment_method' );
-		if ( 'gocardless' !== $payment_method ) {
+		if ( $this->id !== $payment_method ) {
 			wc_gocardless()->log( sprintf( '%s - Order #%s is not paid via GoCardless.', __METHOD__, $order->get_order_number() ) );
 			return false;
 		}
@@ -2290,7 +2367,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 
 		// Make sure the order payment method is GoCardless.
 		$payment_method = wc_gocardless_get_order_prop( $order, 'payment_method' );
-		if ( 'gocardless' !== $payment_method ) {
+		if ( $this->id !== $payment_method ) {
 			wc_gocardless()->log( sprintf( '%s - Order #%s is not paid via GoCardless.', __METHOD__, $order->get_order_number() ) );
 			return false;
 		}
@@ -2632,7 +2709,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	 * @param array $method Item of payment method.
 	 */
 	public function saved_payment_methods_column_method( $method ) {
-		if ( ! empty( $method['method']['gateway'] ) && 'gocardless' === $method['method']['gateway'] ) {
+		if ( ! empty( $method['method']['gateway'] ) && $this->id === $method['method']['gateway'] ) {
 			echo esc_html( $method['method']['display_name'] );
 		} else {
 			echo esc_html( $this->_get_default_column_method_display( $method ) );
