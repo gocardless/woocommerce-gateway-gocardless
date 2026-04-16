@@ -217,8 +217,9 @@ class WC_GoCardless {
 
 		// Includes.
 		require_once $this->plugin_path . '/includes/class-wc-gocardless-payment-token-direct-debit.php';
-		require_once $this->plugin_path . '/includes/class-wc-gocardless-payment-token-payto.php';
+		require_once $this->plugin_path . '/includes/class-wc-payment-token-gocardless-payto.php';
 		require_once $this->plugin_path . '/includes/class-wc-gocardless-gateway.php';
+		require_once $this->plugin_path . '/includes/class-wc-gocardless-payto-gateway.php';
 		require_once $this->plugin_path . '/includes/class-wc-gocardless-privacy.php';
 		require_once $this->plugin_path . '/includes/class-wc-gocardless-compat.php';
 
@@ -362,6 +363,8 @@ class WC_GoCardless {
 			$methods[] = 'WC_GoCardless_Gateway';
 		}
 
+		$methods[] = 'WC_GoCardless_PayTo_Gateway';
+
 		return $methods;
 	}
 
@@ -412,6 +415,45 @@ class WC_GoCardless {
 		$gateways = WC()->payment_gateways->payment_gateways();
 
 		return ! empty( $gateways['gocardless'] ) ? $gateways['gocardless'] : false;
+	}
+
+	/**
+	 * Return the PayTo gateway instance when registered.
+	 *
+	 * @since x.x.x
+	 *
+	 * @return WC_GoCardless_PayTo_Gateway|bool
+	 */
+	public function payto_gateway_instance() {
+		if ( ! function_exists( 'WC' ) || ! WC()->payment_gateways ) {
+			return false;
+		}
+
+		$gateways = WC()->payment_gateways->payment_gateways();
+
+		return ! empty( $gateways['gocardless_payto'] ) ? $gateways['gocardless_payto'] : false;
+	}
+
+	/**
+	 * Resolve which GoCardless gateway should handle an order (main vs PayTo).
+	 *
+	 * @since x.x.x
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return WC_GoCardless_Gateway|WC_GoCardless_PayTo_Gateway|bool
+	 */
+	public function get_gateway_for_order( $order ) {
+		if ( ! $order instanceof WC_Order ) {
+			return $this->gateway_instance();
+		}
+
+		$method = $order->get_payment_method( 'edit' );
+		if ( 'gocardless_payto' === $method ) {
+			$payto = $this->payto_gateway_instance();
+			return $payto ? $payto : $this->gateway_instance();
+		}
+
+		return $this->gateway_instance();
 	}
 
 	/**
