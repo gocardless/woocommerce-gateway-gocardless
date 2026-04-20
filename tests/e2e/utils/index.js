@@ -306,7 +306,7 @@ export async function handleGoCardlessPayment(page, options) {
 		.getByTestId('loading-spinner')
 		.waitFor({ state: 'detached' });
 
-	if (await page.getByText(/Instant bank pay|Make a one-off/).isVisible()) {
+	if (await page.getByText(/Instant bank pay|Make a one-off|One-off payment/).isVisible()) {
 		if (await page.locator('#given_name').isVisible()) {
 			await page
 				.locator('#given_name')
