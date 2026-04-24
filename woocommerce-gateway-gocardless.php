@@ -90,6 +90,7 @@ class WC_GoCardless {
 		$this->plugin_path = untrailingslashit( plugin_dir_path( __FILE__ ) );
 		$this->plugin_url  = untrailingslashit( plugins_url( '/', __FILE__ ) );
 
+		require_once $this->plugin_path . '/includes/class-wc-gocardless-helper.php';
 		require_once $this->plugin_path . '/includes/class-wc-gocardless-api.php';
 
 		$this->settings = WC_GoCardless_API::get_settings();
@@ -224,7 +225,9 @@ class WC_GoCardless {
 		require_once $this->plugin_path . '/includes/class-wc-gocardless-compat.php';
 
 		if ( $this->can_use_gateway_addons() ) {
-			include_once $this->plugin_path . '/includes/class-wc-gocardless-gateway-addons.php';
+			require_once $this->plugin_path . '/includes/trait-wc-gocardless-gateway-subscriptions-pre-orders.php';
+			require_once $this->plugin_path . '/includes/class-wc-gocardless-gateway-addons.php';
+			require_once $this->plugin_path . '/includes/class-wc-gocardless-payto-gateway-addons.php';
 		}
 
 		// Backwards compatibility.
@@ -359,11 +362,11 @@ class WC_GoCardless {
 	public function register_gateway( $methods ) {
 		if ( $this->can_use_gateway_addons() ) {
 			$methods[] = 'WC_GoCardless_Gateway_Addons';
+			$methods[] = 'WC_GoCardless_PayTo_Gateway_Addons';
 		} else {
 			$methods[] = 'WC_GoCardless_Gateway';
+			$methods[] = 'WC_GoCardless_PayTo_Gateway';
 		}
-
-		$methods[] = 'WC_GoCardless_PayTo_Gateway';
 
 		return $methods;
 	}
@@ -417,44 +420,6 @@ class WC_GoCardless {
 		return ! empty( $gateways['gocardless'] ) ? $gateways['gocardless'] : false;
 	}
 
-	/**
-	 * Return the PayTo gateway instance when registered.
-	 *
-	 * @since x.x.x
-	 *
-	 * @return WC_GoCardless_PayTo_Gateway|bool
-	 */
-	public function payto_gateway_instance() {
-		if ( ! function_exists( 'WC' ) || ! WC()->payment_gateways ) {
-			return false;
-		}
-
-		$gateways = WC()->payment_gateways->payment_gateways();
-
-		return ! empty( $gateways['gocardless_payto'] ) ? $gateways['gocardless_payto'] : false;
-	}
-
-	/**
-	 * Resolve which GoCardless gateway should handle an order (main vs PayTo).
-	 *
-	 * @since x.x.x
-	 *
-	 * @param WC_Order $order Order object.
-	 * @return WC_GoCardless_Gateway|WC_GoCardless_PayTo_Gateway|bool
-	 */
-	public function get_gateway_for_order( $order ) {
-		if ( ! $order instanceof WC_Order ) {
-			return $this->gateway_instance();
-		}
-
-		$method = $order->get_payment_method( 'edit' );
-		if ( 'gocardless_payto' === $method ) {
-			$payto = $this->payto_gateway_instance();
-			return $payto ? $payto : $this->gateway_instance();
-		}
-
-		return $this->gateway_instance();
-	}
 
 	/**
 	 * Log message.
@@ -673,7 +638,8 @@ class WC_GoCardless {
 		);
 
 		if ( $this->can_use_gateway_addons() ) {
-			$aliases['WC_GoCardless_Gateway_Addons'] = 'WC_Gateway_GoCardless_Addons';
+			$aliases['WC_GoCardless_Gateway_Addons']       = 'WC_Gateway_GoCardless_Addons';
+			$aliases['WC_GoCardless_PayTo_Gateway_Addons'] = 'WC_Gateway_GoCardless_PayTo_Addons';
 		}
 
 		foreach ( $aliases as $new_class => $orig_class ) {

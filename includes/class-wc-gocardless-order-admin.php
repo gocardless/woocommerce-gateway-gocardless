@@ -66,7 +66,7 @@ class WC_GoCardless_Order_Admin {
 			return false;
 		}
 
-		if ( 'gocardless' !== wc_gocardless_get_order_prop( $order, 'payment_method' ) ) {
+		if ( ! WC_GoCardless_Helper::is_gocardless_order( $order ) ) {
 			return false;
 		}
 
@@ -168,11 +168,11 @@ class WC_GoCardless_Order_Admin {
 			return $actions;
 		}
 
-		if ( 'gocardless' !== wc_gocardless_get_order_prop( $order, 'payment_method' ) ) {
+		if ( ! WC_GoCardless_Helper::is_gocardless_order( $order ) ) {
 			return $actions;
 		}
 
-		$gateway = wc_gocardless()->gateway_instance();
+		$gateway = WC_GoCardless_Helper::get_gateway_for_order( $order );
 		if ( ! $gateway ) {
 			return $actions;
 		}
@@ -215,11 +215,11 @@ class WC_GoCardless_Order_Admin {
 			return;
 		}
 
-		if ( 'gocardless' !== wc_gocardless_get_order_prop( $order, 'payment_method' ) ) {
+		if ( ! WC_GoCardless_Helper::is_gocardless_order( $order ) ) {
 			return;
 		}
 
-		$gateway = wc_gocardless()->gateway_instance();
+		$gateway = WC_GoCardless_Helper::get_gateway_for_order( $order );
 		if ( ! $gateway ) {
 			return;
 		}
@@ -270,11 +270,11 @@ class WC_GoCardless_Order_Admin {
 			return;
 		}
 
-		if ( 'gocardless' !== wc_gocardless_get_order_prop( $order, 'payment_method' ) ) {
+		if ( ! WC_GoCardless_Helper::is_gocardless_order( $order ) ) {
 			return;
 		}
 
-		$gateway = wc_gocardless()->gateway_instance();
+		$gateway = WC_GoCardless_Helper::get_gateway_for_order( $order );
 		if ( ! $gateway ) {
 			return;
 		}
@@ -377,8 +377,8 @@ class WC_GoCardless_Order_Admin {
 	 */
 	public function get_gocardless_payment_status( $order_id, $markup = false ) {
 		$order   = wc_get_order( $order_id );
-		$gateway = wc_gocardless()->gateway_instance();
-		if ( ! $order || 'gocardless' !== $order->get_payment_method() || ! $gateway ) {
+		$gateway = $order ? WC_GoCardless_Helper::get_gateway_for_order( $order ) : false;
+		if ( ! $order || ! WC_GoCardless_Helper::is_gocardless_order( $order ) || ! $gateway ) {
 			return '-';
 		}
 
@@ -440,7 +440,7 @@ class WC_GoCardless_Order_Admin {
 	 * @return array
 	 */
 	public function add_payment_status_to_order_preview( $details, $order ) {
-		if ( 'gocardless' !== $order->get_payment_method() ) {
+		if ( ! WC_GoCardless_Helper::is_gocardless_order( $order ) ) {
 			return $details;
 		}
 

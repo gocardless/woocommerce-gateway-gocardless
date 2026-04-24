@@ -492,7 +492,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 		);
 
 		$this->form_fields = array(
-			'connection'                => array(
+			'connection'          => array(
 				'type'                    => 'connection',
 				'title'                   => __( 'Connect', 'woocommerce-gateway-gocardless' ),
 				'connect_button_label'    => __( 'Connect with GoCardless', 'woocommerce-gateway-gocardless' ),
@@ -502,37 +502,37 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				'use_sandbox_link_text'   => __( 'Not ready to accept live payments? Click here to connect using sandbox mode.', 'woocommerce-gateway-gocardless' ),
 				'desc_tip'                => true,
 			),
-			'enabled'                   => array(
+			'enabled'             => array(
 				'title'       => __( 'Enable/Disable', 'woocommerce-gateway-gocardless' ),
 				'label'       => __( 'Enable Bank pay (open banking and direct debit via GoCardless)', 'woocommerce-gateway-gocardless' ),
 				'type'        => 'checkbox',
 				'description' => '',
 				'default'     => 'no',
 			),
-			'title'                     => array(
+			'title'               => array(
 				'title'       => __( 'Title', 'woocommerce-gateway-gocardless' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce-gateway-gocardless' ),
 				'default'     => __( 'Pay by bank', 'woocommerce-gateway-gocardless' ),
 				'desc_tip'    => true,
 			),
-			'description'               => array(
+			'description'         => array(
 				'title'       => __( 'Description', 'woocommerce-gateway-gocardless' ),
 				'type'        => 'text',
 				'description' => __( 'This controls the description which the user sees during checkout.', 'woocommerce-gateway-gocardless' ),
 				'default'     => __( 'Pay securely via your bank account.', 'woocommerce-gateway-gocardless' ),
 				'desc_tip'    => true,
 			),
-			'access_token'              => array(
+			'access_token'        => array(
 				'type'    => 'hidden',
 				'default' => '',
 			),
-			'webhook_secret'            => array(
+			'webhook_secret'      => array(
 				'title'   => __( 'GoCardless Sync', 'woocommerce-gateway-gocardless' ),
 				'type'    => 'webhook_secret',
 				'default' => $default_webhook_secret,
 			),
-			'instant_bank_pay'          => array(
+			'instant_bank_pay'    => array(
 				'title'       => __( 'Instant Bank Pay', 'woocommerce-gateway-gocardless' ),
 				'label'       => __( 'Enable Instant Bank Pay', 'woocommerce-gateway-gocardless' ),
 				'type'        => 'checkbox',
@@ -540,7 +540,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				'default'     => 'no',
 				'desc_tip'    => true,
 			),
-			'saved_bank_accounts'       => array(
+			'saved_bank_accounts' => array(
 				'title'       => __( 'Saved Bank Accounts', 'woocommerce-gateway-gocardless' ),
 				'label'       => __( 'Enable Payment via Saved Bank Accounts', 'woocommerce-gateway-gocardless' ),
 				'type'        => 'checkbox',
@@ -548,15 +548,15 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				'default'     => 'yes',
 				'desc_tip'    => true,
 			),
-			'fallback_enabled'          => array(
+			'fallback_enabled'    => array(
 				'title'       => __( 'Enable Fallback', 'woocommerce-gateway-gocardless' ),
 				'label'       => __( 'Enable fallback to allow customers to complete the Billing Request via Direct Debit', 'woocommerce-gateway-gocardless' ),
 				'type'        => 'checkbox',
 				'description' => __( 'If enabled, customers who are unable to authorise the open banking transaction may be able to complete the billing request via Direct Debit.', 'woocommerce-gateway-gocardless' ),
-				'default'     => 'no',
+				'default'     => 'yes',
 				'desc_tip'    => true,
 			),
-			'scheme'                    => array(
+			'scheme'              => array(
 				'title'       => __( 'Direct Debit Scheme', 'woocommerce-gateway-gocardless' ),
 				'type'        => 'select',
 				'class'       => 'wc-enhanced-select',
@@ -565,11 +565,11 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				/* translators: Link to documentation */
 				'description' => sprintf( __( 'The Direct Debit scheme of the mandate. See <a target="_blank" href="%s">this page</a> for  scheme and its supported countries. If ACH, Autogiro, BACS, BECS, BECS NZ, Betalingsservice, PAD or SEPA Core is specified, the payment pages will only allow the set-up of a mandate for the specified scheme. If auto detect is specified, failed validation may occur in case currency in the order is not supported by the scheme.', 'woocommerce-gateway-gocardless' ), 'https://developer.gocardless.com/api-reference#overview-supported-direct-debit-schemes' ),
 			),
-			'testmode'                  => array(
+			'testmode'            => array(
 				'type'    => 'hidden',
 				'default' => 'no',
 			),
-			'logging'                   => array(
+			'logging'             => array(
 				'title'       => __( 'Logging', 'woocommerce-gateway-gocardless' ),
 				'label'       => __( 'Log debug messages', 'woocommerce-gateway-gocardless' ),
 				'type'        => 'checkbox',
@@ -577,25 +577,25 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				'default'     => 'no',
 				'desc_tip'    => true,
 			),
-			'payto_heading'             => array(
+			'payto_heading'       => array(
 				'title'       => __( 'PayTo', 'woocommerce-gateway-gocardless' ),
 				'type'        => 'title',
 				'description' => __( 'Configure PayTo payment method for Australian customers.', 'woocommerce-gateway-gocardless' ),
 			),
-			'payto_enabled'             => array(
+			'payto_enabled'       => array(
 				'title'   => __( 'Enable/Disable', 'woocommerce-gateway-gocardless' ),
 				'label'   => __( 'Enable PayTo', 'woocommerce-gateway-gocardless' ),
 				'type'    => 'checkbox',
 				'default' => 'no',
 			),
-			'payto_title'               => array(
+			'payto_title'         => array(
 				'title'       => __( 'Title', 'woocommerce-gateway-gocardless' ),
 				'type'        => 'text',
 				'default'     => __( 'PayTo', 'woocommerce-gateway-gocardless' ),
 				'description' => __( 'The title shown to customers at checkout.', 'woocommerce-gateway-gocardless' ),
 				'desc_tip'    => true,
 			),
-			'payto_description'         => array(
+			'payto_description'   => array(
 				'title'       => __( 'Description', 'woocommerce-gateway-gocardless' ),
 				'type'        => 'text',
 				'default'     => __( 'Pay securely via PayTo from your Australian bank account.', 'woocommerce-gateway-gocardless' ),
@@ -1374,7 +1374,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 
 			wc_gocardless()->log( sprintf( '%s - Maybe redirected from GoCardless with billing_request_id "%s" and order ID %s', __METHOD__, $billing_request_id, $order_id ) );
 
-			$gateway = wc_gocardless()->get_gateway_for_order( $order );
+			$gateway = WC_GoCardless_Helper::get_gateway_for_order( $order );
 
 			$save_bank_accounts  = 'yes' === $gateway->get_option( 'saved_bank_accounts', 'no' );
 			$save_customer_token = (
