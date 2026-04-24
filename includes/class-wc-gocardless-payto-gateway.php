@@ -427,7 +427,7 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 			return false;
 		}
 
-		if ( ! class_exists( 'WC_GoCardless_Payment_Token_PayTo' ) ) {
+		if ( ! class_exists( 'WC_Payment_Token_GoCardless_PayTo' ) ) {
 			return false;
 		}
 
@@ -438,7 +438,7 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 		}
 		$bank_account = $bank_account['customer_bank_accounts'];
 
-		$token = new WC_GoCardless_Payment_Token_PayTo();
+		$token = new WC_Payment_Token_GoCardless_PayTo();
 
 		// Set basic info required by token API.
 		$token->set_token( $mandate['id'] );

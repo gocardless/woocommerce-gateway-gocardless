@@ -817,7 +817,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 		try {
 			$token_input = $this->get_payment_token_input_name();
 			$token_id    = isset( $_POST[ $token_input ] ) ? wc_clean( wp_unslash( $_POST[ $token_input ] ) ) : ''; //phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verification is done in WooCommerce side.
-			$token    = WC_Payment_Tokens::get( $token_id );
+			$token       = WC_Payment_Tokens::get( $token_id );
 			if ( ! $token || $token->get_user_id() !== get_current_user_id() ) {
 				throw new Exception( esc_html__( 'Invalid payment method. Please setup a new direct debit account.', 'woocommerce-gateway-gocardless' ) );
 			}

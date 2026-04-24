@@ -147,7 +147,7 @@ class WC_GoCardless {
 	 * @version 2.4.6
 	 */
 	public function process_webhook_payload_cron( array $payload ) {
-		$gateway = $this->gateway_instance();
+		$gateway = WC_GoCardless_Helper::resolve_gateway_for_webhook( $payload );
 		if ( $gateway ) {
 			$gateway->process_webhook_payload( $payload );
 		}
@@ -526,7 +526,7 @@ class WC_GoCardless {
 						$this->remove_temporary_activated( $order );
 					}
 
-					$gateway = $this->gateway_instance();
+					$gateway = WC_GoCardless_Helper::get_gateway_for_order( $order );
 					if ( $gateway ) {
 						$gateway->update_order_resource( $order_id, 'payment', $payment['payments'] );
 					}

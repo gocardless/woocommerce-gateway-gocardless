@@ -90,4 +90,69 @@ class WC_GoCardless_Helper {
 
 		return $payto ? $payto : self::get_main_gateway();
 	}
+
+
+	/**
+	 * Choose Bank pay or PayTo gateway for async webhook handling from the related order.
+	 *
+	 * @since x.x.x
+	 *
+	 * @param array $payload Webhook payload (single event per scheduled action).
+	 * @return WC_GoCardless_Gateway|WC_GoCardless_PayTo_Gateway|bool
+	 */
+	public static function resolve_gateway_for_webhook( array $payload ) {
+		$main = self::get_main_gateway();
+		if ( ! $main ) {
+			return false;
+		}
+
+		// We will always have a single event per scheduled action.
+		if ( empty( $payload['events'][0] ) ) {
+			return $main;
+		}
+
+		$order = self::get_order_for_webhook_event( $main, $payload['events'][0] );
+		if ( $order instanceof WC_Order ) {
+			return self::get_gateway_for_order( $order );
+		}
+
+		return $main;
+	}
+
+	/**
+	 * Resolve a WooCommerce order from a GoCardless webhook event when possible.
+	 *
+	 * Mandate and legacy subscription events are handled on the main gateway because they do not
+	 * tie to a single order via payment/refund/billing_request meta in a reliable way.
+	 *
+	 * @since x.x.x
+	 *
+	 * @param WC_GoCardless_Gateway $gateway Gateway instance (used for get_order_from_resource).
+	 * @param array                 $event   Single event from the webhook payload.
+	 * @return WC_Order|bool
+	 */
+	public static function get_order_for_webhook_event( $gateway, array $event ) {
+		$resource_type = isset( $event['resource_type'] ) ? $event['resource_type'] : '';
+		$links         = isset( $event['links'] ) && is_array( $event['links'] ) ? $event['links'] : array();
+
+		switch ( $resource_type ) {
+			case 'payments':
+				if ( ! empty( $links['payment'] ) ) {
+					return $gateway->get_order_from_resource( 'payment', 'id', $links['payment'] );
+				}
+				break;
+			case 'refunds':
+				if ( ! empty( $links['refund'] ) ) {
+					return $gateway->get_order_from_resource( 'refund', 'id', $links['refund'] );
+				}
+				break;
+			case 'billing_requests':
+				if ( ! empty( $links['billing_request'] ) ) {
+					return $gateway->get_order_from_resource( 'billing_request', 'id', $links['billing_request'] );
+				}
+				break;
+		}
+
+		return false;
+	}
 }
