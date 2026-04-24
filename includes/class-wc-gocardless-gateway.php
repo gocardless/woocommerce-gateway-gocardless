@@ -2559,7 +2559,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 		$items = array();
 		foreach ( $order->get_items() as $item ) {
 			/* translators: product item x qty to send to GoCardless */
-			$items[] = sprintf( esc_html__( '%1$s × %2$s', 'woocommerce-gateway-gocardless' ), $item['name'], $item['qty'] );
+			$items[] = sprintf( esc_html__( '%1$s x %2$s', 'woocommerce-gateway-gocardless' ), $item['name'], $item['qty'] );
 		}
 
 		// translators: %s: Order Number.
