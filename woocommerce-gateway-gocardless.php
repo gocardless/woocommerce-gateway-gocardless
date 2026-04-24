@@ -584,10 +584,12 @@ class WC_GoCardless {
 	public function woocommerce_block_support() {
 		if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
 			require_once $this->plugin_path . '/includes/class-wc-gocardless-gateway-blocks-support.php';
+			require_once $this->plugin_path . '/includes/class-wc-gocardless-payto-gateway-blocks-support.php';
 			add_action(
 				'woocommerce_blocks_payment_method_type_registration',
 				function ( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
 					$payment_method_registry->register( new WC_GoCardless_Gateway_Blocks_Support() );
+					$payment_method_registry->register( new WC_GoCardless_PayTo_Gateway_Blocks_Support() );
 				}
 			);
 		}
