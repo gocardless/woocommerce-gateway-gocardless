@@ -439,9 +439,13 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 		$bank_account = $bank_account['customer_bank_accounts'];
 
 		$token = new WC_GoCardless_Payment_Token_PayTo();
+
+		// Set basic info required by token API.
 		$token->set_token( $mandate['id'] );
 		$token->set_gateway_id( $this->id );
 		$token->set_user_id( $customer_id );
+
+		// Save bank account info for display purpose.
 		$token->set_scheme( $mandate['scheme'] );
 		$token->set_account_holder_name( $bank_account['account_holder_name'] );
 		$token->set_account_number_ending( $bank_account['account_number_ending'] );
@@ -468,5 +472,25 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 		$item['expires']                = '';
 
 		return $item;
+	}
+
+	/**
+	 * Return the gateway's icon.
+	 *
+	 * @return string
+	 */
+	public function get_icon() {
+		$icon = $this->icon ? '<img style="max-width: 60px;" src="' . WC_HTTPS::force_https_url( $this->icon ) . '" alt="' . esc_attr( $this->get_title() ) . '" />' : '';
+
+		/**
+		 * Filter the gateway icon. (This is WooCommerce core filter)
+		 *
+		 * @since x.x.x
+		 *
+		 * @param string $icon Gateway icon.
+		 * @param string $id   Gateway ID.
+		 * @return string
+		 */
+		return apply_filters( 'woocommerce_gateway_icon', $icon, $this->id );
 	}
 }
