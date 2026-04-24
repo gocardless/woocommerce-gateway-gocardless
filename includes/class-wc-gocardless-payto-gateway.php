@@ -38,7 +38,7 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 	 *
 	 * @var bool
 	 */
-	protected $fallback_enabled = false;
+	protected $fallback_enabled = true;
 
 	/**
 	 * Constructor.
@@ -51,7 +51,7 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 			'Accept PayTo bank payments from customers in Australia.',
 			'woocommerce-gateway-gocardless'
 		);
-		$this->icon               = wc_gocardless()->plugin_url . '/images/gocardless.png';
+		$this->icon               = wc_gocardless()->plugin_url . '/images/payto.png';
 
 		$this->setup_hooks();
 	}
@@ -100,7 +100,7 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 		$this->instant_bank_pay    = false;
 		$this->saved_bank_accounts = ( $s['saved_bank_accounts'] ?? 'yes' ) === 'yes';
 		$this->scheme              = 'pay_to';
-		$this->fallback_enabled    = ( $s['fallback_enabled'] ?? 'no' ) === 'yes';
+		$this->fallback_enabled    = ( $s['fallback_enabled'] ?? 'yes' ) === 'yes';
 	}
 
 	/**
