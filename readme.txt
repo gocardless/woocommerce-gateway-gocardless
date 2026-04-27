@@ -140,6 +140,13 @@ Yes, it uses [GoCardless](https://gocardless.com/) ([privacy policy](https://goc
 
 == Changelog ==
 
+= 2.9.10 - 2026-04-27 =
+* Dev - Bump WooCommerce "tested up to" version 10.7.
+* Dev - Bump WooCommerce minimum supported version to 10.5.
+* Dev - Bump WordPress minimum supported version to 6.8.
+* Dev - Bump WordPress "Tested up to" to 7.0.
+* Dev - Update NPM packages.
+
 = 2.9.9 - 2025-12-17 =
 * Fix - Inconsistent subscription status after cancellation.
 * Dev - Bump WordPress "tested up to" version 6.9.
