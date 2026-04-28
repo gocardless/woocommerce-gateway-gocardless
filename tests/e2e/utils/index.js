@@ -300,13 +300,14 @@ export async function blockPlaceGoCardlessOrder(page, options) {
  */
 export async function handleGoCardlessPayment(page, options) {
 	const { customerBilling = customer.billing, currency = 'USD' } = options;
-	await page.waitForTimeout(4000);
+	await page.waitForURL('https://pay-sandbox.gocardless.com/**');
 	await page.waitForLoadState('networkidle');
 	await page
 		.getByTestId('loading-spinner')
 		.waitFor({ state: 'detached' });
+	await page.waitForTimeout(4000);
 
-	if (await page.getByText(/Instant bank pay|Make a one-off/).isVisible()) {
+	if (await page.getByText(/Instant bank pay|Make a one-off|One-off payment/).isVisible()) {
 		if (await page.locator('#given_name').isVisible()) {
 			await page
 				.locator('#given_name')
@@ -320,6 +321,11 @@ export async function handleGoCardlessPayment(page, options) {
 			await page
 				.getByRole('button', { name: 'Continue' })
 				.click({ force: true });
+		}
+
+		if ( await page.getByTestId('confirm-address-button').isVisible() ) {
+			await page.getByTestId('confirm-address-button').click();
+			await page.waitForTimeout(2000);
 		}
 		
 		if ( await page.getByRole('button', { name: 'Choose' }).isVisible() ) {
@@ -387,6 +393,7 @@ export async function handleGoCardlessPayment(page, options) {
 		await expect(
 			page.getByTestId('bank-auth-link-button')
 		).toBeVisible();
+		await page.waitForTimeout(5000); // wait for billing request to be updated to "fulfilling" state.
 		await page
 			.getByTestId('bank-auth-link-button')
 			.click({ force: true });
@@ -510,7 +517,8 @@ export async function handleGoCardlessPaymentSchemeWise(
 
 	const isInstantBankPay = await page.getByText(/Instant bank pay/).isVisible();
 	const isMakeOneOffPayment = await page.getByText(/Make a one-off payment/).isVisible();
-	if ( isInstantBankPay || isMakeOneOffPayment ) {
+	const isOneOffPayment = await page.getByText(/One-off payment/).isVisible();
+	if ( isInstantBankPay || isMakeOneOffPayment || isOneOffPayment ) {
 		return handleGoCardlessPayment(page, options);
 	}
 
