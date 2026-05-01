@@ -402,24 +402,16 @@ export async function handleGoCardlessPayment(page, options) {
 
 	// Fill bank details
 	if (currency === 'USD') {
-		if ( await page.locator('#account_holder_name').isVisible() ) {
-			await page
-				.locator('#account_holder_name')
-				.fill(customerBilling.firstname + ' ' + customerBilling.lastname);
-		}
-		if ( await page.locator('#bank_code').isVisible() ) {
-			await page.locator('#bank_code').fill(bankDetails.bankCode);
-		}
-		if ( await page.locator('#account_number').isVisible() ) {
-			await page
-				.locator('#account_number')
-				.fill(bankDetails.accountNumber);
-		}
-		if ( await page.locator('select[name="account_type"]').isVisible() ) {
-			await page
-				.locator('select[name="account_type"]')
-				.selectOption(bankDetails.accountType);
-		}
+		await page
+			.locator('#account_holder_name')
+			.fill(customerBilling.firstname + ' ' + customerBilling.lastname);
+		await page.locator('#bank_code').fill(bankDetails.bankCode);
+		await page
+			.locator('#account_number')
+			.fill(bankDetails.accountNumber);
+		await page
+			.locator('select[name="account_type"]')
+			.selectOption(bankDetails.accountType);
 	} else {
 		await page
 			.getByTestId('branch_code')
@@ -436,12 +428,9 @@ export async function handleGoCardlessPayment(page, options) {
 		.click({ force: true });
 
 	// Final Confirmation
-	await page.waitForTimeout(2000);
-	if ( await page.getByTestId('billing-request.bank-confirm.default-cta-button').isVisible() ) {
-		await page
-			.getByTestId('billing-request.bank-confirm.direct-debit-cta-button')
-			.click();
-	}
+	await page
+		.getByTestId('billing-request.bank-confirm.direct-debit-cta-button')
+		.click();
 	await page.waitForTimeout(2000);
 }
 
@@ -588,14 +577,11 @@ export async function handleGoCardlessPaymentSchemeWise(
 	await page
 		.getByRole('button', { name: 'Continue' })
 		.click({ force: true });
-	await page.waitForTimeout(2000);
 
 	// Final Confirmation
-	if ( await page.getByTestId('billing-request.bank-confirm.direct-debit-cta-button').isVisible() ) {
-		await page
-			.getByTestId('billing-request.bank-confirm.direct-debit-cta-button')
-			.click();
-	}
+	await page
+		.getByTestId('billing-request.bank-confirm.direct-debit-cta-button')
+		.click();
 	await page.waitForTimeout(2000);
 }
 
