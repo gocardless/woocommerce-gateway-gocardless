@@ -283,7 +283,7 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 			$payment_request = array(
 				'description' => $description,
 				'amount'      => absint( wc_format_decimal( ( (float) $order->get_total() * 100 ), wc_get_price_decimals() ) ),
-				'currency'    => 'AUD',
+				'currency'    => wc_gocardless_get_order_prop( $order, 'currency' ),
 				'scheme'      => 'pay_to',
 				'metadata'    => array(
 					'order_id' => (string) $order->get_id(),
@@ -294,14 +294,14 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 
 			if ( $this->needs_mandate( $order ) ) {
 				$billing_request_params['mandate_request'] = array(
-					'currency'    => 'AUD',
+					'currency'    => wc_gocardless_get_order_prop( $order, 'currency' ),
 					'scheme'      => 'pay_to',
 					'description' => $description,
 				);
 			}
 		} else {
 			$billing_request_params['mandate_request'] = array(
-				'currency'    => 'AUD',
+				'currency'    => wc_gocardless_get_order_prop( $order, 'currency' ),
 				'scheme'      => 'pay_to',
 				'description' => $description,
 			);
