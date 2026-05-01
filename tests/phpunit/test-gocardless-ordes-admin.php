@@ -32,35 +32,27 @@ class OrderAdminTests extends TestCase {
 	}
 
 	public function test_add_webhook_events_meta_box() {
-		global $post;
-
-		$post     = new \stdClass();
-		$post->ID = 1;
-
 		\WP_Mock::passthruFunction( 'absint', array( 'times' => 0 ) );
 
 		// No order -- false
 		$result = $this->wc_gc_admin->add_webhook_events_meta_box( null, null );
 		$this->assertEquals( $result, false );
 
+		$order_other_gateway = \Mockery::mock( 'WC_Order' );
+		$order_other_gateway->shouldReceive( 'get_payment_method' )
+			->with( 'edit' )
+			->andReturn( 'some_other_method' );
+
+		$order_gocardless = \Mockery::mock( 'WC_Order' );
+		$order_gocardless->shouldReceive( 'get_payment_method' )
+			->with( 'edit' )
+			->andReturn( 'gocardless' );
+
 		// Order exists with another payment method
-		\WP_Mock::userFunction(
-			'wc_gocardless_get_order_prop',
-			array(
-				'times'           => 2,
-				'args'            => array( $post, 'payment_method' ),
-				'return_in_order' => array( 'some_other_method', 'gocardless' ),
-			)
-		);
-
-		// No order -- false
-		$result = $this->wc_gc_admin->add_webhook_events_meta_box(null, null);
+		$result = $this->wc_gc_admin->add_webhook_events_meta_box( null, $order_other_gateway );
 		$this->assertEquals( $result, false );
 
-		$result = $this->wc_gc_admin->add_webhook_events_meta_box( null, $post );
-		$this->assertEquals( $result, false );
-
-		// else -- add_meta_box called with null result
+		// GoCardless order -- add_meta_box called; method has no explicit return (null)
 		\WP_Mock::userFunction(
 			'add_meta_box',
 			array(
@@ -74,7 +66,7 @@ class OrderAdminTests extends TestCase {
 				),
 			)
 		);
-		$result = $this->wc_gc_admin->add_webhook_events_meta_box( null, $post );
+		$result = $this->wc_gc_admin->add_webhook_events_meta_box( null, $order_gocardless );
 		$this->assertNull( $result );
 	}
 
