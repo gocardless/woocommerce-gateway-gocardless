@@ -106,6 +106,9 @@ class WC_GoCardless {
 
 		// Admin scripts.
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
+
+		// Priority 5 so we can manipulate the registered gateways before they are shown.
+		add_action( 'woocommerce_admin_field_payment_gateways', array( $this, 'hide_gocardless_payto_gateway_on_settings_page' ), 5 );
 	}
 
 	/**
@@ -646,6 +649,26 @@ class WC_GoCardless {
 
 		foreach ( $aliases as $new_class => $orig_class ) {
 			class_alias( $new_class, $orig_class );
+		}
+	}
+
+	/**
+	 * Removes the GoCardless PayTo gateway on the WooCommerce Settings page.
+	 *
+	 * Note: This function is hooked onto `woocommerce_admin_field_payment_gateways` which is the hook used
+	 * to display the payment gateways on the WooCommerce Settings page.
+	 */
+	public function hide_gocardless_payto_gateway_on_settings_page() {
+		// Prevent hiding gateways in the new payments settings experience (React-based UI).
+		if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) && \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' ) ) {
+			return;
+		}
+
+		foreach ( WC()->payment_gateways->payment_gateways as $index => $payment_gateway ) {
+			if ( $payment_gateway instanceof WC_GoCardless_PayTo_Gateway ) {
+				unset( WC()->payment_gateways->payment_gateways[ $index ] );
+				break;
+			}
 		}
 	}
 }
