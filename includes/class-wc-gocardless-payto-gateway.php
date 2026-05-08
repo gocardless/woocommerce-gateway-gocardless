@@ -64,6 +64,9 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 	protected function setup_hooks() {
 		// Payment-token-API related hook.
 		add_filter( 'woocommerce_payment_methods_list_item', array( $this, 'saved_payment_methods_list_item' ), 99, 2 );
+
+		// Display notice if PayTo is not available.
+		add_action( 'admin_notices', array( $this, 'maybe_show_payto_not_available_notice' ) );
 	}
 
 	/**
@@ -513,5 +516,46 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 		 * @return string
 		 */
 		return apply_filters( 'woocommerce_gateway_icon', $icon, $this->id );
+	}
+
+	/**
+	 * Display notice if PayTo is not available.
+	 *
+	 * @return void
+	 */
+	public function maybe_show_payto_not_available_notice() {
+		// Bail if PayTo is not enabled.
+		if ( 'yes' !== $this->get_option( 'enabled', 'no' ) ) {
+			return;
+		}
+
+		// Bail if access token is not set.
+		if ( ! $this->access_token ) {
+			return;
+		}
+
+		// Bail if PayTo is not supported.
+		if ( $this->merchant_supports_payto() ) {
+			return;
+		}
+		?>
+		<div class="notice notice-warning is-dismissible">
+			<p>
+				<?php
+				echo wp_kses(
+					sprintf(
+						/* translators: %1$s: opening <a> tag, %2$s: closing </a> tag */
+						__( 'PayTo is not enabled on your GoCardless account. Please contact GoCardless support to activate it, or disable PayTo in your %1$spayment gateway settings%2$s.', 'woocommerce-gateway-gocardless' ),
+						'<a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout&section=gocardless' ) ) . '">',
+						'</a>'
+					),
+					array(
+						'a' => array( 'href' => array() ),
+					)
+				);
+				?>
+			</p>
+		</div>
+		<?php
 	}
 }
