@@ -2709,7 +2709,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	 * @param array $method Item of payment method.
 	 */
 	public function saved_payment_methods_column_method( $method ) {
-		if ( ! empty( $method['method']['gateway'] ) && $this->id === $method['method']['gateway'] ) {
+		if ( ! empty( $method['method']['gateway'] ) && in_array( $method['method']['gateway'], array( $this->id, 'gocardless_payto' ), true ) ) {
 			echo esc_html( $method['method']['display_name'] );
 		} else {
 			echo esc_html( $this->_get_default_column_method_display( $method ) );

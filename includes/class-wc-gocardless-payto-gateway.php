@@ -64,7 +64,6 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 	protected function setup_hooks() {
 		// Payment-token-API related hook.
 		add_filter( 'woocommerce_payment_methods_list_item', array( $this, 'saved_payment_methods_list_item' ), 99, 2 );
-		add_action( 'woocommerce_account_payment_methods_column_method', array( $this, 'saved_payment_methods_column_method' ) );
 	}
 
 	/**
