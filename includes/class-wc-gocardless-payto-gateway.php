@@ -275,6 +275,26 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 
 		$description = $this->_get_description_from_order( $order );
 
+		/**
+		 * Filter the default max amount per payment for PayTo in .
+		 *
+		 * @since x.x.x
+		 *
+		 * @param int      $max_amount_per_payment Max amount per payment. Default 100 AUD.
+		 * @param WC_Order $order                  Order.
+		 * @return int Max amount per payment.
+		 */
+		$default_max_amount_per_payment = apply_filters( 'woocommerce_gocardless_payto_default_max_amount_per_payment', 100, $order ); // TODO: Check default value with GoCardless.
+
+		// Convert to cents and ensure minimum 1000 cents.
+		$default_max_amount_per_payment = max( 1000, absint( $default_max_amount_per_payment * 100 ) );
+		$order_amount                   = absint( wc_format_decimal( ( (float) $order->get_total() * 100 ), wc_get_price_decimals() ) );
+		$max_amount_per_payment         = max( $default_max_amount_per_payment, $order_amount );
+		$constraints                    = array(
+			'start_date'             => date( 'Y-m-d' ), // TODO: Check timezone.
+			'max_amount_per_payment' => $max_amount_per_payment,
+		);
+
 		if (
 			$order->get_total() > 0 &&
 			! $this->is_change_payment_method_request() &&
@@ -297,6 +317,7 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 					'currency'    => wc_gocardless_get_order_prop( $order, 'currency' ),
 					'scheme'      => 'pay_to',
 					'description' => $description,
+					'constraints' => $constraints,
 				);
 			}
 		} else {
@@ -304,6 +325,7 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 				'currency'    => wc_gocardless_get_order_prop( $order, 'currency' ),
 				'scheme'      => 'pay_to',
 				'description' => $description,
+				'constraints' => $constraints,
 			);
 		}
 
