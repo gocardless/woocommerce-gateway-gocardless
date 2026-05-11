@@ -307,6 +307,10 @@ export async function handleGoCardlessPayment(page, options) {
 		.waitFor({ state: 'detached' });
 	await page.waitForTimeout(4000);
 
+	if ( await page.getByText(/Payment summary/).isVisible() ) {
+		await page.getByText(/Payment summary/).first().click();
+	}
+
 	if (await page.getByText(/Instant bank pay|Make a one-off|One-off payment/).isVisible()) {
 		if (await page.locator('#given_name').isVisible()) {
 			await page
