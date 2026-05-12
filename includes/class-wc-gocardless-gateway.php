@@ -860,6 +860,74 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * Collect customer details.
+	 *
+	 * @since x.x.x
+	 *
+	 * @param string   $billing_request_id Billing request ID.
+	 * @param WC_Order $order              Order object.
+	 * @return bool Returns true if succeed, otherwise false is returned
+	 */
+	private function collect_customer_details( $billing_request_id, $order ) {
+		if ( ! $billing_request_id || ! $order ) {
+			return false;
+		}
+
+		wc_gocardless()->log( sprintf( '%s - Collecting customer details for order #%s with billing request ID: %s', __METHOD__, $order->get_order_number(), $billing_request_id ), WC_Log_Levels::INFO );
+
+		$customer_details = array(
+			'customer'                => array(
+				'company_name' => $order->get_billing_company(),
+				'given_name'   => $order->get_billing_first_name(),
+				'family_name'  => $order->get_billing_last_name(),
+				'email'        => $order->get_billing_email(),
+			),
+			'customer_billing_detail' => array(
+				'address_line1' => $order->get_billing_address_1(),
+				'address_line2' => $order->get_billing_address_2(),
+				'city'          => $order->get_billing_city(),
+				'postal_code'   => $order->get_billing_postcode(),
+				'country_code'  => $order->get_billing_country(),
+				'region'        => $order->get_billing_state(),
+			),
+		);
+
+		// Get the IP address of the customer. If the IP address is not valid, use 0.0.0.0 as fallback.
+		$ip_address = filter_var( WC_Geolocation::get_ip_address(), FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE );
+		$ip_address = $ip_address ? $ip_address : '0.0.0.0';
+
+		// IP address is required for ACH scheme, checking USD currency for handling auto scheme as well.
+		if ( ! empty( $ip_address ) && ( 'ach' === $this->scheme || 'USD' === $order->get_currency() ) ) {
+			$customer_details['customer_billing_detail']['ip_address'] = $ip_address;
+		}
+
+		/**
+		 * Filter the customer details params.
+		 * This filter can be used to modify the customer details params before collecting them.
+		 *
+		 * @since x.x.x
+		 *
+		 * @param array    $customer_details Customer details params.
+		 * @param WC_Order $order            Order object.
+		 * @return array Customer details params.
+		 */
+		$customer_details = apply_filters( 'woocommerce_gocardless_collect_customer_details_params', $customer_details, $order );
+
+		$collect_customer_details = WC_GoCardless_API::collect_customer_details(
+			$billing_request_id,
+			$customer_details
+		);
+
+		if ( is_wp_error( $collect_customer_details ) ) {
+			wc_gocardless()->log( sprintf( '%s - Failed to collect customer details for order #%s with billing request ID: %s - Error: %s', __METHOD__, $order->get_order_number(), $billing_request_id, $collect_customer_details->get_error_message() ), WC_Log_Levels::ERROR );
+			return false;
+		}
+
+		wc_gocardless()->log( sprintf( '%s - Customer details have been collected for order #%s with billing request ID: %s', __METHOD__, $order->get_order_number(), $billing_request_id ), WC_Log_Levels::INFO );
+		return true;
+	}
+
+	/**
 	 * Create a billing request and billing request flow to process the payment.
 	 *
 	 * @see https://developer.gocardless.com/api-reference/#billing-requests-billing-requests
@@ -987,10 +1055,19 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 			update_user_meta( get_current_user_id(), '_gocardless_customer_id', $customer_id );
 		}
 
-		wc_gocardless()->log( sprintf( '%s - Billing request created: %s', __METHOD__, print_r( $billing_request, true ) ) );
+		wc_gocardless()->log( sprintf( '%s - Billing request created: %s', __METHOD__, print_r( $billing_request, true ) ), WC_Log_Levels::INFO );
+
+		// Collect customer details.
+		$customer_details_collected = $this->collect_customer_details( $billing_request_id, $order );
 
 		$billing_request_flow_params = array(
-			'prefilled_customer' => array(
+			'links'        => array( 'billing_request' => $billing_request_id ),
+			'redirect_uri' => $this->get_success_redirect_url( $order ),
+			'exit_uri'     => $order->get_checkout_payment_url(),
+		);
+
+		if ( ! $customer_details_collected ) { // If customer details are not collected, prefill the customer details.
+			$billing_request_flow_params['prefilled_customer'] = array(
 				'given_name'    => $order->get_billing_first_name(),
 				'family_name'   => $order->get_billing_last_name(),
 				'email'         => $order->get_billing_email(),
@@ -1000,11 +1077,8 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				'country_code'  => $order->get_billing_country(),
 				'city'          => $order->get_billing_city(),
 				'postal_code'   => $order->get_billing_postcode(),
-			),
-			'links'              => array( 'billing_request' => $billing_request_id ),
-			'redirect_uri'       => $this->get_success_redirect_url( $order ),
-			'exit_uri'           => $order->get_checkout_payment_url(),
-		);
+			);
+		}
 
 		/**
 		 * Filter the billing request flow params.

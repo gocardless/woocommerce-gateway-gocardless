@@ -430,10 +430,11 @@ class WC_GoCardless {
 	 * @since 2.3.7
 	 *
 	 * @param string $message Message to log.
+	 * @param string $level   Log level.
 	 *
 	 * @return void
 	 */
-	public function log( $message ) {
+	public function log( $message, $level = WC_Log_Levels::NOTICE ) {
 		if ( 'yes' !== $this->settings['logging'] ) {
 			return;
 		}
@@ -442,7 +443,7 @@ class WC_GoCardless {
 			$this->logger = new WC_Logger();
 		}
 
-		$this->logger->add( 'woocommerce-gateway-gocardless', $message );
+		$this->logger->log( $level, $message, array( 'source' => 'woocommerce-gateway-gocardless' ) );
 
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			//phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
