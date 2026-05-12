@@ -868,7 +868,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	 * @param WC_Order $order              Order object.
 	 * @return bool Returns true if succeed, otherwise false is returned
 	 */
-	private function collect_customer_details( $billing_request_id, $order ) {
+	protected function collect_customer_details( $billing_request_id, $order ) {
 		if ( ! $billing_request_id || ! $order ) {
 			return false;
 		}

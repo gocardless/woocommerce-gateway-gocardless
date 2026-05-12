@@ -379,11 +379,19 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 			update_user_meta( get_current_user_id(), '_gocardless_customer_id', $new_customer_id );
 		}
 
-		wc_gocardless()->log( sprintf( '%s - PayTo billing request created: %s', __METHOD__, print_r( $billing_request, true ) ) );
+		wc_gocardless()->log( sprintf( '%s - Billing request created: %s', __METHOD__, print_r( $billing_request, true ) ), WC_Log_Levels::INFO );
 
-		// TODO: REMOVE PRE-FILLED CUSTOMER and ADD COLLECT CUSTOMER DETAILS API here.
+		// Collect customer details.
+		$customer_details_collected = $this->collect_customer_details( $billing_request_id, $order );
+
 		$billing_request_flow_params = array(
-			'prefilled_customer' => array(
+			'links'        => array( 'billing_request' => $billing_request_id ),
+			'redirect_uri' => $this->get_success_redirect_url( $order ),
+			'exit_uri'     => $order->get_checkout_payment_url(),
+		);
+
+		if ( ! $customer_details_collected ) { // If customer details are not collected, prefill the customer details.
+			$billing_request_flow_params['prefilled_customer'] = array(
 				'given_name'    => $order->get_billing_first_name(),
 				'family_name'   => $order->get_billing_last_name(),
 				'email'         => $order->get_billing_email(),
@@ -393,11 +401,8 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 				'country_code'  => $order->get_billing_country(),
 				'city'          => $order->get_billing_city(),
 				'postal_code'   => $order->get_billing_postcode(),
-			),
-			'links'              => array( 'billing_request' => $billing_request_id ),
-			'redirect_uri'       => $this->get_success_redirect_url( $order ),
-			'exit_uri'           => $order->get_checkout_payment_url(),
-		);
+			);
+		}
 
 		/**
 		 * Filter PayTo billing request flow params before creating the flow.
