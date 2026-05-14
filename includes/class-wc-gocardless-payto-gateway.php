@@ -291,7 +291,6 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 		$order_amount                   = absint( wc_format_decimal( ( (float) $order->get_total() * 100 ), wc_get_price_decimals() ) );
 		$max_amount_per_payment         = max( $default_max_amount_per_payment, $order_amount );
 		$constraints                    = array(
-			'start_date'             => current_time( 'Y-m-d' ),
 			'max_amount_per_payment' => $max_amount_per_payment,
 		);
 
