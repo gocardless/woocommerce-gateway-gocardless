@@ -74,6 +74,13 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	protected $testmode;
 
 	/**
+	 * Whether fallback to Direct debit scheme enabled when IBP is unavailable.
+	 *
+	 * @var bool
+	 */
+	protected $fallback_enabled = true;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -622,6 +629,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 		$this->saved_bank_accounts = $this->get_option( 'saved_bank_accounts', 'yes' ) === 'yes';
 		$this->scheme              = $this->get_option( 'scheme', '' );
 		$this->testmode            = $this->get_option( 'testmode', 'yes' ) === 'yes';
+		$this->fallback_enabled    = $this->get_option( 'fallback_enabled', 'yes' ) === 'yes';
 	}
 
 	/**
@@ -994,6 +1002,9 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 
 				$billing_request_params['mandate_request'] = $mandate_request;
 			}
+
+			// Add fallback based on the settings.
+			$billing_request_params['fallback_enabled'] = $this->fallback_enabled;
 		} else {
 			// Mandate only.
 			$mandate_request = array(
