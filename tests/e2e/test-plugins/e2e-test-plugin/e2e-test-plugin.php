@@ -10,6 +10,7 @@ add_filter( 'woocommerce_api_request_url', function ($url) {
 
 // Simulate GoCardless webhook for testing.
 add_action( 'woocommerce_thankyou_gocardless', 'test_wc_gocardless_simulate_webhook', 999 );
+add_action( 'woocommerce_thankyou_gocardless_payto', 'test_wc_gocardless_simulate_webhook', 999 );
 
 function test_wc_gocardless_simulate_webhook( $order_id ) {
 	$webhook_body = test_wc_gocardless_get_webhook_body( $order_id );

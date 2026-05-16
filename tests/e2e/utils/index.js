@@ -15,6 +15,8 @@ const {
 	bankDetails,
 	gbBankDetails,
 	bankData,
+	payotoPayId,
+	paytoPaymentMethodTitle
 } = require('../config');
 
 /**
@@ -293,6 +295,130 @@ export async function blockPlaceGoCardlessOrder(page, options) {
 }
 
 /**
+ * Enable or disable PayTo on the shared GoCardless settings screen.
+ *
+ * @param {Page}    page    Playwright page object
+ * @param {boolean} enabled Whether PayTo should be enabled
+ */
+export async function enablePayToInSettings(page, enabled = true) {
+	await page.goto(
+		'/wp-admin/admin.php?page=wc-settings&tab=checkout&section=gocardless'
+	);
+	const checkbox = page.locator('#woocommerce_gocardless_payto_enabled');
+	if (enabled) {
+		await checkbox.check();
+	} else {
+		await checkbox.uncheck();
+	}
+	await saveSettings(page);
+}
+
+/**
+ * Place an order using PayTo (AU / AUD); completes the GoCardless redirect with BECS test bank details.
+ *
+ * @param {Page}   page    Playwright page object
+ * @param {Object} options Options (saveMethod, isBlock)
+ * @return {Promise<string>} Order ID
+ */
+export async function placePayToOrder(page, options) {
+	const { saveMethod = false, isBlock = false } = options;
+	const paytoBilling = customer.addresses.becs;
+	await page.waitForTimeout(1500);
+
+	if (isBlock) {
+		await expect(
+			page.locator(
+				'label[for="radio-control-wc-payment-method-options-gocardless_payto"]'
+			)
+		).toBeVisible();
+
+		await page
+			.locator('#radio-control-wc-payment-method-options-gocardless_payto')
+			.check();
+
+		const haveExistingPaymentMethods = await page
+			.locator('input[name="radio-control-wc-payment-method-saved-tokens"]')
+			.first()
+			.isVisible();
+		if (haveExistingPaymentMethods) {
+			await page
+				.locator('#radio-control-wc-payment-method-options-gocardless_payto')
+				.check();
+		}
+
+		if (saveMethod) {
+			await page
+				.locator(
+					'.wc-block-components-payment-methods__save-card-info input[type="checkbox"]'
+				)
+				.first()
+				.check();
+		}
+
+		await page.waitForTimeout( 1000 );
+		await expect(
+			page.locator('button.wc-block-components-checkout-place-order-button')
+		).toBeEnabled();
+		await page
+			.locator('button.wc-block-components-checkout-place-order-button')
+			.click();
+
+		await handleGoCardlessPayToPayment(
+			page,
+			{ ...options, customerBilling: paytoBilling, currency: 'AUD' },
+		);
+
+		await expect(
+			page.getByRole('heading', { name: 'Order received' })
+		).toBeVisible();
+		const blockOrderId = await page
+			.locator('li.woocommerce-order-overview__order strong')
+			.textContent();
+		return blockOrderId;
+	}
+
+	await page
+		.locator('.blockUI.blockOverlay')
+		.last()
+		.waitFor({ state: 'detached' });
+
+	await expect(
+		page.locator('ul.wc_payment_methods li.payment_method_gocardless_payto')
+	).toBeVisible();
+
+	await page.locator('ul.wc_payment_methods li.payment_method_gocardless_payto').first().click();
+	await page.locator('input#payment_method_gocardless_payto').check();
+
+	const haveExistingPaymentMethodsClassic = await page
+		.locator('li.woocommerce-SavedPaymentMethods-token')
+		.first()
+		.isVisible();
+	if (haveExistingPaymentMethodsClassic) {
+		await page.locator('#wc-gocardless_payto-payment-token-new').check();
+	}
+
+	if (saveMethod) {
+		await page.locator('#wc-gocardless_payto-new-payment-method').check();
+	}
+
+	await page.waitForTimeout(500);
+	await page.locator('#place_order').click();
+
+	await handleGoCardlessPayToPayment(
+		page,
+		{ ...options, customerBilling: paytoBilling, currency: 'AUD' },
+	);
+
+	await expect(
+		page.getByRole('heading', { name: 'Order received' })
+	).toBeVisible();
+	const orderId = await page
+		.locator('li.woocommerce-order-overview__order strong')
+		.textContent();
+	return orderId;
+}
+
+/**
  * Handle GoCardless payment.
  *
  * @param {Page}   page    Playwright page object
@@ -436,6 +562,33 @@ export async function handleGoCardlessPayment(page, options) {
 		.getByTestId('billing-request.bank-confirm.direct-debit-cta-button')
 		.click();
 	await page.waitForTimeout(2000);
+}
+
+/**
+ * Handle GoCardless PayTo payment.
+ *
+ * @param {Page}   page    Playwright page object
+ * @param {Object} options Options
+ */
+export async function handleGoCardlessPayToPayment(page, options) {
+	const { customerBilling = customer.billing } = options;
+	await page.waitForURL('https://pay-sandbox.gocardless.com/**');
+	await page.waitForLoadState('networkidle');
+	await page
+		.getByTestId('loading-spinner')
+		.waitFor({ state: 'detached' });
+
+	await expect( page.getByTestId('pay_id') ).toBeVisible();
+	await page.getByTestId('pay_id').fill(payotoPayId);
+	
+	await expect(
+		page.getByRole('button', { name: 'Continue' })
+	).toBeVisible();
+	await page
+		.getByRole('button', { name: 'Continue' })
+		.click({ force: true });
+
+	await page.waitForTimeout(3000);
 }
 
 /**
@@ -684,10 +837,12 @@ export async function goToCheckout(page, isBlock = false) {
 /**
  * Validate GoCardless payment successful.
  *
- * @param {Page}   page    Playwright page object
- * @param {string} orderId Order ID
+ * @param {Page}    page    Playwright page object
+ * @param {string}  orderId Order ID
+ * @param {isSub}   isSub   Is Subscription.
+ * @param {isPayTo} isPayTo Is PayTo.
  */
-export async function validateGoCardlessPayment(page, orderId, isSub = false) {
+export async function validateGoCardlessPayment(page, orderId, isSub = false, isPayTo = false) {
 	const nRetries = 10;
 	for (let i = 0; i < nRetries; i++) {
 		await page.goto(`/wp-admin/post.php?post=${orderId}&action=edit`);
@@ -721,6 +876,11 @@ export async function validateGoCardlessPayment(page, orderId, isSub = false) {
 			)
 			.first()
 	).toBeVisible();
+	if ( isPayTo ) {
+		await expect(
+			page.locator( '.woocommerce-order-data__meta.order_number' )
+		).toContainText( `Payment via ${paytoPaymentMethodTitle}`)
+	}
 }
 
 /**
