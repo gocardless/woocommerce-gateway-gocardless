@@ -50,7 +50,7 @@ export function registerGoCardlessPaymentMethod( paymentMethodId, defaultAriaLab
 	registerPaymentMethod( {
 		name: paymentMethodId,
 		label: <Label />,
-		ariaLabel: defaultAriaLabel,
+		ariaLabel: decodeEntities( title ) || defaultAriaLabel,
 		canMakePayment: ( { billingData, cartTotals } ) => {
 			const currency = cartTotals?.currency_code;
 			const supportedCountries =
