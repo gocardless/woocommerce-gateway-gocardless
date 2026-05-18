@@ -15,7 +15,7 @@ const {
 	bankDetails,
 	gbBankDetails,
 	bankData,
-	payotoPayId,
+	paytoPayId,
 	paytoPaymentMethodTitle
 } = require('../config');
 
@@ -579,7 +579,7 @@ export async function handleGoCardlessPayToPayment(page, options) {
 		.waitFor({ state: 'detached' });
 
 	await expect( page.getByTestId('pay_id') ).toBeVisible();
-	await page.getByTestId('pay_id').fill(payotoPayId);
+	await page.getByTestId('pay_id').fill(paytoPayId);
 	
 	await expect(
 		page.getByRole('button', { name: 'Continue' })
@@ -839,8 +839,8 @@ export async function goToCheckout(page, isBlock = false) {
  *
  * @param {Page}    page    Playwright page object
  * @param {string}  orderId Order ID
- * @param {isSub}   isSub   Is Subscription.
- * @param {isPayTo} isPayTo Is PayTo.
+ * @param {boolean} isSub   Is Subscription.
+ * @param {boolean} isPayTo Is PayTo.
  */
 export async function validateGoCardlessPayment(page, orderId, isSub = false, isPayTo = false) {
 	const nRetries = 10;

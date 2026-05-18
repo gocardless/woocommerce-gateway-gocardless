@@ -1460,6 +1460,9 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 			wc_gocardless()->log( sprintf( '%s - Maybe redirected from GoCardless with billing_request_id "%s" and order ID %s', __METHOD__, $billing_request_id, $order_id ) );
 
 			$gateway = WC_GoCardless_Helper::get_gateway_for_order( $order );
+			if ( ! $gateway ) {
+				throw new Exception( esc_html__( 'Gateway not found.', 'woocommerce-gateway-gocardless' ) );
+			}
 
 			$save_bank_accounts  = 'yes' === $gateway->get_option( 'saved_bank_accounts', 'no' );
 			$save_customer_token = (

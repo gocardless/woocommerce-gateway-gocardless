@@ -248,6 +248,7 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 			return false;
 		}
 
+		// Disable the option in add-payment-method page.
 		if ( function_exists( 'is_add_payment_method_page' ) && is_add_payment_method_page() && 'woocommerce_account_navigation' !== current_action() ) {
 			return false;
 		}

@@ -134,7 +134,7 @@ module.exports = {
 		bankCode: '200000',
 		accountNumber: '55779911',
 	},
-	payotoPayId: '+61-415678901',
+	paytoPayId: '+61-415678901',
 	paytoPaymentMethodTitle: 'TEST PayTo',
 	paytoPaymentMethodDescription: 'TEST PayTo Description',
 	paymentMethodTitle: 'TEST Pay by bank',
