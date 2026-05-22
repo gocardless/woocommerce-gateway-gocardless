@@ -218,8 +218,8 @@ test.describe('Instant Bank Payment Tests', () => {
 				isBlock,
 			});
 
-			// Wait for 10 seconds, to allow the billing request to be fulfilled.
-			await page.waitForTimeout(10000);
+			// Wait for 5 seconds, to allow the billing request to be fulfilled.
+			await page.waitForTimeout(5000);
 			await page.goto(`?billing_request_fulfilled_order_id=${orderId}`, { waitUntil: 'networkidle' });
 			await validateGoCardlessPayment(adminPage, orderId);
 

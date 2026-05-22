@@ -310,6 +310,7 @@ export async function enablePayToInSettings(page, enabled = true) {
 	} else {
 		await checkbox.uncheck();
 	}
+	await page.locator('#woocommerce_gocardless_saved_bank_accounts').check();
 	await saveSettings(page);
 }
 
@@ -523,7 +524,7 @@ export async function handleGoCardlessPayment(page, options) {
 		await expect(
 			page.getByTestId('bank-auth-link-button')
 		).toBeVisible();
-		await page.waitForTimeout(5000); // wait for billing request to be updated to "fulfilling" state.
+		await page.waitForTimeout(10000); // wait for billing request to be updated to "fulfilling" state.
 		await page
 			.getByTestId('bank-auth-link-button')
 			.click({ force: true });
@@ -934,7 +935,8 @@ export async function createPreOrderProduct(page, options = {}) {
 	await page.locator('#_wc_pre_orders_enabled').check();
 	await page
 		.locator('#_wc_pre_orders_availability_datetime')
-		.fill(product.availabilityDate);
+		.fill(product.availabilityDate)
+	await page.locator('#_wc_pre_orders_availability_datetime').blur();
 	await page.locator('#_wc_pre_orders_fee').fill(product.preOrderFee);
 	await page
 		.locator( `input[name="_wc_pre_orders_when_to_charge"][value="${ product.whenToCharge }"]` )
