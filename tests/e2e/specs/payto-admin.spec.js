@@ -13,15 +13,18 @@ const {
 	saveSettings,
 	enablePayToInSettings,
 	runWpCliCommand,
+	fillBillingDetails,
 } = require('../utils');
 const {
 	paytoPaymentMethodTitle,
 	paytoPaymentMethodDescription,
 	products,
+	customer,
 } = require('../config');
 
 test.describe('PayTo admin', () => {
 	test.use({ storageState: process.env.ADMINSTATE });
+	const auBilling = { ...customer.billing, ...customer.addresses.becs };
 
 	test.beforeAll(async ({ browser }) => {
 		await runWpCliCommand('wp option update woocommerce_currency "AUD"');
@@ -58,12 +61,14 @@ test.describe('PayTo admin', () => {
 		// Make sure GoCardless is not visible on traditional checkout page
 		await addToCart(page, products.simple);
 		await goToCheckout(page);
+		await fillBillingDetails(page, auBilling);
 		await expect(
 			page.locator('ul.wc_payment_methods li.payment_method_gocardless_payto')
 		).not.toBeVisible();
 
 		// Make sure GoCardless is not visible on block checkout page
 		await goToCheckout(page, true);
+		await fillBillingDetails(page, auBilling, true);
 		await expect(
 			page.locator(
 				'label[for="radio-control-wc-payment-method-options-gocardless_payto"]'
@@ -87,6 +92,7 @@ test.describe('PayTo admin', () => {
 
 		// Make sure GoCardless is visible on traditional checkout page
 		await goToCheckout(page);
+		await fillBillingDetails(page, auBilling);
 		await expect(
 			page.locator('ul.wc_payment_methods li.payment_method_gocardless_payto')
 		).toBeVisible();
@@ -106,6 +112,7 @@ test.describe('PayTo admin', () => {
 
 		// Make sure GoCardless is visible on block checkout page
 		await goToCheckout(page, true);
+		await fillBillingDetails(page, auBilling, true);
 		await expect(
 			page.locator(
 				'label[for="radio-control-wc-payment-method-options-gocardless_payto"]'
@@ -144,6 +151,7 @@ test.describe('PayTo admin', () => {
 
 		// Verify save bank account on traditional checkout page.
 		await goToCheckout(page);
+		await fillBillingDetails(page, auBilling);
 		await page.locator(
 			'li.payment_method_gocardless_payto label[for="payment_method_gocardless_payto"]'
 		).click();
@@ -153,6 +161,7 @@ test.describe('PayTo admin', () => {
 
 		// Verify save bank account on block checkout page.
 		await goToCheckout(page, true);
+		await fillBillingDetails(page, auBilling, true);
 		await page
 			.locator(
 				'label[for="radio-control-wc-payment-method-options-gocardless_payto"]'

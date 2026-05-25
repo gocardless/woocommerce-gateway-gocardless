@@ -387,14 +387,18 @@ export async function placePayToOrder(page, options) {
 		page.locator('ul.wc_payment_methods li.payment_method_gocardless_payto')
 	).toBeVisible();
 
-	await page.locator('ul.wc_payment_methods li.payment_method_gocardless_payto').first().click();
+	await page.locator('ul.wc_payment_methods label[for="payment_method_gocardless_payto"]').first().click();
 	await page.locator('input#payment_method_gocardless_payto').check();
 
 	const haveExistingPaymentMethodsClassic = await page
 		.locator('li.woocommerce-SavedPaymentMethods-token')
 		.first()
 		.isVisible();
-	if (haveExistingPaymentMethodsClassic) {
+	const haveNewPaymentMethodRadio = await page
+		.locator('input#wc-gocardless_payto-payment-token-new')
+		.first()
+		.isVisible();
+	if (haveExistingPaymentMethodsClassic || haveNewPaymentMethodRadio) {
 		await page.locator('#wc-gocardless_payto-payment-token-new').check();
 	}
 
@@ -524,7 +528,7 @@ export async function handleGoCardlessPayment(page, options) {
 		await expect(
 			page.getByTestId('bank-auth-link-button')
 		).toBeVisible();
-		await page.waitForTimeout(10000); // wait for billing request to be updated to "fulfilling" state.
+		await page.waitForTimeout(12000); // wait for billing request to be updated to "fulfilling" state.
 		await page
 			.getByTestId('bank-auth-link-button')
 			.click({ force: true });
