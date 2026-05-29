@@ -70,6 +70,7 @@ const customer = {
 			state: 'QLD',
 			stateName: 'Queensland',
 			postcode: '4852',
+			email: 'test-pay_out@test.com',
 		},
 		becs_nz: {
 			...address,
