@@ -170,9 +170,11 @@ trait WC_GoCardless_Gateway_Subscriptions_Pre_Orders_Trait {
 
 		add_filter( 'woocommerce_gocardless_payment_description', array( $this, 'payment_description_for_subscription' ) );
 
-		$this->_maybe_create_payment( $order_id, $mandate_id, $amount_to_charge );
-
-		remove_filter( 'woocommerce_gocardless_payment_description', array( $this, 'payment_description_for_subscription' ) );
+		try {
+			$this->_maybe_create_payment( $order_id, $mandate_id, $amount_to_charge );
+		} finally {
+			remove_filter( 'woocommerce_gocardless_payment_description', array( $this, 'payment_description_for_subscription' ) );
+		}
 	}
 
 	/**
@@ -309,7 +311,10 @@ trait WC_GoCardless_Gateway_Subscriptions_Pre_Orders_Trait {
 			//phpcs:enable WordPress.Security.NonceVerification.Missing -- Nonce verification is already handled on the WooCommerce side.
 			$token = WC_Payment_Tokens::get( $token_id );
 			if ( ! $token || $token->get_user_id() !== get_current_user_id() ) {
-				throw new Exception( esc_html__( 'Invalid payment method. Please setup a new direct debit account.', 'woocommerce-gateway-gocardless' ) );
+				$message = ( 'gocardless_payto' === $this->id )
+					? __( 'Invalid payment method. Please add a new PayTo bank account.', 'woocommerce-gateway-gocardless' )
+					: __( 'Invalid payment method. Please setup a new direct debit account.', 'woocommerce-gateway-gocardless' );
+				throw new Exception( esc_html( $message ) );
 			}
 
 			$mandate_id = $token->get_token();
