@@ -323,7 +323,6 @@ export async function enablePayToInSettings(page, enabled = true) {
  */
 export async function placePayToOrder(page, options) {
 	const { saveMethod = false, isBlock = false } = options;
-	const paytoBilling = customer.addresses.becs;
 	await page.waitForTimeout(1500);
 
 	if (isBlock) {
@@ -364,10 +363,7 @@ export async function placePayToOrder(page, options) {
 			.locator('button.wc-block-components-checkout-place-order-button')
 			.click();
 
-		await handleGoCardlessPayToPayment(
-			page,
-			{ ...options, customerBilling: paytoBilling, currency: 'AUD' },
-		);
+		await handleGoCardlessPayToPayment(page);
 
 		await expect(
 			page.getByRole('heading', { name: 'Order received' })
@@ -409,10 +405,7 @@ export async function placePayToOrder(page, options) {
 	await page.waitForTimeout(500);
 	await page.locator('#place_order').click();
 
-	await handleGoCardlessPayToPayment(
-		page,
-		{ ...options, customerBilling: paytoBilling, currency: 'AUD' },
-	);
+	await handleGoCardlessPayToPayment(page);
 
 	await expect(
 		page.getByRole('heading', { name: 'Order received' })
@@ -573,10 +566,8 @@ export async function handleGoCardlessPayment(page, options) {
  * Handle GoCardless PayTo payment.
  *
  * @param {Page}   page    Playwright page object
- * @param {Object} options Options
  */
-export async function handleGoCardlessPayToPayment(page, options) {
-	const { customerBilling = customer.billing } = options;
+export async function handleGoCardlessPayToPayment(page) {
 	await page.waitForURL('https://pay-sandbox.gocardless.com/**');
 	await page.waitForLoadState('networkidle');
 	await page
@@ -939,7 +930,7 @@ export async function createPreOrderProduct(page, options = {}) {
 	await page.locator('#_wc_pre_orders_enabled').check();
 	await page
 		.locator('#_wc_pre_orders_availability_datetime')
-		.fill(product.availabilityDate)
+		.fill(product.availabilityDate);
 	await page.locator('#_wc_pre_orders_availability_datetime').blur();
 	await page.locator('#_wc_pre_orders_fee').fill(product.preOrderFee);
 	await page
