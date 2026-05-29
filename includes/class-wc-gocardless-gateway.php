@@ -215,6 +215,21 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * Process admin options.
+	 *
+	 * Also, clear the available scheme transient.
+	 *
+	 * @return bool
+	 * @since x.x.x
+	 */
+	public function process_admin_options() {
+		// Clear the available scheme transient.
+		delete_transient( 'wc_gocardless_available_scheme_identifiers' );
+
+		return parent::process_admin_options();
+	}
+
+	/**
 	 * Get connection HTML.
 	 *
 	 * @since 2.4.0
