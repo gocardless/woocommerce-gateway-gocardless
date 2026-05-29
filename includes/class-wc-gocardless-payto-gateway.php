@@ -104,18 +104,6 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 	}
 
 	/**
-	 * Initialise settings from the shared option array.
-	 *
-	 * @return void
-	 */
-	public function init_settings() {
-		$this->settings = get_option( $this->get_option_key(), array() );
-		if ( ! is_array( $this->settings ) ) {
-			$this->settings = array();
-		}
-	}
-
-	/**
 	 * Map logical option keys to storage keys in the shared option.
 	 *
 	 * @since x.x.x
