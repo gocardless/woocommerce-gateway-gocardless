@@ -32,6 +32,8 @@ class WC_GoCardless_Reports {
 	/**
 	 * Enqueue scripts for analytics reports.
 	 *
+	 * @param string $hook_suffix The hook suffix.
+	 *
 	 * @return void
 	 */
 	public function enqueue_reports_scripts( $hook_suffix = '' ) {
