@@ -34,12 +34,10 @@ class WC_GoCardless_Reports {
 	 *
 	 * @return void
 	 */
-	public function enqueue_reports_scripts() {
-		$page = sanitize_text_field( wp_unslash( $_GET['page'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- No nonce needed as we are just checking the page.
-
+	public function enqueue_reports_scripts( $hook_suffix = '' ) {
 		// Only enqueue scripts for the wc-admin pages. Enqueue scripts for all wc-admin pages because WooCommerce uses client-side navigation,
 		// so the page does not fully reload when switching between admin pages.
-		if ( 'wc-admin' !== $page ) {
+		if ( 'woocommerce_page_wc-admin' !== $hook_suffix ) {
 			return;
 		}
 
