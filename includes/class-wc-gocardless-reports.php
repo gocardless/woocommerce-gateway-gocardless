@@ -35,6 +35,14 @@ class WC_GoCardless_Reports {
 	 * @return void
 	 */
 	public function enqueue_reports_scripts() {
+		$page = sanitize_text_field( wp_unslash( $_GET['page'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- No nonce needed as we are just checking the page.
+
+		// Only enqueue scripts for the wc-admin pages. Enqueue scripts for all wc-admin pages because WooCommerce uses client-side navigation,
+		// so the page does not fully reload when switching between admin pages.
+		if ( 'wc-admin' !== $page ) {
+			return;
+		}
+
 		// Enqueue scripts for analytics reports.
 		$asset_path   = wc_gocardless()->plugin_path . '/build/customer-reports.asset.php';
 		$version      = wc_gocardless()->version;
