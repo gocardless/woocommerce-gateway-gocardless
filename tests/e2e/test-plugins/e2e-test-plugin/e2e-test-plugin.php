@@ -54,16 +54,17 @@ function test_wc_gocardless_simulate_webhook( $order_id ) {
 	// Trigger the action scheduler to run scheduled action.
 	$queue = WC()->queue()->search(
 		array(
-			'status' => 'pending',
-			'per_page' => 1,
-			'hook' => 'woocommerce_gocardless_process_webhook_payload_async'
+			'status'   => 'pending',
+			'per_page' => 10,
+			'hook'     => 'woocommerce_gocardless_process_webhook_payload_async'
 		)
 	);
 
 	try {
 		if ( ! empty( $queue ) ) {
-			$action = current( $queue );
-			$action->execute();
+			foreach ( $queue as $action ) {
+				$action->execute();
+			}
 		}
 	} catch (\Exception $exception) {
 	}

@@ -307,6 +307,10 @@ export async function handleGoCardlessPayment(page, options) {
 		.waitFor({ state: 'detached' });
 	await page.waitForTimeout(4000);
 
+	if ( await page.getByText(/Payment summary/).isVisible() ) {
+		await page.getByText(/Payment summary/).first().click();
+	}
+
 	if (await page.getByText(/Instant bank pay|Make a one-off|One-off payment/).isVisible()) {
 		if (await page.locator('#given_name').isVisible()) {
 			await page
@@ -336,6 +340,13 @@ export async function handleGoCardlessPayment(page, options) {
 		if ( await page.getByTestId('CONSENT_AUTHORISED_READ_REFUND_ACCOUNT_SANDBOX_BANK').isVisible() ) {
 			await page
 				.getByTestId('CONSENT_AUTHORISED_READ_REFUND_ACCOUNT_SANDBOX_BANK')
+				.click();
+		} else {
+			await page.getByRole('button', { name: 'Change' }).last().waitFor();
+			await page.getByRole('button', { name: 'Change' }).last().click();
+			await page
+				.getByTestId('CONSENT_AUTHORISED_READ_REFUND_ACCOUNT_SANDBOX_BANK')
+				.first()
 				.click();
 		}
 
@@ -393,7 +404,7 @@ export async function handleGoCardlessPayment(page, options) {
 		await expect(
 			page.getByTestId('bank-auth-link-button')
 		).toBeVisible();
-		await page.waitForTimeout(5000); // wait for billing request to be updated to "fulfilling" state.
+		await page.waitForTimeout(12000); // wait for billing request to be updated to "fulfilling" state.
 		await page
 			.getByTestId('bank-auth-link-button')
 			.click({ force: true });
