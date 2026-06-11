@@ -435,7 +435,7 @@ export async function handleGoCardlessPayment(page, options) {
 		await page.getByText(/Payment summary/).first().click();
 	}
 
-	if (await page.getByText(/Instant bank pay|Make a one-off|One-off payment/).isVisible()) {
+	if (await page.getByText(/Make a one-off|One-off payment/).isVisible()) {
 		if (await page.locator('#given_name').isVisible()) {
 			await page
 				.locator('#given_name')
@@ -634,10 +634,9 @@ export async function handleGoCardlessPaymentSchemeWise(
 		.getByTestId('loading-spinner')
 		.waitFor({ state: 'detached' });
 
-	const isInstantBankPay = await page.getByText(/Instant bank pay/).isVisible();
 	const isMakeOneOffPayment = await page.getByText(/Make a one-off payment/).isVisible();
 	const isOneOffPayment = await page.getByText(/One-off payment/).isVisible();
-	if ( isInstantBankPay || isMakeOneOffPayment || isOneOffPayment ) {
+	if ( isMakeOneOffPayment || isOneOffPayment ) {
 		return handleGoCardlessPayment(page, options);
 	}
 
