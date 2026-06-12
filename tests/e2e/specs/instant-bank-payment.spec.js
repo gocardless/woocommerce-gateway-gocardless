@@ -22,7 +22,7 @@ const {
 } = require('../utils');
 const { products, customer } = require('../config');
 
-test.describe('Instant Bank Payment Tests', () => {
+test.describe('Pay by Bank Tests', () => {
 	// Set customer as logged-in user.
 	let adminPage;
 	test.use({ storageState: process.env.CUSTOMERSTATE });
@@ -49,7 +49,7 @@ test.describe('Instant Bank Payment Tests', () => {
 		await saveSettings(adminPage);
 	});
 
-	test('Instant bank pay should be used for supported currencies and countries - @foundational', async ({
+	test('Pay by Bank should be used for supported currencies and countries - @foundational', async ({
 		page,
 	}) => {
 		// USD & US
@@ -59,7 +59,7 @@ test.describe('Instant Bank Payment Tests', () => {
 		await goToCheckout(page, true);
 		await fillBillingDetails(page, customer.billing, true);
 		await blockPlaceOrder(page);
-		// Make sure Instant Bank Payment is not available for USA.
+		// Make sure Pay by Bank is not available for USA.
 		await expect(
 			page.getByText(/Make a one-off|One-off payment/).first()
 		).not.toBeVisible();
@@ -75,7 +75,7 @@ test.describe('Instant Bank Payment Tests', () => {
 		await page.waitForTimeout(3000);
 		await blockPlaceOrder(page);
 
-		// Make sure Instant Bank Payment is available.
+		// Make sure Pay by Bank is available.
 		await expect(
 			page.getByText(/Make a one-off|One-off payment/).first()
 		).toBeVisible();
@@ -100,16 +100,16 @@ test.describe('Instant Bank Payment Tests', () => {
 		await page.waitForTimeout(3000);
 		await blockPlaceOrder(page);
 
-		// Make sure Instant Bank Payment is available.
+		// Make sure Pay by Bank is available.
 		await expect(
 			page.getByText(/Make a one-off|One-off payment/).first()
 		).toBeVisible();
 	});
 
-	test('Merchant should be able to enable/disable Instant bank pay - @foundational', async ({
+	test('Merchant should be able to enable/disable Pay by Bank - @foundational', async ({
 		page,
 	}) => {
-		// Disable Instant Bank Payment.
+		// Disable Pay by Bank.
 		await adminPage.goto(
 			'/wp-admin/admin.php?page=wc-settings&tab=checkout&section=gocardless'
 		);
@@ -129,12 +129,12 @@ test.describe('Instant Bank Payment Tests', () => {
 		);
 		await blockPlaceOrder(page);
 
-		// Make sure Instant Bank Payment is not available.
+		// Make sure Pay by Bank is not available.
 		await expect(
 			page.getByText(/Make a one-off|One-off payment/).first()
 		).not.toBeVisible();
 
-		// Enable Instant Bank Payment.
+		// Enable Pay by Bank.
 		await adminPage.goto(
 			'/wp-admin/admin.php?page=wc-settings&tab=checkout&section=gocardless'
 		);
@@ -151,7 +151,7 @@ test.describe('Instant Bank Payment Tests', () => {
 		);
 		await blockPlaceOrder(page);
 
-		// Make sure Instant Bank Payment is available.
+		// Make sure Pay by Bank is available.
 		await expect(
 			page.getByText(/Make a one-off|One-off payment/).first()
 		).toBeVisible();

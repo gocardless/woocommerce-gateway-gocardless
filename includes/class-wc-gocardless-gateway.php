@@ -60,7 +60,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	protected $saved_bank_accounts;
 
 	/**
-	 * Is instant bank pay turned on.
+	 * Is pay by bank turned on.
 	 *
 	 * @var bool
 	 */
@@ -555,10 +555,10 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				'default' => $default_webhook_secret,
 			),
 			'instant_bank_pay'    => array(
-				'title'       => __( 'Instant Bank Pay', 'woocommerce-gateway-gocardless' ),
-				'label'       => __( 'Enable Instant Bank Pay', 'woocommerce-gateway-gocardless' ),
+				'title'       => __( 'Pay by Bank', 'woocommerce-gateway-gocardless' ),
+				'label'       => __( 'Enable Pay by Bank', 'woocommerce-gateway-gocardless' ),
 				'type'        => 'checkbox',
-				'description' => __( 'Enables Instant Bank Payments in supported countries.', 'woocommerce-gateway-gocardless' ),
+				'description' => __( 'Enables Pay by Bank payments in supported countries.', 'woocommerce-gateway-gocardless' ),
 				'default'     => 'no',
 				'desc_tip'    => true,
 			),
@@ -981,14 +981,14 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 		 *     - Order total is zero (eg: Setup Trail subscription)
 		 *     - For the change payment method request.
 		 *     - For Pre-Orders with Pay upon release.
-		 * - Instant Bank Payment Only (For one-off payment):
+		 * - Pay by Bank Only (For one-off payment):
 		 *     - IBP is Enabled in the settings &&
 		 *     - For countries and currencies where instant payment is supported. (GB with GBP, DE with EUR) &&
 		 *     - Order total is greater than zero &&
 		 *     - Not a change payment method request &&
 		 *     - Not a Pre-Orders with Pay upon release.
-		 * - Mandate and Instant Bank Payment:
-		 *     - Instant Bank Payment Only condition +
+		 * - Mandate and Pay by Bank:
+		 *     - Pay by Bank Only condition +
 		 *     - Order contains subscription product.
 		 *     - Customer wants to save the payment method.
 		 */
