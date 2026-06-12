@@ -162,7 +162,7 @@ test.describe('Pay by Bank Tests', () => {
 	checkouts.forEach((isBlock) => {
 		const blockText = isBlock ? '[Block Checkout]' : '[Checkout]';
 
-		test(`${blockText} Customer should be able to place order using IBP - @foundational`, async ({
+		test(`${blockText} Customer should be able to place order using Pay by Bank - @foundational`, async ({
 			page,
 		}) => {
 			// GBP & GB
@@ -251,7 +251,7 @@ test.describe('Pay by Bank Tests', () => {
 		});
 	});
 
-	test('Customer can sign up to subscription using IBP and renewal using GoCardless DD - @foundational', async ({
+	test('Customer can sign up to subscription using Pay by Bank and renewal using GoCardless DD - @foundational', async ({
 		page,
 	}) => {
 		await addToCart(page, products.subscription);
