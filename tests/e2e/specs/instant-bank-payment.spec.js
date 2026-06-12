@@ -22,7 +22,7 @@ const {
 } = require('../utils');
 const { products, customer } = require('../config');
 
-test.describe('Pay by Bank Tests', () => {
+test.describe('Pay by Bank (formerly IBP) Tests', () => {
 	// Set customer as logged-in user.
 	let adminPage;
 	test.use({ storageState: process.env.CUSTOMERSTATE });
