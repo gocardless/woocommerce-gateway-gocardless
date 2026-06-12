@@ -86,7 +86,7 @@ Yes. As of version 2.4.5, WooCommerce GoCardless includes support for merchants 
 
 = How is it decided which payment method gets selected between Pay by Bank, Direct Debit, or a combination of both? =
 
-The selection is automated and depends on two things: first, whether Pay by Bank payments are supported for both the customer and the merchant, and second, the items being purchased. For example, **Pay by Bank** will be used for simple product purchases where the customer’s billing address is in the UK (GBP), Germany (EURO), and France (EURO). Similarly, for the same setup, subscription product purchases will be completed using the **Pay by Bank** and **Direct Debit (mandate)** setup flow. For countries and currencies where instant payment is not supported, the Direct **Debit (mandate)** only flow will be used.
+The selection is automated and depends on two things: first, whether Pay by Bank payments are supported for both the customer and the merchant, and second, the items being purchased. For example, **Pay by Bank** will be used for simple product purchases where the customer’s billing address is in the UK (GBP), Germany (EUR), and France (EUR). Similarly, for the same setup, subscription product purchases will be completed using the **Pay by Bank** and **Direct Debit (mandate)** setup flow. For countries and currencies where instant payment is not supported, the Direct **Debit (mandate)** only flow will be used.
 
 = Why does the GoCardless gateway classify all transactions as "recurrent"? =
 

@@ -60,7 +60,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	protected $saved_bank_accounts;
 
 	/**
-	 * Is pay by bank turned on.
+	 * Is Pay by Bank turned on.
 	 *
 	 * @var bool
 	 */
@@ -982,7 +982,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 		 *     - For the change payment method request.
 		 *     - For Pre-Orders with Pay upon release.
 		 * - Pay by Bank Only (For one-off payment):
-		 *     - IBP is Enabled in the settings &&
+		 *     - Pay by Bank is enabled in the settings &&
 		 *     - For countries and currencies where instant payment is supported. (GB with GBP, DE with EUR) &&
 		 *     - Order total is greater than zero &&
 		 *     - Not a change payment method request &&
