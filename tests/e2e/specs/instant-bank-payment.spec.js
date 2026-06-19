@@ -61,7 +61,7 @@ test.describe('Instant Bank Payment Tests', () => {
 		await blockPlaceOrder(page);
 		// Make sure Instant Bank Payment is not available for USA.
 		await expect(
-			page.getByText(/Instant bank pay|Make a one-off|One-off payment/).first()
+			page.getByText(/Make a one-off|One-off payment/).first()
 		).not.toBeVisible();
 
 		// GBP & GB
@@ -77,7 +77,7 @@ test.describe('Instant Bank Payment Tests', () => {
 
 		// Make sure Instant Bank Payment is available.
 		await expect(
-			page.getByText(/Instant bank pay|Make a one-off|One-off payment/).first()
+			page.getByText(/Make a one-off|One-off payment/).first()
 		).toBeVisible();
 
 		// EUR & DE
@@ -102,7 +102,7 @@ test.describe('Instant Bank Payment Tests', () => {
 
 		// Make sure Instant Bank Payment is available.
 		await expect(
-			page.getByText(/Instant bank pay|Make a one-off|One-off payment/).first()
+			page.getByText(/Make a one-off|One-off payment/).first()
 		).toBeVisible();
 	});
 
@@ -131,7 +131,7 @@ test.describe('Instant Bank Payment Tests', () => {
 
 		// Make sure Instant Bank Payment is not available.
 		await expect(
-			page.getByText(/Instant bank pay|Make a one-off|One-off payment/).first()
+			page.getByText(/Make a one-off|One-off payment/).first()
 		).not.toBeVisible();
 
 		// Enable Instant Bank Payment.
@@ -153,7 +153,7 @@ test.describe('Instant Bank Payment Tests', () => {
 
 		// Make sure Instant Bank Payment is available.
 		await expect(
-			page.getByText(/Instant bank pay|Make a one-off|One-off payment/).first()
+			page.getByText(/Make a one-off|One-off payment/).first()
 		).toBeVisible();
 	});
 
@@ -218,8 +218,8 @@ test.describe('Instant Bank Payment Tests', () => {
 				isBlock,
 			});
 
-			// Wait for 10 seconds, to allow the billing request to be fulfilled.
-			await page.waitForTimeout(10000);
+			// Wait for 5 seconds, to allow the billing request to be fulfilled.
+			await page.waitForTimeout(5000);
 			await page.goto(`?billing_request_fulfilled_order_id=${orderId}`, { waitUntil: 'networkidle' });
 			await validateGoCardlessPayment(adminPage, orderId);
 
