@@ -8,7 +8,6 @@ import { expect, Page } from '@playwright/test';
  */
 const { promisify } = require('util');
 const execAsync = promisify(require('child_process').exec);
-export const api = require('./api');
 const {
 	goCardlessConfig,
 	customer,
