@@ -28,24 +28,21 @@ You can create a user on [gocardless.com](https://gocardless.com) for live trans
 
 ## Screenshots
 
-Where to enable GoCardless payment gateway:
-<img src="/.wordpress-org/screenshot-1.png" alt="Payment Methods screen showing where to enable the GoCardless payment gateway." width="300">
 
-Default GoCardless configuration:
-<img src="/.wordpress-org/screenshot-2.png" alt="GoCardless settings screen showing the initial state." width="300">
 
-Properly connected GoCardless configuration:
-<img src="/.wordpress-org/screenshot-3.png" alt="GoCardless settings screen showing a store connected to ad configured with GoCardless to use the ACH direct debit scheme." width="300">
+| <img src="/.wordpress-org/screenshot-1.png" alt="Payment Methods screen showing where to enable the GoCardless payment gateway." width="300"> | <img src="/.wordpress-org/screenshot-2.png" alt="GoCardless settings screen showing the initial state." width="300"> | <img src="/.wordpress-org/screenshot-3.png" alt="GoCardless settings screen showing a store connected to ad configured with GoCardless to use the ACH direct debit scheme." width="300"> |
+| --- | --- | --- |
+| Payment Methods screen | Default GoCardless configuration | Properly connected GoCardless configuration |
 
 ## Development
 
 ### Requirements
 
 - PHP: 7.4+
-- WordPress: 6.6+
-- WooCommerce: 9.8+
-- Node: v20
-- NPM: v10
+- WordPress: 6.8+
+- WooCommerce: 10.7+
+- Node: v24
+- NPM: v11
 
 ### Install dependencies & build
 
@@ -56,6 +53,8 @@ Properly connected GoCardless configuration:
 - `npm run test:unit` - Executes PHPUnit tests.
 
 ## Run E2E Tests
+
+E2E tests are powered by [Playwright](https://playwright.dev/) running against a site provisioned by [`@wordpress/env`](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/).
 
 ### Prerequisites
 
