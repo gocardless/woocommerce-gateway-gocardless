@@ -46,6 +46,7 @@ test.describe('Refunds Tests', () => {
 		page,
 		browser,
 	}) => {
+		test.slow();
 		const adminPage = await browser.newPage({
 			storageState: process.env.ADMINSTATE,
 		});

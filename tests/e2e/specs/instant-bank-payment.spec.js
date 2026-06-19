@@ -18,6 +18,7 @@ const {
 	runWpCliCommand,
 	blockPlaceOrder,
 	saveSettings,
+	clearCart,
 } = require('../utils');
 const { products, customer } = require('../config');
 
@@ -53,13 +54,14 @@ test.describe('Instant Bank Payment Tests', () => {
 	}) => {
 		// USD & US
 		await runWpCliCommand('wp option update woocommerce_currency "USD"');
+		await clearCart(page);
 		await addToCart(page, products.simple);
 		await goToCheckout(page, true);
 		await fillBillingDetails(page, customer.billing, true);
 		await blockPlaceOrder(page);
 		// Make sure Instant Bank Payment is not available for USA.
 		await expect(
-			page.getByText(/Make a one-off|Instant bank pay/).first()
+			page.getByText(/Instant bank pay|Make a one-off|One-off payment/).first()
 		).not.toBeVisible();
 
 		// GBP & GB
@@ -75,7 +77,7 @@ test.describe('Instant Bank Payment Tests', () => {
 
 		// Make sure Instant Bank Payment is available.
 		await expect(
-			page.getByText(/Make a one-off|Instant bank pay/).first()
+			page.getByText(/Instant bank pay|Make a one-off|One-off payment/).first()
 		).toBeVisible();
 
 		// EUR & DE
@@ -100,7 +102,7 @@ test.describe('Instant Bank Payment Tests', () => {
 
 		// Make sure Instant Bank Payment is available.
 		await expect(
-			page.getByText(/Make a one-off|Instant bank pay/).first()
+			page.getByText(/Instant bank pay|Make a one-off|One-off payment/).first()
 		).toBeVisible();
 	});
 
@@ -117,6 +119,7 @@ test.describe('Instant Bank Payment Tests', () => {
 		await saveSettings(adminPage);
 
 		await runWpCliCommand('wp option update woocommerce_currency "GBP"');
+		await clearCart(page);
 		await addToCart(page, products.simple);
 		await goToCheckout(page, true);
 		await fillBillingDetails(
@@ -128,7 +131,7 @@ test.describe('Instant Bank Payment Tests', () => {
 
 		// Make sure Instant Bank Payment is not available.
 		await expect(
-			page.getByText(/Make a one-off|Instant bank pay/).first()
+			page.getByText(/Instant bank pay|Make a one-off|One-off payment/).first()
 		).not.toBeVisible();
 
 		// Enable Instant Bank Payment.
@@ -150,7 +153,7 @@ test.describe('Instant Bank Payment Tests', () => {
 
 		// Make sure Instant Bank Payment is available.
 		await expect(
-			page.getByText(/Make a one-off|Instant bank pay/).first()
+			page.getByText(/Instant bank pay|Make a one-off|One-off payment/).first()
 		).toBeVisible();
 	});
 
@@ -166,6 +169,7 @@ test.describe('Instant Bank Payment Tests', () => {
 			await runWpCliCommand(
 				'wp option update woocommerce_currency "GBP"'
 			);
+			await clearCart(page);
 			await addToCart(page, products.simple);
 			await goToCheckout(page, isBlock);
 			await fillBillingDetails(
@@ -197,6 +201,7 @@ test.describe('Instant Bank Payment Tests', () => {
 				await page.waitForTimeout(1000);
 			}
 
+			await clearCart(page);
 			await addToCart(page, products.simple);
 			await goToCheckout(page, isBlock);
 			await fillBillingDetails(

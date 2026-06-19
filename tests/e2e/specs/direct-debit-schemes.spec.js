@@ -32,6 +32,9 @@ test.describe('Direct Debit Scheme Tests', () => {
 			'/wp-admin/admin.php?page=wc-settings&tab=checkout&section=gocardless'
 		);
 		await adminPage
+			.locator('#woocommerce_gocardless_instant_bank_pay')
+			.uncheck();
+		await adminPage
 			.locator('#woocommerce_gocardless_scheme')
 			.selectOption('');
 		await saveSettings(adminPage);
@@ -68,9 +71,9 @@ test.describe('Direct Debit Scheme Tests', () => {
 	};
 
 	for (const scheme in schemes) {
-		if (scheme === 'betalingsservice') {
-			continue; // Skip test temporarily and look into it later getting issue in sandbox, maybe a temporary issue.
-		}
+		// if (scheme === 'betalingsservice') {
+		// 	continue; // Skip test temporarily and look into it later getting issue in sandbox, maybe a temporary issue.
+		// }
 		// eslint-disable-next-line jest/expect-expect
 		test(`${schemes[scheme]} - @foundational`, async ({ page }) => {
 			const isBlock = true;
