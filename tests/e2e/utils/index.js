@@ -523,7 +523,7 @@ export async function handleGoCardlessPayment(page, options) {
 		await expect(
 			page.getByTestId('bank-auth-link-button')
 		).toBeVisible();
-		await page.waitForTimeout(12000); // wait for billing request to be updated to "fulfilling" state.
+		await page.waitForTimeout(15000); // wait for billing request to be updated to "fulfilling" state.
 		await page
 			.getByTestId('bank-auth-link-button')
 			.click({ force: true });
