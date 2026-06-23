@@ -462,9 +462,10 @@ export async function handleGoCardlessPayment(page, options) {
 		}
 
 		// Select bank
-		if ( await page.getByTestId('CONSENT_AUTHORISED_READ_REFUND_ACCOUNT_SANDBOX_BANK').isVisible() ) {
+		if ( await page.getByTestId('CONSENT_AUTHORISED_READ_REFUND_ACCOUNT_SANDBOX_BANK').first().isVisible() ) {
 			await page
 				.getByTestId('CONSENT_AUTHORISED_READ_REFUND_ACCOUNT_SANDBOX_BANK')
+				.first()
 				.click();
 		}
 
