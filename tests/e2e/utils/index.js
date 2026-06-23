@@ -453,11 +453,12 @@ export async function handleGoCardlessPayment(page, options) {
 
 		if ( await page.getByTestId('confirm-address-button').isVisible() ) {
 			await page.getByTestId('confirm-address-button').click();
-			await page.waitForTimeout(2000);
 		}
+		await page.waitForTimeout(2000);
 		
-		if ( await page.getByRole('button', { name: 'Choose' }).isVisible() ) {
-			await page.getByRole('button', { name: 'Choose' }).click();
+		if ( await page.getByRole('button', { name: 'Change' }).isVisible() ) {
+			await page.getByRole('button', { name: 'Change' }).click();
+			await page.waitForTimeout(1000);
 		}
 
 		// Select bank
