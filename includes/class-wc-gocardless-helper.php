@@ -30,7 +30,7 @@ class WC_GoCardless_Helper {
 	/**
 	 * Bank pay (main) GoCardless gateway instance.
 	 *
-	 * @since x.x.x
+	 * @since 3.0.0
 	 *
 	 * @return WC_GoCardless_Gateway|WC_GoCardless_Gateway_Addons|bool
 	 */
@@ -43,7 +43,7 @@ class WC_GoCardless_Helper {
 	/**
 	 * PayTo GoCardless gateway instance when registered.
 	 *
-	 * @since x.x.x
+	 * @since 3.0.0
 	 *
 	 * @return WC_GoCardless_PayTo_Gateway|WC_GoCardless_PayTo_Gateway_Addons|bool
 	 */
@@ -56,7 +56,7 @@ class WC_GoCardless_Helper {
 	/**
 	 * Whether the order uses a GoCardless payment method (Bank pay or PayTo).
 	 *
-	 * @since x.x.x
+	 * @since 3.0.0
 	 *
 	 * @param WC_Order|mixed $order Order object.
 	 * @return bool
@@ -72,7 +72,7 @@ class WC_GoCardless_Helper {
 	/**
 	 * Resolve which GoCardless gateway should handle an order (Bank pay vs PayTo).
 	 *
-	 * @since x.x.x
+	 * @since 3.0.0
 	 *
 	 * @param WC_Order|mixed $order Order object.
 	 * @return WC_GoCardless_Gateway|WC_GoCardless_Gateway_Addons|WC_GoCardless_PayTo_Gateway|WC_GoCardless_PayTo_Gateway_Addons|bool
@@ -95,7 +95,7 @@ class WC_GoCardless_Helper {
 	/**
 	 * Choose Bank pay or PayTo gateway for async webhook handling from the related order.
 	 *
-	 * @since x.x.x
+	 * @since 3.0.0
 	 *
 	 * @param array $payload Webhook payload (single event per scheduled action).
 	 * @return WC_GoCardless_Gateway|WC_GoCardless_PayTo_Gateway|bool
@@ -125,7 +125,7 @@ class WC_GoCardless_Helper {
 	 * Mandate and legacy subscription events are handled on the main gateway because they do not
 	 * tie to a single order via payment/refund/billing_request meta in a reliable way.
 	 *
-	 * @since x.x.x
+	 * @since 3.0.0
 	 *
 	 * @param WC_GoCardless_Gateway $gateway Gateway instance (used for get_order_from_resource).
 	 * @param array                 $event   Single event from the webhook payload.

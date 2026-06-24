@@ -2,7 +2,7 @@
 Contributors: gocardless, woocommerce, automattic
 Tags:         gocardless, woocommerce, direct debit, pay by bank, payto
 Tested up to: 7.0
-Stable tag:   2.9.10
+Stable tag:   3.0.0
 License:      GPL-3.0-or-later
 License URI:  https://spdx.org/licenses/GPL-3.0-or-later.html
 
@@ -139,6 +139,14 @@ Yes, it uses [GoCardless](https://gocardless.com/) ([privacy policy](https://goc
 3. GoCardless settings screen showing a store connected to ad configured with GoCardless to use the ACH direct debit scheme.
 
 == Changelog ==
+
+= 3.0.0 - 2026-06-24 =
+* Add - PayTo payment method for Australian merchants, supporting one-off payments, saved bank accounts, subscriptions, pre-orders, and refunds.
+* Add - Implement collect customer details for the billing request to improve overall customer experience.
+* Update - GoCardless settings and plugin documentation now use the Pay by Bank name instead of Instant Bank Pay.
+* Dev - Bump WooCommerce "tested up to" version 10.9.
+* Dev - Bump WooCommerce minimum supported version to 10.7.
+* Dev - Update NPM packages.
 
 = 2.9.10 - 2026-04-27 =
 * Dev - Bump WooCommerce "tested up to" version 10.7.

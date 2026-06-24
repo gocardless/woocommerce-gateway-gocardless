@@ -31,7 +31,7 @@ final class WC_GoCardless_Gateway_Blocks_Support extends AbstractPaymentMethodTy
 	/**
 	 * Register the shared Blocks bundle once; return its script handle.
 	 *
-	 * @since x.x.x
+	 * @since 3.0.0
 	 *
 	 * @return string
 	 */

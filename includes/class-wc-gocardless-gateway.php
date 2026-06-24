@@ -220,7 +220,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	 * Also, clear the available scheme transient.
 	 *
 	 * @return bool
-	 * @since x.x.x
+	 * @since 3.0.0
 	 */
 	public function process_admin_options() {
 		// Clear the available scheme transient.
@@ -805,7 +805,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	/**
 	 * POST field name for saved payment token selection (matches WooCommerce tokenization UI).
 	 *
-	 * @since x.x.x
+	 * @since 3.0.0
 	 *
 	 * @return string Input name without brackets.
 	 */
@@ -816,7 +816,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	/**
 	 * POST field name for "save payment method" checkbox.
 	 *
-	 * @since x.x.x
+	 * @since 3.0.0
 	 *
 	 * @return string Input name.
 	 */
@@ -888,7 +888,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	/**
 	 * Collect customer details.
 	 *
-	 * @since x.x.x
+	 * @since 3.0.0
 	 *
 	 * @param string   $billing_request_id Billing request ID.
 	 * @param WC_Order $order              Order object.
@@ -935,7 +935,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 		 * Filter the customer details params.
 		 * This filter can be used to modify the customer details params before collecting them.
 		 *
-		 * @since x.x.x
+		 * @since 3.0.0
 		 *
 		 * @param array    $customer_details Customer details params.
 		 * @param WC_Order $order            Order object.

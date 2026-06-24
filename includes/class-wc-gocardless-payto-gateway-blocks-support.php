@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * PayTo Blocks checkout integration.
  *
- * @since x.x.x
+ * @since 3.0.0
  */
 final class WC_GoCardless_PayTo_Gateway_Blocks_Support extends AbstractPaymentMethodType {
 
