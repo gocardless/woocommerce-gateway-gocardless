@@ -332,7 +332,7 @@ class WC_GoCardless_API {
 	/**
 	 * Collect customer details.
 	 *
-	 * @since x.x.x
+	 * @since 3.0.0
 	 *
 	 * @param string $billing_request_id Billing request ID.
 	 * @param array  $customer_details   Customer details.

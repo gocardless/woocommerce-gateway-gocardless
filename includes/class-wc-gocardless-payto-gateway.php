@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Settings are stored in {@see WC_GoCardless_Gateway} options under payto_* keys.
  *
  * @class WC_GoCardless_PayTo_Gateway
- * @since x.x.x
+ * @since 3.0.0
  */
 class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 
@@ -70,7 +70,7 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 	/**
 	 * Shared option key with the main GoCardless gateway (payto_* keys).
 	 *
-	 * @since x.x.x
+	 * @since 3.0.0
 	 *
 	 * @return string
 	 */
@@ -106,7 +106,7 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 	/**
 	 * Map logical option keys to storage keys in the shared option.
 	 *
-	 * @since x.x.x
+	 * @since 3.0.0
 	 *
 	 * @param string $key Option key.
 	 * @param mixed  $empty_value Default when empty.
@@ -141,7 +141,7 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 	/**
 	 * Defaults for PayTo keys when missing from the database.
 	 *
-	 * @since x.x.x
+	 * @since 3.0.0
 	 *
 	 * @param string $storage_key Key in woocommerce_gocardless_settings.
 	 * @return mixed|null Null if no default.
@@ -267,7 +267,7 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 		/**
 		 * Filter the default max amount per payment for PayTo in AUD.
 		 *
-		 * @since x.x.x
+		 * @since 3.0.0
 		 *
 		 * @param int      $max_amount_per_payment Max amount per payment. Default 1,000 AUD.
 		 * @param WC_Order $order                  Order.
@@ -332,7 +332,7 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 		/**
 		 * Filter PayTo billing request params.
 		 *
-		 * @since x.x.x
+		 * @since 3.0.0
 		 *
 		 * @param array    $billing_request_params Params.
 		 * @param WC_Order $order                  Order.
@@ -395,7 +395,7 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 		/**
 		 * Filter PayTo billing request flow params before creating the flow.
 		 *
-		 * @since x.x.x
+		 * @since 3.0.0
 		 *
 		 * @param array    $billing_request_flow_params Billing request flow params.
 		 * @param WC_Order $order                       Order.
@@ -500,7 +500,7 @@ class WC_GoCardless_PayTo_Gateway extends WC_GoCardless_Gateway {
 		/**
 		 * Filter the gateway icon. (This is WooCommerce core filter)
 		 *
-		 * @since x.x.x
+		 * @since 3.0.0
 		 *
 		 * @param string $icon Gateway icon.
 		 * @param string $id   Gateway ID.
