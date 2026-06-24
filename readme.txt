@@ -1,6 +1,6 @@
 === GoCardless for WooCommerce ===
 Contributors: gocardless, woocommerce, automattic
-Tags:         gocardless, woocommerce, direct debit, instant bank pay
+Tags:         gocardless, woocommerce, direct debit, pay by bank, payto
 Tested up to: 7.0
 Stable tag:   2.9.10
 License:      GPL-3.0-or-later
@@ -84,15 +84,15 @@ Yes. As of version 2.4.5, WooCommerce GoCardless includes support for merchants 
 - Notifies via webhook with event “mandate_replaced” with the new mandate in the payload.
 - Gives an error response about mandate replacement when payment is created with the old mandate.
 
-= How is it decided which payment method gets selected between Instant Bank Pay, Direct Debit, or a combination of both? =
+= How is it decided which payment method gets selected between Pay by Bank, Direct Debit, or a combination of both? =
 
-The selection is automated and depends on two things: first, whether Instant Bank payments are supported for both the customer and the merchant, and second, the items being purchased. For example, **Instant Bank Pay** will be used for simple product purchases where the customer’s billing address is in the UK (GBP), Germany (EURO), and France (EURO). Similarly, for the same setup, subscription product purchases will be completed using the **Instant Bank Payment** and **Direct Debit (mandate)** setup flow. For countries and currencies where instant payment is not supported, the Direct **Debit (mandate)** only flow will be used.
+The selection is automated and depends on two things: first, whether Pay by Bank payments are supported for both the customer and the merchant, and second, the items being purchased. For example, **Pay by Bank** will be used for simple product purchases where the customer’s billing address is in the UK (GBP), Germany (EUR), and France (EUR). Similarly, for the same setup, subscription product purchases will be completed using the **Pay by Bank** and **Direct Debit (mandate)** setup flow. For countries and currencies where instant payment is not supported, the Direct **Debit (mandate)** only flow will be used.
 
 = Why does the GoCardless gateway classify all transactions as "recurrent"? =
 
 GoCardless collects payments by setting up a **Direct Debit (Mandate)**. This Direct Debit mandate can be used to collect future payments. Even for a simple product, GoCardless sets up a Direct Debit and collects the payment under the mandate. As a result, every payment—whether for a one-time purchase or a subscription—is processed via this Direct Debit (Mandate), which is recurrent. Therefore, transactions appear as recurrent.
 
-It is important to note that for merchants and customers in the UK (GBP), Germany (EUR), and France (EUR), GoCardless supports **Instant Bank Pay (IBP)**. IBP allows for one-off payments that are collected instantly without setting up a Direct Debit, and these transactions are not marked as recurrent.
+It is important to note that for merchants and customers in the UK (GBP), Germany (EUR), and France (EUR), GoCardless supports **Pay by Bank**. Pay by Bank allows for one-off payments that are collected instantly without setting up a Direct Debit, and these transactions are not marked as recurrent.
 
 = How can I connect a single GoCardless account to multiple WooCommerce stores using this plugin? =
 
