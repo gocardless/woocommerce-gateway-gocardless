@@ -19,6 +19,7 @@ const {
 	blockPlaceOrder,
 	saveSettings,
 	clearCart,
+	isBillingRequestFulfilled,
 } = require('../utils');
 const { products, customer } = require('../config');
 
@@ -201,6 +202,10 @@ test.describe('Pay by Bank (formerly IBP) Tests', () => {
 				await page.waitForTimeout(1000);
 			}
 
+			// GBP & GB
+			await runWpCliCommand(
+				'wp option update woocommerce_currency "GBP"'
+			);
 			await clearCart(page);
 			await addToCart(page, products.simple);
 			await goToCheckout(page, isBlock);
@@ -219,15 +224,27 @@ test.describe('Pay by Bank (formerly IBP) Tests', () => {
 			});
 
 			// Wait for 5 seconds, to allow the billing request to be fulfilled.
-			await page.waitForTimeout(5000);
-			await page.goto(`?billing_request_fulfilled_order_id=${orderId}`, { waitUntil: 'networkidle' });
+
+			let retryCount = 0;
+			const maxRetries = 10;
+			while (
+				!(await isBillingRequestFulfilled(page, orderId)) &&
+				retryCount < maxRetries
+			) {
+				retryCount++;
+				await page.waitForTimeout(2000);
+			}
+			await page.goto(`?billing_request_fulfilled_order_id=${orderId}`, {
+				waitUntil: 'networkidle',
+			});
 			await validateGoCardlessPayment(adminPage, orderId);
 
 			// Verify that the saved payment method is available.
 			const nRetries = 5;
 			for (let i = 0; i < nRetries; i++) {
 				await page.goto('/my-account/payment-methods/');
-				if ( await page
+				if (
+					await page
 						.locator('td.woocommerce-PaymentMethod', {
 							hasText: 'Barclays bank plc ending in 11',
 						})
@@ -236,7 +253,7 @@ test.describe('Pay by Bank (formerly IBP) Tests', () => {
 				) {
 					break;
 				} else {
-					await page.waitForTimeout(10000); // wait for webhook to be processed
+					await page.waitForTimeout(2000); // wait for webhook to be processed
 				}
 			}
 
@@ -268,16 +285,19 @@ test.describe('Pay by Bank (formerly IBP) Tests', () => {
 		});
 
 		// Wait for 10 seconds, to allow the billing request to be fulfilled.
-		await page.waitForTimeout(10000);
-		await page.goto(`?billing_request_fulfilled_order_id=${orderId}`, { waitUntil: 'networkidle' });
-
+		await page.waitForTimeout(15000);
+		await page.goto(`?billing_request_fulfilled_order_id=${orderId}`, {
+			waitUntil: 'networkidle',
+		});
 
 		// Verify that mandate saved.
 		const nRetries = 5;
 		for (let i = 0; i < nRetries; i++) {
-			const metaData = await runWpCliCommand( `wp wc shop_order get ${orderId} --user=admin --field=meta_data` );
+			const metaData = await runWpCliCommand(
+				`wp wc shop_order get ${orderId} --user=admin --field=meta_data`
+			);
 			console.log(metaData);
-			if ( metaData?.includes( '_gocardless_mandate_id' ) ) {
+			if (metaData?.includes('_gocardless_mandate_id')) {
 				break;
 			} else {
 				await page.waitForTimeout(10000); // wait for webhook to be processed
