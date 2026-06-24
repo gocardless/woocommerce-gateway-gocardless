@@ -18,12 +18,57 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @since 2.6.0
  */
 final class WC_GoCardless_Gateway_Blocks_Support extends AbstractPaymentMethodType {
+
+	const SCRIPT_HANDLE = 'wc-gocardless-blocks-integration';
+
 	/**
 	 * Name of the payment method.
 	 *
 	 * @var string
 	 */
 	protected $name = 'gocardless';
+
+	/**
+	 * Register the shared Blocks bundle once; return its script handle.
+	 *
+	 * @since 3.0.0
+	 *
+	 * @return string
+	 */
+	public static function register_blocks_integration_script() {
+		static $registered = false;
+		if ( $registered ) {
+			return self::SCRIPT_HANDLE;
+		}
+		$registered = true;
+
+		$asset_path   = wc_gocardless()->plugin_path . '/build/index.asset.php';
+		$version      = wc_gocardless()->version;
+		$dependencies = array();
+		if ( file_exists( $asset_path ) ) {
+			$asset        = require $asset_path;
+			$version      = is_array( $asset ) && isset( $asset['version'] )
+				? $asset['version']
+				: $version;
+			$dependencies = is_array( $asset ) && isset( $asset['dependencies'] )
+				? $asset['dependencies']
+				: $dependencies;
+		}
+
+		wp_register_script(
+			self::SCRIPT_HANDLE,
+			wc_gocardless()->plugin_url . '/build/index.js',
+			$dependencies,
+			$version,
+			true
+		);
+		wp_set_script_translations(
+			self::SCRIPT_HANDLE,
+			'woocommerce-gateway-gocardless'
+		);
+
+		return self::SCRIPT_HANDLE;
+	}
 
 	/**
 	 * Initializes the payment method type.
@@ -47,32 +92,7 @@ final class WC_GoCardless_Gateway_Blocks_Support extends AbstractPaymentMethodTy
 	 * @return array
 	 */
 	public function get_payment_method_script_handles() {
-		$asset_path   = wc_gocardless()->plugin_path . '/build/index.asset.php';
-		$version      = wc_gocardless()->version;
-		$dependencies = array();
-		if ( file_exists( $asset_path ) ) {
-			$asset        = require $asset_path;
-			$version      = is_array( $asset ) && isset( $asset['version'] )
-				? $asset['version']
-				: $version;
-			$dependencies = is_array( $asset ) && isset( $asset['dependencies'] )
-				? $asset['dependencies']
-				: $dependencies;
-		}
-
-		wp_register_script(
-			'wc-gocardless-blocks-integration',
-			wc_gocardless()->plugin_url . '/build/index.js',
-			$dependencies,
-			$version,
-			true
-		);
-		wp_set_script_translations(
-			'wc-gocardless-blocks-integration',
-			'woocommerce-gateway-gocardless'
-		);
-
-		return array( 'wc-gocardless-blocks-integration' );
+		return array( self::register_blocks_integration_script() );
 	}
 
 	/**

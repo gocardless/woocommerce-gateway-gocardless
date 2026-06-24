@@ -10,6 +10,7 @@ add_filter( 'woocommerce_api_request_url', function ($url) {
 
 // Simulate GoCardless webhook for testing.
 add_action( 'woocommerce_thankyou_gocardless', 'test_wc_gocardless_simulate_webhook', 999 );
+add_action( 'woocommerce_thankyou_gocardless_payto', 'test_wc_gocardless_simulate_webhook', 999 );
 
 function test_wc_gocardless_simulate_webhook( $order_id ) {
 	$webhook_body = test_wc_gocardless_get_webhook_body( $order_id );
@@ -54,16 +55,17 @@ function test_wc_gocardless_simulate_webhook( $order_id ) {
 	// Trigger the action scheduler to run scheduled action.
 	$queue = WC()->queue()->search(
 		array(
-			'status' => 'pending',
-			'per_page' => 1,
-			'hook' => 'woocommerce_gocardless_process_webhook_payload_async'
+			'status'   => 'pending',
+			'per_page' => 10,
+			'hook'     => 'woocommerce_gocardless_process_webhook_payload_async'
 		)
 	);
 
 	try {
 		if ( ! empty( $queue ) ) {
-			$action = current( $queue );
-			$action->execute();
+			foreach ( $queue as $action ) {
+				$action->execute();
+			}
 		}
 	} catch (\Exception $exception) {
 	}
@@ -245,12 +247,14 @@ function test_wc_gocardless_simulate_billing_request_fulfilled_webhook() {
 	}
 
 	$billing_request_id = $order->get_meta( '_gocardless_billing_request_id' );
+	$mandate_id         = $order->get_meta( '_gocardless_mandate_id' );
+	$payment_id         = $order->get_meta( '_gocardless_payment_id' );
 	if ( empty( $billing_request_id ) ) {
 		return false;
 	}
 
-	$search = array( 'BILLING_REQUEST_ID', 'CURRENT_TIME', 'ORDER_ID' );
-	$replace = array( $billing_request_id, current_time( 'c' ), $order_id );
+	$search = array( 'BILLING_REQUEST_ID', 'CURRENT_TIME', 'ORDER_ID', 'MANDATE_ID', 'PAYMENT_ID' );
+	$replace = array( $billing_request_id, current_time( 'c' ), $order_id, $mandate_id, $payment_id );
 	$webhook_body = '{
 		"events": [
 		{
@@ -266,6 +270,8 @@ function test_wc_gocardless_simulate_billing_request_fulfilled_webhook() {
 			},
 			"links": {
 				"billing_request": "BILLING_REQUEST_ID"
+				"mandate_request_mandate": "MANDATE_ID",
+				"payment_request_payment": "PAYMENT_ID",
 			},
 			"resource_metadata": {
 				"order_id": "ORDER_ID"
@@ -311,7 +317,60 @@ add_action( 'rest_api_init', function () {
 			),
 		),
 	) );
+
+	register_rest_route( 'gocardless-e2e/v1', '/billing-request-status', array(
+		'methods'             => 'POST',
+		'callback'            => 'gocardless_e2e_billing_request_status_callback',
+		'permission_callback' => '__return_true',
+		'args'                => array(
+			'order_id' => array(
+				'type'     => 'string',
+				'required' => true,
+			),
+		),
+	) );
 } );
+
+/**
+ * Gets the billing request status.
+ *
+ * @param WP_REST_Request $request The request object.
+ * @return WP_REST_Response The response object.
+ */
+function gocardless_e2e_billing_request_status_callback( $request ) {
+	global $wpdb;
+	$order_id = $request->get_param( 'order_id' );
+
+	$order = wc_get_order( $order_id );
+	if ( ! $order ) {
+		return new WP_REST_Response( array(
+			'error' => __( 'Order not found.', 'gocardless-e2e' )
+		), 404 );
+	}
+
+	$billing_request_id = $order->get_meta( '_gocardless_billing_request_id' );
+
+	if ( empty( $billing_request_id ) ) {
+		return new WP_REST_Response( array(
+			'error' => __( 'Billing request not found.', 'gocardless-e2e' )
+		), 404 );
+	}
+
+	$billing_requests = WC_GoCardless_API::get_billing_request( $billing_request_id );
+
+	$status = '';
+	if ( is_wp_error( $billing_requests ) || empty( $billing_requests['billing_requests'] ) ) {
+		$status = 'error';
+	}
+
+	$billing_request = $billing_requests['billing_requests'];
+	$status = $billing_request['status'] ?? '';
+
+	return rest_ensure_response( array(
+		'success' => true,
+		'status' => $status,
+	) );
+}
 
 /**
  * Updates the access token.

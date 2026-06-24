@@ -13,4 +13,5 @@ require_once TEST_PLUGIN_DIR . '/vendor/autoload.php';
 WP_Mock::bootstrap();
 
 require_once __DIR__ . '/../../includes/class-wc-gocardless-compat.php';
+require_once __DIR__ . '/../../includes/class-wc-gocardless-helper.php';
 require_once __DIR__ . '/../../includes/class-wc-gocardless-order-admin.php';

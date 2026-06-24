@@ -70,6 +70,7 @@ const customer = {
 			state: 'QLD',
 			stateName: 'Queensland',
 			postcode: '4852',
+			email: 'test-pay_out@test.com',
 		},
 		becs_nz: {
 			...address,
@@ -134,6 +135,9 @@ module.exports = {
 		bankCode: '200000',
 		accountNumber: '55779911',
 	},
+	paytoPayId: '+61-415678901',
+	paytoPaymentMethodTitle: 'TEST PayTo',
+	paytoPaymentMethodDescription: 'TEST PayTo Description',
 	paymentMethodTitle: 'TEST Pay by bank',
 	paymentMethodDescription: 'TEST Pay securely via your bank account.',
 	products: {

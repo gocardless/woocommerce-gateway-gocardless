@@ -3,7 +3,7 @@
  * Plugin Name:          GoCardless for WooCommerce
  * Plugin URI:           https://www.woocommerce.com/products/gocardless/
  * Description:          Extends both WooCommerce and WooCommerce Subscriptions with the GoCardless Payment Gateway. A GoCardless merchant account is required.
- * Version:              2.9.10
+ * Version:              3.0.0
  * Requires at least:    6.8
  * Requires PHP:         7.4
  * PHP tested up to:     8.3
@@ -12,8 +12,8 @@
  * License:              GPL-3.0-or-later
  * License URI:          https://spdx.org/licenses/GPL-3.0-or-later.html
  * Requires Plugins:     woocommerce
- * WC requires at least: 10.5
- * WC tested up to:      10.7
+ * WC requires at least: 10.7
+ * WC tested up to:      10.9
  *
  * Copyright: © 2023-2025 WooCommerce
  * Copyright: © 2025 GoCardless
@@ -38,7 +38,7 @@ class WC_GoCardless {
 	 *
 	 * @var string
 	 */
-	public $version = '2.9.10'; // WRCS: DEFINED_VERSION.
+	public $version = '3.0.0'; // WRCS: DEFINED_VERSION.
 
 	/**
 	 * Plugin's absolute path.
@@ -90,6 +90,7 @@ class WC_GoCardless {
 		$this->plugin_path = untrailingslashit( plugin_dir_path( __FILE__ ) );
 		$this->plugin_url  = untrailingslashit( plugins_url( '/', __FILE__ ) );
 
+		require_once $this->plugin_path . '/includes/class-wc-gocardless-helper.php';
 		require_once $this->plugin_path . '/includes/class-wc-gocardless-api.php';
 
 		$this->settings = WC_GoCardless_API::get_settings();
@@ -105,6 +106,9 @@ class WC_GoCardless {
 
 		// Admin scripts.
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
+
+		// Priority 5 so we can manipulate the registered gateways before they are shown.
+		add_action( 'woocommerce_admin_field_payment_gateways', array( $this, 'hide_gocardless_payto_gateway_on_settings_page' ), 5 );
 	}
 
 	/**
@@ -146,7 +150,7 @@ class WC_GoCardless {
 	 * @version 2.4.6
 	 */
 	public function process_webhook_payload_cron( array $payload ) {
-		$gateway = $this->gateway_instance();
+		$gateway = WC_GoCardless_Helper::resolve_gateway_for_webhook( $payload );
 		if ( $gateway ) {
 			$gateway->process_webhook_payload( $payload );
 		}
@@ -217,12 +221,16 @@ class WC_GoCardless {
 
 		// Includes.
 		require_once $this->plugin_path . '/includes/class-wc-gocardless-payment-token-direct-debit.php';
+		require_once $this->plugin_path . '/includes/class-wc-payment-token-gocardless-payto.php';
 		require_once $this->plugin_path . '/includes/class-wc-gocardless-gateway.php';
+		require_once $this->plugin_path . '/includes/class-wc-gocardless-payto-gateway.php';
 		require_once $this->plugin_path . '/includes/class-wc-gocardless-privacy.php';
 		require_once $this->plugin_path . '/includes/class-wc-gocardless-compat.php';
 
 		if ( $this->can_use_gateway_addons() ) {
-			include_once $this->plugin_path . '/includes/class-wc-gocardless-gateway-addons.php';
+			require_once $this->plugin_path . '/includes/trait-wc-gocardless-gateway-subscriptions-pre-orders.php';
+			require_once $this->plugin_path . '/includes/class-wc-gocardless-gateway-addons.php';
+			require_once $this->plugin_path . '/includes/class-wc-gocardless-payto-gateway-addons.php';
 		}
 
 		// Backwards compatibility.
@@ -357,8 +365,10 @@ class WC_GoCardless {
 	public function register_gateway( $methods ) {
 		if ( $this->can_use_gateway_addons() ) {
 			$methods[] = 'WC_GoCardless_Gateway_Addons';
+			$methods[] = 'WC_GoCardless_PayTo_Gateway_Addons';
 		} else {
 			$methods[] = 'WC_GoCardless_Gateway';
+			$methods[] = 'WC_GoCardless_PayTo_Gateway';
 		}
 
 		return $methods;
@@ -413,16 +423,18 @@ class WC_GoCardless {
 		return ! empty( $gateways['gocardless'] ) ? $gateways['gocardless'] : false;
 	}
 
+
 	/**
 	 * Log message.
 	 *
 	 * @since 2.3.7
 	 *
 	 * @param string $message Message to log.
+	 * @param string $level   Log level.
 	 *
 	 * @return void
 	 */
-	public function log( $message ) {
+	public function log( $message, $level = WC_Log_Levels::NOTICE ) {
 		if ( 'yes' !== $this->settings['logging'] ) {
 			return;
 		}
@@ -431,7 +443,7 @@ class WC_GoCardless {
 			$this->logger = new WC_Logger();
 		}
 
-		$this->logger->add( 'woocommerce-gateway-gocardless', $message );
+		$this->logger->log( $level, $message, array( 'source' => 'woocommerce-gateway-gocardless' ) );
 
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			//phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
@@ -518,7 +530,7 @@ class WC_GoCardless {
 						$this->remove_temporary_activated( $order );
 					}
 
-					$gateway = $this->gateway_instance();
+					$gateway = WC_GoCardless_Helper::get_gateway_for_order( $order );
 					if ( $gateway ) {
 						$gateway->update_order_resource( $order_id, 'payment', $payment['payments'] );
 					}
@@ -576,10 +588,12 @@ class WC_GoCardless {
 	public function woocommerce_block_support() {
 		if ( class_exists( 'Automattic\WooCommerce\Blocks\Payments\Integrations\AbstractPaymentMethodType' ) ) {
 			require_once $this->plugin_path . '/includes/class-wc-gocardless-gateway-blocks-support.php';
+			require_once $this->plugin_path . '/includes/class-wc-gocardless-payto-gateway-blocks-support.php';
 			add_action(
 				'woocommerce_blocks_payment_method_type_registration',
 				function ( Automattic\WooCommerce\Blocks\Payments\PaymentMethodRegistry $payment_method_registry ) {
 					$payment_method_registry->register( new WC_GoCardless_Gateway_Blocks_Support() );
+					$payment_method_registry->register( new WC_GoCardless_PayTo_Gateway_Blocks_Support() );
 				}
 			);
 		}
@@ -630,11 +644,32 @@ class WC_GoCardless {
 		);
 
 		if ( $this->can_use_gateway_addons() ) {
-			$aliases['WC_GoCardless_Gateway_Addons'] = 'WC_Gateway_GoCardless_Addons';
+			$aliases['WC_GoCardless_Gateway_Addons']       = 'WC_Gateway_GoCardless_Addons';
+			$aliases['WC_GoCardless_PayTo_Gateway_Addons'] = 'WC_Gateway_GoCardless_PayTo_Addons';
 		}
 
 		foreach ( $aliases as $new_class => $orig_class ) {
 			class_alias( $new_class, $orig_class );
+		}
+	}
+
+	/**
+	 * Removes the GoCardless PayTo gateway on the WooCommerce Settings page.
+	 *
+	 * Note: This function is hooked onto `woocommerce_admin_field_payment_gateways` which is the hook used
+	 * to display the payment gateways on the WooCommerce Settings page.
+	 */
+	public function hide_gocardless_payto_gateway_on_settings_page() {
+		// Prevent hiding gateways in the new payments settings experience (React-based UI).
+		if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) && \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'reactify-classic-payments-settings' ) ) {
+			return;
+		}
+
+		foreach ( WC()->payment_gateways->payment_gateways as $index => $payment_gateway ) {
+			if ( $payment_gateway instanceof WC_GoCardless_PayTo_Gateway ) {
+				unset( WC()->payment_gateways->payment_gateways[ $index ] );
+				break;
+			}
 		}
 	}
 }

@@ -330,6 +330,25 @@ class WC_GoCardless_API {
 	}
 
 	/**
+	 * Collect customer details.
+	 *
+	 * @since 3.0.0
+	 *
+	 * @param string $billing_request_id Billing request ID.
+	 * @param array  $customer_details   Customer details.
+	 *
+	 * @return WP_Error|array See self::_request return value
+	 */
+	public static function collect_customer_details( $billing_request_id, $customer_details = array() ) {
+		$args = array(
+			'method' => 'POST',
+			'body'   => wp_json_encode( array( 'data' => $customer_details ) ),
+		);
+
+		return self::_request( sprintf( 'billing_requests/%s/actions/collect_customer_details', $billing_request_id ), $args );
+	}
+
+	/**
 	 * Get billing request.
 	 *
 	 * @since 2.7.0

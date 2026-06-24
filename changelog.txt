@@ -1,5 +1,13 @@
 *** GoCardless for WooCommerce Changelog ***
 
+2026-06-24 - version 3.0.0
+* Add - PayTo payment method for Australian merchants, supporting one-off payments, saved bank accounts, subscriptions, pre-orders, and refunds.
+* Add - Implement collect customer details for the billing request to improve overall customer experience.
+* Update - GoCardless settings and plugin documentation now use the Pay by Bank name instead of Instant Bank Pay.
+* Dev - Bump WooCommerce "tested up to" version 10.9.
+* Dev - Bump WooCommerce minimum supported version to 10.7.
+* Dev - Update NPM packages.
+
 2026-04-27 - version 2.9.10
 * Dev - Bump WooCommerce "tested up to" version 10.7.
 * Dev - Bump WooCommerce minimum supported version to 10.5.

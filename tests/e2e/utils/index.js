@@ -15,6 +15,8 @@ const {
 	bankDetails,
 	gbBankDetails,
 	bankData,
+	paytoPayId,
+	paytoPaymentMethodTitle
 } = require('../config');
 
 /**
@@ -293,6 +295,128 @@ export async function blockPlaceGoCardlessOrder(page, options) {
 }
 
 /**
+ * Enable or disable PayTo on the shared GoCardless settings screen.
+ *
+ * @param {Page}    page    Playwright page object
+ * @param {boolean} enabled Whether PayTo should be enabled
+ */
+export async function enablePayToInSettings(page, enabled = true) {
+	await page.goto(
+		'/wp-admin/admin.php?page=wc-settings&tab=checkout&section=gocardless'
+	);
+	const checkbox = page.locator('#woocommerce_gocardless_payto_enabled');
+	if (enabled) {
+		await checkbox.check();
+	} else {
+		await checkbox.uncheck();
+	}
+	await page.locator('#woocommerce_gocardless_saved_bank_accounts').check();
+	await saveSettings(page);
+}
+
+/**
+ * Place an order using PayTo (AU / AUD); completes the GoCardless redirect with BECS test bank details.
+ *
+ * @param {Page}   page    Playwright page object
+ * @param {Object} options Options (saveMethod, isBlock)
+ * @return {Promise<string>} Order ID
+ */
+export async function placePayToOrder(page, options) {
+	const { saveMethod = false, isBlock = false } = options;
+	await page.waitForTimeout(1500);
+
+	if (isBlock) {
+		await expect(
+			page.locator(
+				'label[for="radio-control-wc-payment-method-options-gocardless_payto"]'
+			)
+		).toBeVisible();
+
+		await page
+			.locator('#radio-control-wc-payment-method-options-gocardless_payto')
+			.check();
+
+		const haveExistingPaymentMethods = await page
+			.locator('input[name="radio-control-wc-payment-method-saved-tokens"]')
+			.first()
+			.isVisible();
+		if (haveExistingPaymentMethods) {
+			await page
+				.locator('#radio-control-wc-payment-method-options-gocardless_payto')
+				.check();
+		}
+
+		if (saveMethod) {
+			await page
+				.locator(
+					'.wc-block-components-payment-methods__save-card-info input[type="checkbox"]'
+				)
+				.first()
+				.check();
+		}
+
+		await page.waitForTimeout( 1000 );
+		await expect(
+			page.locator('button.wc-block-components-checkout-place-order-button')
+		).toBeEnabled();
+		await page
+			.locator('button.wc-block-components-checkout-place-order-button')
+			.click();
+
+		await handleGoCardlessPayToPayment(page);
+
+		await expect(
+			page.getByRole('heading', { name: 'Order received' })
+		).toBeVisible();
+		const blockOrderId = await page
+			.locator('li.woocommerce-order-overview__order strong')
+			.textContent();
+		return blockOrderId;
+	}
+
+	await page
+		.locator('.blockUI.blockOverlay')
+		.last()
+		.waitFor({ state: 'detached' });
+
+	await expect(
+		page.locator('ul.wc_payment_methods li.payment_method_gocardless_payto')
+	).toBeVisible();
+
+	await page.locator('ul.wc_payment_methods label[for="payment_method_gocardless_payto"]').first().click();
+	await page.locator('input#payment_method_gocardless_payto').check();
+
+	const haveExistingPaymentMethodsClassic = await page
+		.locator('li.woocommerce-SavedPaymentMethods-token')
+		.first()
+		.isVisible();
+	const haveNewPaymentMethodRadio = await page
+		.locator('input#wc-gocardless_payto-payment-token-new')
+		.first()
+		.isVisible();
+	if (haveExistingPaymentMethodsClassic || haveNewPaymentMethodRadio) {
+		await page.locator('#wc-gocardless_payto-payment-token-new').check();
+	}
+
+	if (saveMethod) {
+		await page.locator('#wc-gocardless_payto-new-payment-method').check();
+	}
+
+	await page.waitForTimeout(500);
+	await page.locator('#place_order').click();
+
+	await handleGoCardlessPayToPayment(page);
+
+	await expect(
+		page.getByRole('heading', { name: 'Order received' })
+	).toBeVisible();
+	const orderId = await page
+		.locator('li.woocommerce-order-overview__order strong')
+		.textContent();
+	return orderId;
+}
+
+/**
  * Handle GoCardless payment.
  *
  * @param {Page}   page    Playwright page object
@@ -307,7 +431,11 @@ export async function handleGoCardlessPayment(page, options) {
 		.waitFor({ state: 'detached' });
 	await page.waitForTimeout(4000);
 
-	if (await page.getByText(/Instant bank pay|Make a one-off|One-off payment/).isVisible()) {
+	if ( await page.getByText(/Payment summary/).isVisible() ) {
+		await page.getByText(/Payment summary/).first().click();
+	}
+
+	if (await page.getByText(/Make a one-off|One-off payment/).isVisible()) {
 		if (await page.locator('#given_name').isVisible()) {
 			await page
 				.locator('#given_name')
@@ -325,17 +453,19 @@ export async function handleGoCardlessPayment(page, options) {
 
 		if ( await page.getByTestId('confirm-address-button').isVisible() ) {
 			await page.getByTestId('confirm-address-button').click();
-			await page.waitForTimeout(2000);
 		}
+		await page.waitForTimeout(2000);
 		
-		if ( await page.getByRole('button', { name: 'Choose' }).isVisible() ) {
-			await page.getByRole('button', { name: 'Choose' }).click();
+		if ( await page.getByRole('button', { name: 'Change' }).isVisible() ) {
+			await page.getByRole('button', { name: 'Change' }).click();
+			await page.waitForTimeout(1000);
 		}
 
 		// Select bank
-		if ( await page.getByTestId('CONSENT_AUTHORISED_READ_REFUND_ACCOUNT_SANDBOX_BANK').isVisible() ) {
+		if ( await page.getByTestId('CONSENT_AUTHORISED_READ_REFUND_ACCOUNT_SANDBOX_BANK').first().isVisible() ) {
 			await page
 				.getByTestId('CONSENT_AUTHORISED_READ_REFUND_ACCOUNT_SANDBOX_BANK')
+				.first()
 				.click();
 		}
 
@@ -393,45 +523,16 @@ export async function handleGoCardlessPayment(page, options) {
 		await expect(
 			page.getByTestId('bank-auth-link-button')
 		).toBeVisible();
-		await page.waitForTimeout(5000); // wait for billing request to be updated to "fulfilling" state.
+
+		await page.route('http://localhost/wc-api/WC_Gateway_GoCardless/?request=billing_request_flow**', async (route, request) => {
+			await page.waitForTimeout(10000);
+			await route.continue();
+		});
+
 		await page
 			.getByTestId('bank-auth-link-button')
 			.click({ force: true });
 		return;
-	}
-
-	// Fill GoCardless payment details
-	await page.locator('#currencySelector').selectOption(currency);
-	await page
-		.locator('#country_code')
-		.selectOption(customerBilling.country);
-	await page.locator('#given_name').fill(customerBilling.firstname);
-	await page.locator('#family_name').fill(customerBilling.lastname);
-	await page
-		.locator('#address_line1')
-		.fill(customerBilling.addressfirstline);
-	await page
-		.locator('#address_line2')
-		.fill(customerBilling.addresssecondline);
-	await page.locator('#city').fill(customerBilling.city);
-	await page.locator('#postal_code').fill(customerBilling.postcode);
-	if (await page.locator('#region').isVisible()) {
-		await page
-			.locator('#region')
-			.selectOption(customerBilling.state);
-	}
-	await expect(
-		page.getByRole('button', { name: 'Continue' })
-	).toBeVisible();
-	await page
-		.getByRole('button', { name: 'Continue' })
-		.click({ force: true });
-
-	await page.waitForTimeout(3000);
-	if ( await page.getByTestId('checkout-as-guest').isVisible() ) {
-		await page
-			.getByTestId('checkout-as-guest')
-			.click({ force: true });
 	}
 
 	// Fill bank details
@@ -466,6 +567,31 @@ export async function handleGoCardlessPayment(page, options) {
 		.getByTestId('billing-request.bank-confirm.direct-debit-cta-button')
 		.click();
 	await page.waitForTimeout(2000);
+}
+
+/**
+ * Handle GoCardless PayTo payment.
+ *
+ * @param {Page}   page    Playwright page object
+ */
+export async function handleGoCardlessPayToPayment(page) {
+	await page.waitForURL('https://pay-sandbox.gocardless.com/**');
+	await page.waitForLoadState('networkidle');
+	await page
+		.getByTestId('loading-spinner')
+		.waitFor({ state: 'detached' });
+
+	await expect( page.getByTestId('pay_id') ).toBeVisible();
+	await page.getByTestId('pay_id').fill(paytoPayId);
+	
+	await expect(
+		page.getByRole('button', { name: 'Continue' })
+	).toBeVisible();
+	await page
+		.getByRole('button', { name: 'Continue' })
+		.click({ force: true });
+
+	await page.waitForTimeout(3000);
 }
 
 /**
@@ -515,40 +641,23 @@ export async function handleGoCardlessPaymentSchemeWise(
 		.getByTestId('loading-spinner')
 		.waitFor({ state: 'detached' });
 
-	const isInstantBankPay = await page.getByText(/Instant bank pay/).isVisible();
 	const isMakeOneOffPayment = await page.getByText(/Make a one-off payment/).isVisible();
 	const isOneOffPayment = await page.getByText(/One-off payment/).isVisible();
-	if ( isInstantBankPay || isMakeOneOffPayment || isOneOffPayment ) {
+	if ( isMakeOneOffPayment || isOneOffPayment ) {
 		return handleGoCardlessPayment(page, options);
 	}
 
 	// Fill GoCardless payment details
 	const data = bankData[scheme] || bankDetails;
-	await page.locator('#currencySelector').selectOption(currency);
-
-	await page.waitForTimeout(2500); // Add waiting time to avoid flakiness.
-	if (scheme === 'sepa_core') {
-		await page
-			.getByTestId('country-residence-selector')
-			.selectOption('DK');
-	} else {
-		await page
-			.locator('#given_name')
-			.fill(customerBilling.firstname);
-		await page
-			.locator('#family_name')
-			.fill(customerBilling.lastname);
-	}
-
 	if (scheme === 'betalingsservice') {
-		page.locator('#danish_identity_number').fill(data.idNumber);
+		await page.locator('#danish_identity_number').fill(data.idNumber);
+		await expect(
+			page.getByRole('button', { name: 'Continue' })
+		).toBeVisible();
+		await page
+			.getByRole('button', { name: 'Continue' })
+			.click({ force: true });
 	}
-	await expect(
-		page.getByRole('button', { name: 'Continue' })
-	).toBeVisible();
-	await page
-		.getByRole('button', { name: 'Continue' })
-		.click({ force: true });
 
 	// Fill bank details
 	switch (scheme) {
@@ -730,10 +839,12 @@ export async function goToCheckout(page, isBlock = false) {
 /**
  * Validate GoCardless payment successful.
  *
- * @param {Page}   page    Playwright page object
- * @param {string} orderId Order ID
+ * @param {Page}    page    Playwright page object
+ * @param {string}  orderId Order ID
+ * @param {boolean} isSub   Is Subscription.
+ * @param {boolean} isPayTo Is PayTo.
  */
-export async function validateGoCardlessPayment(page, orderId, isSub = false) {
+export async function validateGoCardlessPayment(page, orderId, isSub = false, isPayTo = false) {
 	const nRetries = 10;
 	for (let i = 0; i < nRetries; i++) {
 		await page.goto(`/wp-admin/post.php?post=${orderId}&action=edit`);
@@ -767,6 +878,11 @@ export async function validateGoCardlessPayment(page, orderId, isSub = false) {
 			)
 			.first()
 	).toBeVisible();
+	if ( isPayTo ) {
+		await expect(
+			page.locator( '.woocommerce-order-data__meta.order_number' )
+		).toContainText( `Payment via ${paytoPaymentMethodTitle}`)
+	}
 }
 
 /**
@@ -821,6 +937,7 @@ export async function createPreOrderProduct(page, options = {}) {
 	await page
 		.locator('#_wc_pre_orders_availability_datetime')
 		.fill(product.availabilityDate);
+	await page.locator('#_wc_pre_orders_availability_datetime').blur();
 	await page.locator('#_wc_pre_orders_fee').fill(product.preOrderFee);
 	await page
 		.locator( `input[name="_wc_pre_orders_when_to_charge"][value="${ product.whenToCharge }"]` )
@@ -947,4 +1064,35 @@ export async function updateAccessToken( page, accessToken ) {
 			`Access token update failed: ${ result.error || 'Unknown error' }`
 		);
 	}
+}
+
+export async function isBillingRequestFulfilled( page, orderId ) {
+	const response = await page.request.post(
+		'/wp-json/gocardless-e2e/v1/billing-request-status',
+		{
+			data: {
+				order_id: orderId,
+			},
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		}
+	);
+
+	if ( ! response.ok() ) {
+		const errorBody = await response.text();
+		throw new Error(
+			`Failed to update access token. HTTP ${ response.status() }: ${ errorBody }`
+		);
+	}
+
+	const result = await response.json();
+
+	if ( ! result.success ) {
+		throw new Error(
+			`Access token update failed: ${ result.error || 'Unknown error' }`
+		);
+	}
+
+	return result.status === 'fulfilling' || result.status === 'fulfilled';
 }
