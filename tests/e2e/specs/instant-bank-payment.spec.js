@@ -19,10 +19,11 @@ const {
 	blockPlaceOrder,
 	saveSettings,
 	clearCart,
+	isBillingRequestFulfilled,
 } = require('../utils');
 const { products, customer } = require('../config');
 
-test.describe('Instant Bank Payment Tests', () => {
+test.describe('Pay by Bank (formerly IBP) Tests', () => {
 	// Set customer as logged-in user.
 	let adminPage;
 	test.use({ storageState: process.env.CUSTOMERSTATE });
@@ -49,7 +50,7 @@ test.describe('Instant Bank Payment Tests', () => {
 		await saveSettings(adminPage);
 	});
 
-	test('Instant bank pay should be used for supported currencies and countries - @foundational', async ({
+	test('Pay by Bank should be used for supported currencies and countries - @foundational', async ({
 		page,
 	}) => {
 		// USD & US
@@ -59,9 +60,9 @@ test.describe('Instant Bank Payment Tests', () => {
 		await goToCheckout(page, true);
 		await fillBillingDetails(page, customer.billing, true);
 		await blockPlaceOrder(page);
-		// Make sure Instant Bank Payment is not available for USA.
+		// Make sure Pay by Bank is not available for USA.
 		await expect(
-			page.getByText(/Instant bank pay|Make a one-off|One-off payment/).first()
+			page.getByText(/Make a one-off|One-off payment/).first()
 		).not.toBeVisible();
 
 		// GBP & GB
@@ -75,9 +76,9 @@ test.describe('Instant Bank Payment Tests', () => {
 		await page.waitForTimeout(3000);
 		await blockPlaceOrder(page);
 
-		// Make sure Instant Bank Payment is available.
+		// Make sure Pay by Bank is available.
 		await expect(
-			page.getByText(/Instant bank pay|Make a one-off|One-off payment/).first()
+			page.getByText(/Make a one-off|One-off payment/).first()
 		).toBeVisible();
 
 		// EUR & DE
@@ -100,16 +101,16 @@ test.describe('Instant Bank Payment Tests', () => {
 		await page.waitForTimeout(3000);
 		await blockPlaceOrder(page);
 
-		// Make sure Instant Bank Payment is available.
+		// Make sure Pay by Bank is available.
 		await expect(
-			page.getByText(/Instant bank pay|Make a one-off|One-off payment/).first()
+			page.getByText(/Make a one-off|One-off payment/).first()
 		).toBeVisible();
 	});
 
-	test('Merchant should be able to enable/disable Instant bank pay - @foundational', async ({
+	test('Merchant should be able to enable/disable Pay by Bank - @foundational', async ({
 		page,
 	}) => {
-		// Disable Instant Bank Payment.
+		// Disable Pay by Bank.
 		await adminPage.goto(
 			'/wp-admin/admin.php?page=wc-settings&tab=checkout&section=gocardless'
 		);
@@ -129,12 +130,12 @@ test.describe('Instant Bank Payment Tests', () => {
 		);
 		await blockPlaceOrder(page);
 
-		// Make sure Instant Bank Payment is not available.
+		// Make sure Pay by Bank is not available.
 		await expect(
-			page.getByText(/Instant bank pay|Make a one-off|One-off payment/).first()
+			page.getByText(/Make a one-off|One-off payment/).first()
 		).not.toBeVisible();
 
-		// Enable Instant Bank Payment.
+		// Enable Pay by Bank.
 		await adminPage.goto(
 			'/wp-admin/admin.php?page=wc-settings&tab=checkout&section=gocardless'
 		);
@@ -153,9 +154,9 @@ test.describe('Instant Bank Payment Tests', () => {
 		);
 		await blockPlaceOrder(page);
 
-		// Make sure Instant Bank Payment is available.
+		// Make sure Pay by Bank is available.
 		await expect(
-			page.getByText(/Instant bank pay|Make a one-off|One-off payment/).first()
+			page.getByText(/Make a one-off|One-off payment/).first()
 		).toBeVisible();
 	});
 
@@ -164,7 +165,7 @@ test.describe('Instant Bank Payment Tests', () => {
 	checkouts.forEach((isBlock) => {
 		const blockText = isBlock ? '[Block Checkout]' : '[Checkout]';
 
-		test(`${blockText} Customer should be able to place order using IBP - @foundational`, async ({
+		test(`${blockText} Customer should be able to place order using Pay by Bank - @foundational`, async ({
 			page,
 		}) => {
 			// GBP & GB
@@ -203,6 +204,10 @@ test.describe('Instant Bank Payment Tests', () => {
 				await page.waitForTimeout(1000);
 			}
 
+			// GBP & GB
+			await runWpCliCommand(
+				'wp option update woocommerce_currency "GBP"'
+			);
 			await clearCart(page);
 			await addToCart(page, products.simple);
 			await goToCheckout(page, isBlock);
@@ -220,16 +225,28 @@ test.describe('Instant Bank Payment Tests', () => {
 				isBlock,
 			});
 
-			// Wait for 10 seconds, to allow the billing request to be fulfilled.
-			await page.waitForTimeout(10000);
-			await page.goto(`?billing_request_fulfilled_order_id=${orderId}`, { waitUntil: 'networkidle' });
+			// Wait for 5 seconds, to allow the billing request to be fulfilled.
+
+			let retryCount = 0;
+			const maxRetries = 10;
+			while (
+				!(await isBillingRequestFulfilled(page, orderId)) &&
+				retryCount < maxRetries
+			) {
+				retryCount++;
+				await page.waitForTimeout(2000);
+			}
+			await page.goto(`?billing_request_fulfilled_order_id=${orderId}`, {
+				waitUntil: 'networkidle',
+			});
 			await validateGoCardlessPayment(adminPage, orderId);
 
 			// Verify that the saved payment method is available.
 			const nRetries = 5;
 			for (let i = 0; i < nRetries; i++) {
 				await page.goto('/my-account/payment-methods/');
-				if ( await page
+				if (
+					await page
 						.locator('td.woocommerce-PaymentMethod', {
 							hasText: 'Barclays bank plc ending in 11',
 						})
@@ -238,7 +255,7 @@ test.describe('Instant Bank Payment Tests', () => {
 				) {
 					break;
 				} else {
-					await page.waitForTimeout(10000); // wait for webhook to be processed
+					await page.waitForTimeout(2000); // wait for webhook to be processed
 				}
 			}
 
@@ -253,7 +270,7 @@ test.describe('Instant Bank Payment Tests', () => {
 		});
 	});
 
-	test('Customer can sign up to subscription using IBP and renewal using GoCardless DD - @foundational', async ({
+	test('Customer can sign up to subscription using Pay by Bank and renewal using GoCardless DD - @foundational', async ({
 		page,
 	}) => {
 		await addToCart(page, products.subscription);
@@ -270,16 +287,19 @@ test.describe('Instant Bank Payment Tests', () => {
 		});
 
 		// Wait for 10 seconds, to allow the billing request to be fulfilled.
-		await page.waitForTimeout(10000);
-		await page.goto(`?billing_request_fulfilled_order_id=${orderId}`, { waitUntil: 'networkidle' });
-
+		await page.waitForTimeout(15000);
+		await page.goto(`?billing_request_fulfilled_order_id=${orderId}`, {
+			waitUntil: 'networkidle',
+		});
 
 		// Verify that mandate saved.
 		const nRetries = 5;
 		for (let i = 0; i < nRetries; i++) {
-			const metaData = await runWpCliCommand( `wp wc shop_order get ${orderId} --user=admin --field=meta_data` );
+			const metaData = await runWpCliCommand(
+				`wp wc shop_order get ${orderId} --user=admin --field=meta_data`
+			);
 			console.log(metaData);
-			if ( metaData?.includes( '_gocardless_mandate_id' ) ) {
+			if (metaData?.includes('_gocardless_mandate_id')) {
 				break;
 			} else {
 				await page.waitForTimeout(10000); // wait for webhook to be processed

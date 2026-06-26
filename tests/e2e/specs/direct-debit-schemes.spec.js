@@ -71,9 +71,9 @@ test.describe('Direct Debit Scheme Tests', () => {
 	};
 
 	for (const scheme in schemes) {
-		if (scheme === 'betalingsservice') {
-			continue; // Skip test temporarily and look into it later getting issue in sandbox, maybe a temporary issue.
-		}
+		// if (scheme === 'betalingsservice') {
+		// 	continue; // Skip test temporarily and look into it later getting issue in sandbox, maybe a temporary issue.
+		// }
 		// eslint-disable-next-line jest/expect-expect
 		test(`${schemes[scheme]} - @foundational`, async ({ page }) => {
 			const isBlock = true;
