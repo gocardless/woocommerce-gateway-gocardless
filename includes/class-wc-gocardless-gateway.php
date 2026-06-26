@@ -60,7 +60,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	protected $saved_bank_accounts;
 
 	/**
-	 * Is instant bank pay turned on.
+	 * Is Pay by Bank (formerly Instant Bank Pay) turned on.
 	 *
 	 * @var bool
 	 */
@@ -74,7 +74,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	protected $testmode;
 
 	/**
-	 * Whether fallback to Direct debit scheme enabled when IBP is unavailable.
+	 * Whether fallback to Direct debit scheme enabled when Pay by Bank (formerly IBP) is unavailable.
 	 *
 	 * @var bool
 	 */
@@ -220,7 +220,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	 * Also, clear the available scheme transient.
 	 *
 	 * @return bool
-	 * @since x.x.x
+	 * @since 3.0.0
 	 */
 	public function process_admin_options() {
 		// Clear the available scheme transient.
@@ -555,10 +555,10 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				'default' => $default_webhook_secret,
 			),
 			'instant_bank_pay'    => array(
-				'title'       => __( 'Instant Bank Pay', 'woocommerce-gateway-gocardless' ),
-				'label'       => __( 'Enable Instant Bank Pay', 'woocommerce-gateway-gocardless' ),
+				'title'       => __( 'Pay by Bank', 'woocommerce-gateway-gocardless' ),
+				'label'       => __( 'Enable Pay by Bank', 'woocommerce-gateway-gocardless' ),
 				'type'        => 'checkbox',
-				'description' => __( 'Enables Instant Bank Payments in supported countries.', 'woocommerce-gateway-gocardless' ),
+				'description' => __( 'Enables Pay by Bank payments in supported countries.', 'woocommerce-gateway-gocardless' ),
 				'default'     => 'no',
 				'desc_tip'    => true,
 			),
@@ -805,7 +805,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	/**
 	 * POST field name for saved payment token selection (matches WooCommerce tokenization UI).
 	 *
-	 * @since x.x.x
+	 * @since 3.0.0
 	 *
 	 * @return string Input name without brackets.
 	 */
@@ -816,7 +816,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	/**
 	 * POST field name for "save payment method" checkbox.
 	 *
-	 * @since x.x.x
+	 * @since 3.0.0
 	 *
 	 * @return string Input name.
 	 */
@@ -888,7 +888,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 	/**
 	 * Collect customer details.
 	 *
-	 * @since x.x.x
+	 * @since 3.0.0
 	 *
 	 * @param string   $billing_request_id Billing request ID.
 	 * @param WC_Order $order              Order object.
@@ -902,36 +902,40 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 		wc_gocardless()->log( sprintf( '%s - Collecting customer details for order #%s with billing request ID: %s', __METHOD__, $order->get_order_number(), $billing_request_id ), WC_Log_Levels::INFO );
 
 		$customer_details = array(
-			'customer'                => array(
+			'customer' => array(
 				'company_name' => $order->get_billing_company(),
 				'given_name'   => $order->get_billing_first_name(),
 				'family_name'  => $order->get_billing_last_name(),
 				'email'        => $order->get_billing_email(),
 			),
-			'customer_billing_detail' => array(
+		);
+
+		// Collect customer billing details only for non-PayTo scheme. given_name, family_name, email are the only required fields for PayTo scheme.
+		if ( 'pay_to' !== $this->scheme ) {
+			$customer_details['customer_billing_detail'] = array(
 				'address_line1' => $order->get_billing_address_1(),
 				'address_line2' => $order->get_billing_address_2(),
 				'city'          => $order->get_billing_city(),
 				'postal_code'   => $order->get_billing_postcode(),
 				'country_code'  => $order->get_billing_country(),
 				'region'        => $order->get_billing_state(),
-			),
-		);
+			);
 
-		// Get the IP address of the customer. If the IP address is not valid, use 0.0.0.0 as fallback.
-		$ip_address = filter_var( WC_Geolocation::get_ip_address(), FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE );
-		$ip_address = $ip_address ? $ip_address : '0.0.0.0';
+			// Get the IP address of the customer. If the IP address is not valid, use 0.0.0.0 as fallback.
+			$ip_address = filter_var( WC_Geolocation::get_ip_address(), FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE );
+			$ip_address = $ip_address ? $ip_address : '0.0.0.0';
 
-		// IP address is required for ACH scheme, checking USD currency for handling auto scheme as well.
-		if ( ! empty( $ip_address ) && ( 'ach' === $this->scheme || 'USD' === $order->get_currency() ) ) {
-			$customer_details['customer_billing_detail']['ip_address'] = $ip_address;
+			// IP address is required for ACH scheme, checking USD currency for handling auto scheme as well.
+			if ( ! empty( $ip_address ) && ( 'ach' === $this->scheme || 'USD' === $order->get_currency() ) ) {
+				$customer_details['customer_billing_detail']['ip_address'] = $ip_address;
+			}
 		}
 
 		/**
 		 * Filter the customer details params.
 		 * This filter can be used to modify the customer details params before collecting them.
 		 *
-		 * @since x.x.x
+		 * @since 3.0.0
 		 *
 		 * @param array    $customer_details Customer details params.
 		 * @param WC_Order $order            Order object.
@@ -981,14 +985,14 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 		 *     - Order total is zero (eg: Setup Trail subscription)
 		 *     - For the change payment method request.
 		 *     - For Pre-Orders with Pay upon release.
-		 * - Instant Bank Payment Only (For one-off payment):
-		 *     - IBP is Enabled in the settings &&
+		 * - Pay by Bank (formerly IBP) Only (For one-off payment):
+		 *     - Pay by Bank is enabled in the settings &&
 		 *     - For countries and currencies where instant payment is supported. (GB with GBP, DE with EUR) &&
 		 *     - Order total is greater than zero &&
 		 *     - Not a change payment method request &&
 		 *     - Not a Pre-Orders with Pay upon release.
-		 * - Mandate and Instant Bank Payment:
-		 *     - Instant Bank Payment Only condition +
+		 * - Mandate and Pay by Bank (formerly IBP):
+		 *     - Pay by Bank (formerly IBP) Only condition +
 		 *     - Order contains subscription product.
 		 *     - Customer wants to save the payment method.
 		 */
@@ -1157,7 +1161,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 		$is_ibp_enabled = $this->get_option( 'instant_bank_pay', 'no' ) === 'yes';
 		$is_supported   = false;
 
-		// Only check for supported country and currency if IBP is enabled in payment method settings.
+		// Only check for supported country and currency if Pay by Bank(formerly IBP) is enabled in payment method settings.
 		if ( $is_ibp_enabled ) {
 			$country           = $order->get_billing_country();
 			$currency          = wc_gocardless_get_order_prop( $order, 'currency' );

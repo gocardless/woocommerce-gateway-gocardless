@@ -452,17 +452,19 @@ export async function handleGoCardlessPayment(page, options) {
 
 		if ( await page.getByTestId('confirm-address-button').isVisible() ) {
 			await page.getByTestId('confirm-address-button').click();
-			await page.waitForTimeout(2000);
 		}
+		await page.waitForTimeout(2000);
 		
-		if ( await page.getByRole('button', { name: 'Choose' }).isVisible() ) {
-			await page.getByRole('button', { name: 'Choose' }).click();
+		if ( await page.getByRole('button', { name: 'Change' }).isVisible() ) {
+			await page.getByRole('button', { name: 'Change' }).click();
+			await page.waitForTimeout(1000);
 		}
 
 		// Select bank
-		if ( await page.getByTestId('CONSENT_AUTHORISED_READ_REFUND_ACCOUNT_SANDBOX_BANK').isVisible() ) {
+		if ( await page.getByTestId('CONSENT_AUTHORISED_READ_REFUND_ACCOUNT_SANDBOX_BANK').first().isVisible() ) {
 			await page
 				.getByTestId('CONSENT_AUTHORISED_READ_REFUND_ACCOUNT_SANDBOX_BANK')
+				.first()
 				.click();
 		}
 
@@ -520,7 +522,12 @@ export async function handleGoCardlessPayment(page, options) {
 		await expect(
 			page.getByTestId('bank-auth-link-button')
 		).toBeVisible();
-		await page.waitForTimeout(12000); // wait for billing request to be updated to "fulfilling" state.
+
+		await page.route('http://localhost/wc-api/WC_Gateway_GoCardless/?request=billing_request_flow**', async (route, request) => {
+			await page.waitForTimeout(10000);
+			await route.continue();
+		});
+
 		await page
 			.getByTestId('bank-auth-link-button')
 			.click({ force: true });
@@ -1056,4 +1063,35 @@ export async function updateAccessToken( page, accessToken ) {
 			`Access token update failed: ${ result.error || 'Unknown error' }`
 		);
 	}
+}
+
+export async function isBillingRequestFulfilled( page, orderId ) {
+	const response = await page.request.post(
+		'/wp-json/gocardless-e2e/v1/billing-request-status',
+		{
+			data: {
+				order_id: orderId,
+			},
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		}
+	);
+
+	if ( ! response.ok() ) {
+		const errorBody = await response.text();
+		throw new Error(
+			`Failed to update access token. HTTP ${ response.status() }: ${ errorBody }`
+		);
+	}
+
+	const result = await response.json();
+
+	if ( ! result.success ) {
+		throw new Error(
+			`Access token update failed: ${ result.error || 'Unknown error' }`
+		);
+	}
+
+	return result.status === 'fulfilling' || result.status === 'fulfilled';
 }

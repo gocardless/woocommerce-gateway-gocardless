@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Shares behaviour and meta with {@see WC_GoCardless_Payment_Token_Direct_Debit}; differs by token type and display label.
  *
  * @class WC_Payment_Token_GoCardless_PayTo
- * @since x.x.x
+ * @since 3.0.0
  */
 class WC_Payment_Token_GoCardless_PayTo extends WC_GoCardless_Payment_Token_Direct_Debit {
 
@@ -25,7 +25,7 @@ class WC_Payment_Token_GoCardless_PayTo extends WC_GoCardless_Payment_Token_Dire
 	 *
 	 * Stored in the database; WooCommerce resolves class `WC_Payment_Token_{type}`.
 	 *
-	 * @since x.x.x
+	 * @since 3.0.0
 	 *
 	 * @var string
 	 */
@@ -34,7 +34,7 @@ class WC_Payment_Token_GoCardless_PayTo extends WC_GoCardless_Payment_Token_Dire
 	/**
 	 * Get bank name for display (PayTo label instead of Direct Debit Mandate).
 	 *
-	 * @since x.x.x
+	 * @since 3.0.0
 	 *
 	 * @return string Bank name with PayTo prefix.
 	 */
