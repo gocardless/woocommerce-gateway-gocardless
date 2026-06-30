@@ -43,6 +43,7 @@ You can create a user on [gocardless.com](https://gocardless.com) for live trans
 - WooCommerce: 10.7+
 - Node: v24
 - NPM: v11
+- Composer: v2
 
 ### Install dependencies & build
 
