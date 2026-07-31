@@ -466,6 +466,13 @@ export async function handleGoCardlessPayment(page, options) {
 				.getByTestId('CONSENT_AUTHORISED_READ_REFUND_ACCOUNT_SANDBOX_BANK')
 				.first()
 				.click();
+		} else {
+			await page.getByRole('button', { name: 'Change' }).last().waitFor();
+			await page.getByRole('button', { name: 'Change' }).last().click();
+			await page
+				.getByTestId('CONSENT_AUTHORISED_READ_REFUND_ACCOUNT_SANDBOX_BANK')
+				.first()
+				.click();
 		}
 
 		await page.getByRole('button', { name: 'Change' }).last().waitFor();
