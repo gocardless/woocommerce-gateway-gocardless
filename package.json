@@ -31,12 +31,13 @@
 		"@playwright/test": "^1.60.0",
 		"@woocommerce/dependency-extraction-webpack-plugin": "^3.1.0",
 		"@woocommerce/eslint-plugin": "^3.0.0",
-		"@wordpress/env": "^10.39.0",
-		"@wordpress/scripts": "^30.12.1"
+		"@wordpress/env": "^10.33.1",
+		"@wordpress/scripts": "^30.26.2"
 	},
 	"overrides": {
 		"serialize-javascript": "^7.0.5",
-		"minimatch": "^3.1.5"
+		"minimatch": "^3.1.5",
+		"typescript": "~5.9.3"
 	},
 	"engines": {
 		"node": "~24",
