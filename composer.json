@@ -5,10 +5,11 @@
     "homepage": "https://woocommerce.com/products/gocardless/",
     "license": "GPL-3.0-or-later",
     "minimum-stability": "dev",
+    "prefer-stable": true,
     "require-dev": {
-        "woocommerce/woocommerce-sniffs": "1.0.0",
-        "sirbrillig/phpcs-changed": "^2.11.5",
-        "10up/wp_mock": "^1.0.1",
+        "woocommerce/woocommerce-sniffs": "^1.0.1",
+        "sirbrillig/phpcs-changed": "^2.13",
+        "10up/wp_mock": "^1.1",
         "phpunit/phpunit": "^9.6"
     },
     "archive": {
@@ -37,6 +38,9 @@
 		]
 	},
     "config": {
+        "platform": {
+            "php": "7.4"
+        },
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true
         }

@@ -1,5 +1,5 @@
 module.exports = {
-	extends: ['plugin:@woocommerce/eslint-plugin/recommended'],
+	extends: [ 'plugin:@woocommerce/eslint-plugin/recommended' ],
 	globals: {
 		_: false,
 		Backbone: false,
@@ -20,11 +20,17 @@ module.exports = {
 		],
 		'import/resolver': {
 			node: {
-				extensions: ['.js'],
+				extensions: [ '.js' ],
 			},
 		},
 	},
 	rules: {
 		'react/react-in-jsx-scope': 'off',
+		'@wordpress/i18n-text-domain': [
+			'error',
+			{
+				allowedTextDomain: 'woocommerce-gateway-gocardless',
+			},
+		],
 	},
 };
