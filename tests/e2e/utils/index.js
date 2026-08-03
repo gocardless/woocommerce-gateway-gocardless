@@ -8,7 +8,6 @@ import { expect, Page } from '@playwright/test';
  */
 const { promisify } = require('util');
 const execAsync = promisify(require('child_process').exec);
-export const api = require('./api');
 const {
 	goCardlessConfig,
 	customer,
@@ -463,6 +462,13 @@ export async function handleGoCardlessPayment(page, options) {
 
 		// Select bank
 		if ( await page.getByTestId('CONSENT_AUTHORISED_READ_REFUND_ACCOUNT_SANDBOX_BANK').first().isVisible() ) {
+			await page
+				.getByTestId('CONSENT_AUTHORISED_READ_REFUND_ACCOUNT_SANDBOX_BANK')
+				.first()
+				.click();
+		} else {
+			await page.getByRole('button', { name: 'Change' }).last().waitFor();
+			await page.getByRole('button', { name: 'Change' }).last().click();
 			await page
 				.getByTestId('CONSENT_AUTHORISED_READ_REFUND_ACCOUNT_SANDBOX_BANK')
 				.first()

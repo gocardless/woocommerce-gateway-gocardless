@@ -32,9 +32,17 @@ class WC_GoCardless_Reports {
 	/**
 	 * Enqueue scripts for analytics reports.
 	 *
+	 * @param string $hook_suffix The hook suffix.
+	 *
 	 * @return void
 	 */
-	public function enqueue_reports_scripts() {
+	public function enqueue_reports_scripts( $hook_suffix = '' ) {
+		// Only enqueue scripts for the wc-admin pages. Enqueue scripts for all wc-admin pages because WooCommerce uses client-side navigation,
+		// so the page does not fully reload when switching between admin pages.
+		if ( 'woocommerce_page_wc-admin' !== $hook_suffix ) {
+			return;
+		}
+
 		// Enqueue scripts for analytics reports.
 		$asset_path   = wc_gocardless()->plugin_path . '/build/customer-reports.asset.php';
 		$version      = wc_gocardless()->version;

@@ -1,6 +1,6 @@
 {
 	"name": "woocommerce-gateway-gocardless",
-	"version": "3.0.0",
+	"version": "3.0.1",
 	"description": "GoCardless for WooCommerce",
 	"homepage": "https://woocommerce.com/products/gocardless/",
 	"license": "GPL-3.0-or-later",
@@ -28,18 +28,21 @@
 		"test:e2e-foundational": "npx playwright test --config tests/e2e/playwright.config.js --grep @foundational"
 	},
 	"devDependencies": {
-		"@playwright/test": "^1.57.0",
-		"@woocommerce/api": "^0.2.0",
-		"@woocommerce/dependency-extraction-webpack-plugin": "^3.0.1",
-		"@woocommerce/eslint-plugin": "^2.3.0",
-		"@woocommerce/woocommerce-rest-api": "^1.0.1",
-		"@wordpress/env": "^10.28.0",
-		"@wordpress/scripts": "^30.11.0",
-		"prettier": "^2.8.8"
+		"@playwright/test": "^1.60.0",
+		"@woocommerce/dependency-extraction-webpack-plugin": "^3.1.0",
+		"@woocommerce/eslint-plugin": "^3.0.0",
+		"@wordpress/env": "^10.33.1",
+		"@wordpress/scripts": "^30.26.2"
+	},
+	"overrides": {
+		"serialize-javascript": "^7.0.5",
+		"minimatch": "^3.1.5",
+		"brace-expansion": "^5.0.9",
+		"typescript": "~5.9.3"
 	},
 	"engines": {
-		"node": "~20",
-		"npm": "~10"
+		"node": "~24",
+		"npm": "~11"
 	},
 	"config": {
 		"wp_org_slug": "woocommerce-gateway-gocardless"

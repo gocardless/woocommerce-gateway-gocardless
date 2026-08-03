@@ -144,6 +144,8 @@ test.describe('Pay by Bank (formerly IBP) Tests', () => {
 			.check();
 		await saveSettings(adminPage);
 
+		await clearCart(page);
+		await addToCart(page, products.simple);
 		await goToCheckout(page, true);
 		await fillBillingDetails(
 			page,

@@ -8,20 +8,19 @@ import { getPaymentMethodData } from '@woocommerce/settings';
 /**
  * Register one GoCardless-derived payment method when Blocks exposes server data for it.
  *
- * @param {string} paymentMethodId Gateway ID (gocardless or gocardless_payto).
+ * @param {string} paymentMethodId  Gateway ID (gocardless or gocardless_payto).
  * @param {string} defaultAriaLabel Fallback accessible label.
  */
-export function registerGoCardlessPaymentMethod( paymentMethodId, defaultAriaLabel ) {
+export function registerGoCardlessPaymentMethod(
+	paymentMethodId,
+	defaultAriaLabel
+) {
 	const methodData = getPaymentMethodData( paymentMethodId, null );
 	if ( ! methodData ) {
 		return;
 	}
 
-	const {
-		description,
-		logo_url: logoUrl,
-		title,
-	} = methodData;
+	const { description, logo_url: logoUrl, title } = methodData;
 
 	const Content = () => {
 		return decodeEntities( description || '' );
@@ -53,10 +52,8 @@ export function registerGoCardlessPaymentMethod( paymentMethodId, defaultAriaLab
 		ariaLabel: decodeEntities( title ) || defaultAriaLabel,
 		canMakePayment: ( { billingData, cartTotals } ) => {
 			const currency = cartTotals?.currency_code;
-			const supportedCountries =
-				methodData?.supportedCountries || [];
-			const supportedCurrencies =
-				methodData?.supportedCurrencies || [];
+			const supportedCountries = methodData?.supportedCountries || [];
+			const supportedCurrencies = methodData?.supportedCurrencies || [];
 			return (
 				supportedCountries.includes( billingData?.country ) &&
 				supportedCurrencies.includes( currency )

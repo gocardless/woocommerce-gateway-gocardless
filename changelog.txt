@@ -1,5 +1,14 @@
 *** GoCardless for WooCommerce Changelog ***
 
+2026-08-03 - version 3.0.1
+* Fix - Ensure the customer reports script is enqueued only on WooCommerce Admin (wc-admin) pages to avoid unnecessary asset loading elsewhere in wp-admin.
+* Dev - Bump WooCommerce "tested up to" version 11.0.
+* Dev - Bump WooCommerce minimum supported version to 10.8.
+* Dev - Bump WordPress minimum supported version to 6.9.
+* Dev - Upgrade Node.js from v20 to v24 and npm from v10 to v11.
+* Dev - Upgrade npm and Composer dependencies.
+* Dev - Upgrade GitHub Actions workflows.
+
 2026-06-24 - version 3.0.0
 * Add - PayTo payment method for Australian merchants, supporting one-off payments, saved bank accounts, subscriptions, pre-orders, and refunds.
 * Add - Implement collect customer details for the billing request to improve overall customer experience.
