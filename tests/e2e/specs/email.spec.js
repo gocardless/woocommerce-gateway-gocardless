@@ -64,7 +64,7 @@ test.describe('Email Tests', () => {
 				hasText: `[woocommerce-gateway-gocardless]: New order #${orderId}`,
 			})
 			.first();
-		await emailRow.locator('td.sent_date').hover();
+		await emailRow.locator('.column-sent_date.sent_date').hover();
 		await emailRow.locator('.view-content a').click();
 		await expect(
 			await adminPage
@@ -83,7 +83,7 @@ test.describe('Email Tests', () => {
 					'Your woocommerce-gateway-gocardless order has been received!',
 			})
 			.first();
-		await customerEmailRow.locator('td.sent_date').hover();
+		await customerEmailRow.locator('.column-sent_date.sent_date').hover();
 		await customerEmailRow.locator('.view-content a').click();
 		await expect(
 			await adminPage
