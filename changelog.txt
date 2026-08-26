@@ -1,5 +1,10 @@
 *** GoCardless for WooCommerce Changelog ***
 
+2026-08-25 - version 3.0.2
+* Dev - Bump WooCommerce "tested up to" version 11.1.
+* Dev - Bump WooCommerce minimum supported version to 10.9.
+* Dev - Bump WordPress "Tested up to" version 7.1.
+
 2026-08-03 - version 3.0.1
 * Fix - Ensure the customer reports script is enqueued only on WooCommerce Admin (wc-admin) pages to avoid unnecessary asset loading elsewhere in wp-admin.
 * Dev - Bump WooCommerce "tested up to" version 11.0.
