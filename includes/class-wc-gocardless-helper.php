@@ -155,4 +155,115 @@ class WC_GoCardless_Helper {
 
 		return false;
 	}
+
+	/**
+	 * GoCardless payment statuses eligible for temporary activation of a
+	 * subscription/renewal order.
+	 *
+	 * Only merchant-approved, finite collection states belong here — states that
+	 * the payment will leave on its own timeline (Bacs collection typically takes
+	 * a few days). Approval-dependent states such as `pending_customer_approval`
+	 * (e.g. Bacs dual-signature mandates) must NOT be included: those can remain
+	 * unauthorised indefinitely, so activating a subscription before the initial
+	 * payment is confirmed would let a shopper retain the active-subscriber
+	 * entitlement without ever authorising collection.
+	 *
+	 * @since 3.0.3
+	 *
+	 * @param int $order_id Order ID, for filter context.
+	 * @return string[] Payment statuses eligible for temporary activation.
+	 */
+	public static function get_temporary_activatable_payment_statuses( $order_id = 0 ) {
+		/**
+		 * Filter the GoCardless payment statuses eligible for temporary activation
+		 * of a subscription/renewal order.
+		 *
+		 * @since 3.0.3
+		 *
+		 * @param string[] $statuses Payment statuses eligible for temporary activation.
+		 * @param int      $order_id Order ID.
+		 * @return string[] Payment statuses eligible for temporary activation.
+		 */
+		return (array) apply_filters(
+			'woocommerce_gocardless_temporary_activatable_payment_statuses',
+			array( 'pending_submission', 'submitted' ),
+			$order_id
+		);
+	}
+
+	/**
+	 * Whether a GoCardless payment status is eligible for temporary activation of
+	 * a subscription/renewal order.
+	 *
+	 * @since 3.0.3
+	 *
+	 * @param string $payment_status GoCardless payment status.
+	 * @param int    $order_id       Order ID, for filter context.
+	 * @return bool True when the status may temporarily activate a subscription order.
+	 */
+	public static function is_payment_status_temporary_activatable( $payment_status, $order_id = 0 ) {
+		return in_array( $payment_status, self::get_temporary_activatable_payment_statuses( $order_id ), true );
+	}
+
+	/**
+	 * Whether a temporarily activated order whose payment is still in a
+	 * merchant-approved finite collection state (`pending_submission` /
+	 * `submitted`) should be checked again rather than demoted.
+	 *
+	 * Keeps polling while the order is within the maximum temporary-activation
+	 * age, falling back to the order creation date when the first-seen time is
+	 * unknown. Once the maximum age is exceeded — or the age cannot be determined
+	 * at all — returns false so the caller demotes the order and stops
+	 * rescheduling: temporary activation can never persist unbounded.
+	 *
+	 * @since 3.0.3
+	 *
+	 * @param WC_Order $order Temporarily activated order.
+	 * @return bool True to reschedule another check; false to demote the order.
+	 */
+	public static function should_reschedule_temporary_activation( $order ) {
+		if ( ! $order instanceof WC_Order ) {
+			return false;
+		}
+
+		$activated_time = (int) $order->get_meta( '_gocardless_temporary_activated_time', true );
+
+		// If the activated time is not set, use the order created time.
+		if ( empty( $activated_time ) ) {
+			$date_created = $order->get_date_created();
+
+			/*
+			 * `get_date_created()` is nullable (WC_DateTime|null). With neither a
+			 * recorded activation time nor a creation date the age cannot be
+			 * bounded, so demote rather than keep an unconfirmed order active
+			 * indefinitely — the same fail-safe direction as an exceeded max age.
+			 */
+			if ( ! $date_created instanceof DateTimeInterface ) {
+				return false;
+			}
+
+			$activated_time = $date_created->getTimestamp();
+		}
+
+		/**
+		 * Filter the maximum age (in seconds) a subscription/renewal order may
+		 * remain temporarily activated while its payment is still in-progress.
+		 * After this cutoff the order is demoted to on-hold (which cascades the
+		 * subscription to on-hold) and the scheduled check stops rescheduling.
+		 *
+		 * @since 3.0.3
+		 *
+		 * @param int $max_age  Maximum age in seconds. Default 14 days.
+		 * @param int $order_id Order ID.
+		 * @return int Maximum age in seconds.
+		 */
+		$max_age = (int) apply_filters( 'woocommerce_gocardless_temporary_activation_max_age', 14 * DAY_IN_SECONDS, $order->get_id() );
+
+		// If the max age is 0 or less, do not reschedule.
+		if ( $max_age <= 0 ) {
+			return false;
+		}
+
+		return ( time() - $activated_time ) <= $max_age;
+	}
 }

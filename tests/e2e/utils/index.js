@@ -610,13 +610,14 @@ export async function handleGoCardlessPayToPayment(page) {
 export async function blockPlaceGoCardlessOrderSchemeWise(
 	page,
 	options,
-	scheme = 'ACH'
+	scheme = 'ACH',
+	selfAuthorised = true
 ) {
 	const { saveMethod = false } = options;
 	await blockPlaceOrder(page, saveMethod);
 
 	// Handle GoCardless redirect
-	await handleGoCardlessPaymentSchemeWise(page, options, scheme);
+	await handleGoCardlessPaymentSchemeWise(page, options, scheme, selfAuthorised);
 
 	// verify order received page
 	await expect(
@@ -638,7 +639,8 @@ export async function blockPlaceGoCardlessOrderSchemeWise(
 export async function handleGoCardlessPaymentSchemeWise(
 	page,
 	options,
-	scheme = 'ach'
+	scheme = 'ach',
+	selfAuthorised = true
 ) {
 	const { customerBilling = customer.billing, currency = 'USD' } = options;
 	await page.waitForTimeout(4000);
@@ -742,6 +744,10 @@ export async function handleGoCardlessPaymentSchemeWise(
 	await page
 		.getByRole('button', { name: 'Continue' })
 		.click({ force: true });
+
+	if (!selfAuthorised) {
+		await page.getByTestId('self-payment-authorisation-check').uncheck();
+	}
 
 	// Final Confirmation
 	await page
