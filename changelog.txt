@@ -1,5 +1,8 @@
 *** GoCardless for WooCommerce Changelog ***
 
+2026-09-15 - version 3.0.3
+* Fix - Temporary subscription activation now expires after a set time and only applies while payment is pending or submitted. The time limit is adjustable with a filter.
+
 2026-08-25 - version 3.0.2
 * Dev - Bump WooCommerce "tested up to" version 11.1.
 * Dev - Bump WooCommerce minimum supported version to 10.9.

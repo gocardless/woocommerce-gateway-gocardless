@@ -3,7 +3,7 @@
  * Plugin Name:          GoCardless for WooCommerce
  * Plugin URI:           https://www.woocommerce.com/products/gocardless/
  * Description:          Extends both WooCommerce and WooCommerce Subscriptions with the GoCardless Payment Gateway. A GoCardless merchant account is required.
- * Version:              3.0.2
+ * Version:              3.0.3
  * Requires at least:    6.9
  * Requires PHP:         7.4
  * PHP tested up to:     8.3
@@ -38,7 +38,7 @@ class WC_GoCardless {
 	 *
 	 * @var string
 	 */
-	public $version = '3.0.2'; // WRCS: DEFINED_VERSION.
+	public $version = '3.0.3'; // WRCS: DEFINED_VERSION.
 
 	/**
 	 * Plugin's absolute path.
@@ -505,18 +505,38 @@ class WC_GoCardless {
 						case 'cancelled':
 							$new_status = 'cancelled';
 							break;
+						case 'pending_customer_approval':
 						case 'customer_approval_denied':
 						case 'charged_back':
+							/*
+							 * `pending_customer_approval` is approval-dependent (e.g. Bacs
+							 * dual-signature): it may never progress, so — like the denied and
+							 * charged-back states — it must not keep a subscription active.
+							 * Moving the order to on-hold cascades to the subscription via
+							 * WooCommerce Subscriptions (put_subscription_on_hold_for_order).
+							 */
 							$new_status = 'on-hold';
 							break;
 						case 'pending_submission':
 						case 'submitted':
-						case 'pending_customer_approval':
-							// Payment is still in-progress, check again tomorrow.
-							if ( function_exists( 'as_schedule_single_action' ) ) {
-								as_schedule_single_action( strtotime( '+1 day' ), 'woocommerce_gocardless_check_subscription_payment_status', array( 'order_id' => $order_id ) );
+							/*
+							 * Merchant-approved finite collection states resolve on their own
+							 * timeline. Keep checking daily, but enforce a maximum age (see
+							 * WC_GoCardless_Helper::should_reschedule_temporary_activation) so
+							 * temporary activation can never persist unbounded.
+							 */
+							if ( WC_GoCardless_Helper::should_reschedule_temporary_activation( $order ) ) {
+								// Payment is still in-progress, check again tomorrow.
+								if ( function_exists( 'as_schedule_single_action' ) ) {
+									as_schedule_single_action( strtotime( '+1 day' ), 'woocommerce_gocardless_check_subscription_payment_status', array( 'order_id' => $order_id ) );
+								}
+								$this->log( sprintf( '%s - GoCardless payment is still in-progress, will check again tomorrow', __METHOD__ ) );
+							} else {
+								// Not confirmed within the allowed period; demote to on-hold.
+								$new_status = 'on-hold';
+								$this->log( sprintf( '%s - Order %d exceeded temporary activation max age; moving to on-hold.', __METHOD__, $order_id ) );
+								$order->add_order_note( sprintf( __( 'GoCardless payment is still in-progress, but exceeded the maximum temporary activation age; will be moved to on-hold.', 'woocommerce-gateway-gocardless' ) ) );
 							}
-							$this->log( sprintf( '%s - GoCardless payment is still in-progress, will check again tomorrow', __METHOD__ ) );
 							break;
 					}
 
@@ -525,8 +545,10 @@ class WC_GoCardless {
 						$order->update_status( $new_status, $note );
 					}
 
-					if ( in_array( $gocardless_status, $end_statuses, true ) ) {
-						// Remove temporary activated flag from the order.
+					if ( in_array( $gocardless_status, $end_statuses, true ) || ! empty( $new_status ) ) {
+						// Remove the temporary activation flag once the order leaves the
+						// temporary-active window — either a terminal payment status, or a
+						// demotion to a non-active status such as on-hold.
 						$this->remove_temporary_activated( $order );
 					}
 
@@ -577,6 +599,7 @@ class WC_GoCardless {
 		}
 
 		$order->delete_meta_data( '_gocardless_temporary_activated' );
+		$order->delete_meta_data( '_gocardless_temporary_activated_time' );
 		$order->save_meta_data();
 	}
 
