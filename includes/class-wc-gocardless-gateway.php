@@ -1680,7 +1680,17 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				 * membership sites.
 				 */
 				$temp_activated = false;
-				if ( function_exists( 'wcs_order_contains_subscription' ) && wcs_order_contains_subscription( $order_id ) ) {
+
+				/*
+				 * Only merchant-approved, finite collection states may temporarily
+				 * activate a subscription/renewal order. Approval-dependent states
+				 * such as `pending_customer_approval` (e.g. Bacs dual-signature) must
+				 * never activate a subscription before the initial payment is
+				 * confirmed. See WC_GoCardless_Helper for the allowlist and filter.
+				 */
+				$is_activatable = WC_GoCardless_Helper::is_payment_status_temporary_activatable( $payment['payments']['status'], $order_id );
+
+				if ( $is_activatable && function_exists( 'wcs_order_contains_subscription' ) && wcs_order_contains_subscription( $order_id ) ) {
 					/**
 					 * Filter the order status for subscription payment.
 					 * This filter can be used to change the initial order status for subscription payment.
@@ -1694,7 +1704,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 					 */
 					$status         = apply_filters( 'woocommerce_gocardless_create_payment_subscription_order_status', 'processing', $order_id );
 					$temp_activated = true;
-				} elseif ( function_exists( 'wcs_order_contains_renewal' ) && wcs_order_contains_renewal( $order_id ) ) {
+				} elseif ( $is_activatable && function_exists( 'wcs_order_contains_renewal' ) && wcs_order_contains_renewal( $order_id ) ) {
 					/**
 					 * Filter the order status for subscription renewal payment.
 					 * This filter can be used to change the initial order status for subscription renewal payment.
@@ -1713,6 +1723,11 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 					 * Filter the order status for payment.
 					 * This filter can be used to change the initial order status for payment.
 					 * By default, the order status is set to on-hold.
+					 *
+					 * This branch also covers subscription/renewal orders whose payment
+					 * is not in a merchant-approved finite collection state (e.g.
+					 * `pending_customer_approval`): those stay on-hold, are not activated,
+					 * and are not marked temporary activated until the payment progresses.
 					 *
 					 * @since 2.4.4
 					 *
@@ -2114,6 +2129,7 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 				break;
 			case 'charged_back':
 			case 'chargeback_settled':
+			case 'customer_approval_denied':
 				$new_status = 'on-hold';
 				break;
 		}
@@ -2133,12 +2149,14 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 			$order->update_status( $new_status, $note );
 		}
 
-		if ( in_array( $event['action'], array( 'confirmed', 'paid_out', 'failed', 'cancelled', 'charged_back', 'chargeback_settled' ), true ) ) {
+		if ( in_array( $event['action'], array( 'confirmed', 'paid_out', 'failed', 'cancelled', 'charged_back', 'chargeback_settled', 'customer_approval_denied' ), true ) ) {
 			// Clear Existing scheduled GoCardless payment status check action.
 			if ( function_exists( 'as_unschedule_all_actions' ) ) {
 				as_unschedule_all_actions( 'woocommerce_gocardless_check_subscription_payment_status', array( 'order_id' => $order_id ) );
 			}
+			// Remove temporary activated flag from the order.
 			$order->delete_meta_data( '_gocardless_temporary_activated' );
+			$order->delete_meta_data( '_gocardless_temporary_activated_time' );
 			$order->save_meta_data();
 		}
 
@@ -2876,6 +2894,14 @@ class WC_GoCardless_Gateway extends WC_Payment_Gateway {
 		}
 
 		$order->update_meta_data( '_gocardless_temporary_activated', true );
+
+		// Record when the order was first temporarily activated so the scheduled
+		// payment status check can enforce a maximum age and never keep an
+		// unconfirmed order active indefinitely. Preserve any existing first-seen
+		// time on re-entry.
+		if ( ! $order->get_meta( '_gocardless_temporary_activated_time', true ) ) {
+			$order->update_meta_data( '_gocardless_temporary_activated_time', time() );
+		}
 		$order->save_meta_data();
 		if ( function_exists( 'as_schedule_single_action' ) && ! empty( $payment['payments'] ) && ! empty( $payment['payments']['charge_date'] ) ) {
 			$charge_date = $payment['payments']['charge_date'];

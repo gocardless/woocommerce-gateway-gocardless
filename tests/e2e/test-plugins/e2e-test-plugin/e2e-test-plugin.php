@@ -8,11 +8,56 @@ add_filter( 'woocommerce_api_request_url', function ($url) {
 	return str_replace( 'https://', 'http://', $url );
 } );
 
+/**
+ * E2E only: force the GoCardless payment status returned by the sandbox.
+ *
+ * Used by the Bacs dual-signature subscription regression test to deterministically
+ * reproduce a `pending_customer_approval` payment (which the sandbox cannot be made
+ * to return on demand). Rewrites only the `status` field of a `payments/{id}` GET
+ * response, leaving the real id/links/amount intact. Enabled by setting the
+ * `gocardless_e2e_force_payment_status` option to the desired status; a falsy/empty
+ * option is a no-op, so this filter never affects normal test runs.
+ */
+add_filter( 'http_response', 'gocardless_e2e_force_payment_status', 10, 3 );
+function gocardless_e2e_force_payment_status( $response, $args, $url ) {
+	$forced = get_option( 'gocardless_e2e_force_payment_status' );
+	if ( empty( $forced ) ) {
+		return $response;
+	}
+
+	// Only touch GoCardless payment GET requests (payments/{id}).
+	if ( false === strpos( (string) $url, '/payments/' ) ) {
+		return $response;
+	}
+	$method = isset( $args['method'] ) ? strtoupper( $args['method'] ) : 'GET';
+	if ( 'GET' !== $method ) {
+		return $response;
+	}
+
+	$body = wp_remote_retrieve_body( $response );
+	$data = json_decode( $body, true );
+	if ( empty( $data['payments'] ) || ! isset( $data['payments']['status'] ) ) {
+		return $response;
+	}
+
+	$data['payments']['status'] = sanitize_text_field( $forced );
+	$response['body']           = wp_json_encode( $data );
+
+	return $response;
+}
+
 // Simulate GoCardless webhook for testing.
 add_action( 'woocommerce_thankyou_gocardless', 'test_wc_gocardless_simulate_webhook', 999 );
 add_action( 'woocommerce_thankyou_gocardless_payto', 'test_wc_gocardless_simulate_webhook', 999 );
 
 function test_wc_gocardless_simulate_webhook( $order_id ) {
+	// E2E only: when a payment status is being forced (e.g. the Bacs
+	// dual-signature regression test), do NOT auto-confirm the payment via the
+	// simulated webhook — that would activate the order regardless of the fix.
+	if ( ! empty( get_option( 'gocardless_e2e_force_payment_status' ) ) ) {
+		return false;
+	}
+
 	$webhook_body = test_wc_gocardless_get_webhook_body( $order_id );
 	if ( ! $webhook_body ) {
 		return false;

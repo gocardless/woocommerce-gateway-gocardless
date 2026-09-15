@@ -2,7 +2,7 @@
 Contributors: gocardless, woocommerce, automattic
 Tags:         gocardless, woocommerce, direct debit, pay by bank, payto
 Tested up to: 7.1
-Stable tag:   3.0.2
+Stable tag:   3.0.3
 License:      GPL-3.0-or-later
 License URI:  https://spdx.org/licenses/GPL-3.0-or-later.html
 
@@ -139,6 +139,9 @@ Yes, it uses [GoCardless](https://gocardless.com/) ([privacy policy](https://goc
 3. GoCardless settings screen showing a store connected to ad configured with GoCardless to use the ACH direct debit scheme.
 
 == Changelog ==
+
+= 3.0.3 - 2026-09-15 =
+* Fix - Temporary subscription activation now expires after a set time and only applies while payment is pending or submitted. The time limit is adjustable with a filter.
 
 = 3.0.2 - 2026-08-25 =
 * Dev - Bump WooCommerce "tested up to" version 11.1.
