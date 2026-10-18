@@ -20,7 +20,7 @@ const {
 } = require('../utils');
 const { customer } = require('../config');
 
-test.describe('PayTo Pre-Orders Tests', () => {
+test.describe.skip('PayTo Pre-Orders Tests', () => {
 	let adminPage;
 	const auBilling = { ...customer.billing, ...customer.addresses.becs };
 

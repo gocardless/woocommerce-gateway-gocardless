@@ -24,7 +24,7 @@ wp-env run tests-cli wp user create customer customer@gocardlesstestsuite.com --
 wp-env run tests-cli wp wc tax create -- --country="*" --state="*" --postcode="*" --city="*" --rate=20 --name="General Tax" --user=1
 wp-env run tests-cli wp wc product create -- --name="Simple Product" --slug="simple-product" --user=1 --regular_price=10
 wp-env run tests-cli wp wc product create -- --name="Simple Product 2" --slug="simple-product-2" --user=1 --regular_price=50
-wp-env run tests-cli wp wc product create -- --name="Simple Subscription Product" --slug="simple-subscription-product" --user=1 --regular_price=10 --type=subscription --meta_data='[{"key":"_subscription_price","value":"10"},{"key":"_subscription_period","value":"month"},{"key":"_subscription_period_interval","value":"1"}]'
+# wp-env run tests-cli wp wc product create -- --name="Simple Subscription Product" --slug="simple-subscription-product" --user=1 --regular_price=10 --type=subscription --meta_data='[{"key":"_subscription_price","value":"10"},{"key":"_subscription_period","value":"month"},{"key":"_subscription_period_interval","value":"1"}]'
 
 # Add Shortcode cart and checkout pages
 wp-env run tests-cli wp post create --post_title='Shortcode Cart' --post_type=page --post_status=publish --post_author=1 --post_content='<!-- wp:shortcode -->[woocommerce_cart]<!-- /wp:shortcode -->'

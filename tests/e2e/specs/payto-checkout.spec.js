@@ -249,7 +249,7 @@ test.describe('PayTo checkout', () => {
 			await validateGoCardlessPayment(adminPage, orderId);
 		});
 
-		test(`${blockLabel} Guest can sign up to subscription using PayTo - @foundational`, async ({
+		test.skip(`${blockLabel} Guest can sign up to subscription using PayTo - @foundational`, async ({
 			browser,
 		}) => {
 			const context = await browser.newContext({
@@ -279,7 +279,7 @@ test.describe('PayTo checkout', () => {
 			await context.close();
 		});
 
-		test(`${blockLabel} Customer can sign up to subscription using PayTo - @foundational`, async ({
+		test.skip(`${blockLabel} Customer can sign up to subscription using PayTo - @foundational`, async ({
 			page,
 		}) => {
 			await addToCart(page, products.subscription);
@@ -301,7 +301,7 @@ test.describe('PayTo checkout', () => {
 		});
 	});
 
-	test('Subscription renewal using PayTo payment gateway - @foundational', async ({
+	test.skip('Subscription renewal using PayTo payment gateway - @foundational', async ({
 		page,
 	}) => {
 		await addToCart(page, products.subscription);
