@@ -1,0 +1,1 @@
+<?php // CI test fixture
