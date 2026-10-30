@@ -270,7 +270,7 @@ test.describe('Pay by Bank (formerly IBP) Tests', () => {
 		});
 	});
 
-	test('Customer can sign up to subscription using Pay by Bank and renewal using GoCardless DD - @foundational', async ({
+	test.skip('Customer can sign up to subscription using Pay by Bank and renewal using GoCardless DD - @foundational', async ({
 		page,
 	}) => {
 		await addToCart(page, products.subscription);

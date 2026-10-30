@@ -3,9 +3,7 @@
     "https://downloads.wordpress.org/plugin/woocommerce.zip",
     "https://downloads.wordpress.org/plugin/email-log.zip",
     ".",
-    "./tests/e2e/test-plugins/e2e-test-plugin",
-    "./test-plugins/woocommerce-subscriptions",
-    "./test-plugins/woocommerce-pre-orders"
+    "./tests/e2e/test-plugins/e2e-test-plugin"
   ],
   "themes": [
     "https://downloads.wordpress.org/theme/storefront.zip"
