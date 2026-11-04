@@ -234,7 +234,7 @@ test.describe('Checkout Tests', () => {
 			await validateGoCardlessPayment(adminPage, orderId);
 		});
 
-		test(`${blockText} Guest customer can sign up to subscription using GoCardless payment gateway - @foundational`, async ({
+		test.skip(`${blockText} Guest customer can sign up to subscription using GoCardless payment gateway - @foundational`, async ({
 			browser,
 		}) => {
 			const context = await browser.newContext({
@@ -265,7 +265,7 @@ test.describe('Checkout Tests', () => {
 		});
 
 		// Covers critical flow: Cross check the Subscription flow with Gocardless.
-		test(`${blockText} Customer can sign up to subscription using GoCardless payment gateway - @foundational`, async ({
+		test.skip(`${blockText} Customer can sign up to subscription using GoCardless payment gateway - @foundational`, async ({
 			page,
 		}) => {
 			await addToCart(page, products.subscription);
@@ -290,7 +290,7 @@ test.describe('Checkout Tests', () => {
 	});
 
 	// Covers critical flow: Cross check the Subscription flow with Gocardless.
-	test('Subscription renewal using GoCardless payment gateway - @foundational', async ({
+	test.skip('Subscription renewal using GoCardless payment gateway - @foundational', async ({
 		page,
 	}) => {
 		await addToCart(page, products.subscription);

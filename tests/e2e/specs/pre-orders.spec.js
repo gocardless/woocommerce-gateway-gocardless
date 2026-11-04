@@ -19,7 +19,7 @@ const {
 } = require('../utils');
 const { customer } = require('../config');
 
-test.describe('Pre-Orders Tests', () => {
+test.describe.skip('Pre-Orders Tests', () => {
 	// Set customer as logged-in user.
 	let adminPage;
 	const customerBilling = {

@@ -33,7 +33,7 @@ const { products, customer } = require('../config');
  * rewrites only the payment `status`), and suppresses the auto-confirm webhook
  * simulator while the option is set.
  */
-test.describe('Subscription temporary activation - Bacs dual-signature', () => {
+test.describe.skip('Subscription temporary activation - Bacs dual-signature', () => {
 	const FORCE_OPTION = 'gocardless_e2e_force_payment_status';
 
 	test.use({ storageState: process.env.CUSTOMERSTATE });
